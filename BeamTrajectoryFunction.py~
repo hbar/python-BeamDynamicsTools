@@ -1,0 +1,64 @@
+import numpy as np
+import scipy as sp
+import pylab as pl
+
+class Trajectory:
+	def __init__ (self, B0 = -0.25, Smax = 1.0, NS = 100, R0 = 0.67, a0 = 0.22, p0 = 0.1, z0 = 0.2, Theta0 = 10, A0 = 2.0):
+	#  NS = Number of iterations
+	# B0 = Magnetic Field [T]
+	# R0 = Major Radius [m]
+	#  a0 = Minor Radius [m]
+	# p0 = Port Length with field [m]
+	# z0 = Initial vertical position [m]
+	# Atomic Mass [amu]
+	# maximum path length [m]
+		qm = 1.602e-19/(A0*1.67e-27)
+		v0 = pl.sqrt(2*900*1.602e-16/(A0*1.67e-27))
+		X = np.zeros( (4,NS),float);  # initialize position array
+		X[0,0] = R0+a0+p0;  
+		X[1,0] = z0;
+		X[2,0] = -v0*pl.cos(Theta0*2*pl.pi/180);
+		X[3,0] = -v0*pl.sin(Theta0*2*pl.pi/180);
+
+		B = np.zeros( (NS),float)   # initialize array for B as a funcition of S
+		S = np.linspace( 0, Smax, NS)		# initialize array S
+		Rho = np.zeros( (NS),float)		# initialize array for Bending Radius
+		Theta = np.zeros( (NS),float)		# initialize array for Deflection Angle
+		dS = S[1]-S[0];   M = np.zeros((4,4),float)
+
+		B[0] = B0/X[0,0]; 
+		Rho[0] = -v0/(qm*B[0])
+		for i in range(NS-1):
+			m13 = dS/v0;  m24 = m13
+			m34 = (qm*B[i]/v0)*dS
+			m43 = -m34
+			#M= sp.array([ [1,0,m13,0],[0,1,0,m24],[0,0,1,m34],[0,0,m43,1] ])
+			M[0,:] = 	[1,0,m13,0];
+			M[1,:] = [0,1,0,m24];
+			M[2,:] = [0,0,1,m34];
+			M[3][:] = [0,0,m43,1];
+			X[:,i+1] = pl.dot(M,X[:,i])
+			B[i+1] = B0/X[0,i+1];
+			if B[i+1] != 0:
+				Rho[i+1] = -v0/(qm*B[i+1])			
+			Theta[i+1]=Theta[i] + (dS/Rho[i+1])*(180.0/pl.pi)
+
+		self.PhaseCoordinates = X
+		self.Angle = Theta
+		self.BField = B
+		self.Radius = Rho
+		self.ArcCoordinate = S
+
+	def Plot1(self, Fig=1,Args='-'):
+		pl.figure(Fig)
+		pl.plot(self.PhaseCoordinates[0,:],self.PhaseCoordinates[1,:],Args);  
+		pl.xlabel('R [m]');  pl.ylabel('Z [m]'); pl.title('Beam Trajectory')
+		pl.show()
+
+	def Plot3(self, Fig=1,Args='-'):
+		pl.figure(Fig)
+		pl.subplot(3,1,1); pl.plot(self.PhaseCoordinates[0,:],self.PhaseCoordinates[1,:],Args);  pl.xlabel('R [m]');  pl.ylabel('Z [m]');  pl.title('Trajectory')
+		pl.subplot(3,1,2); pl.plot(self.ArcCoordinate,self.BField,Args);  pl.xlabel('Longitudinal Coordinate [m]');  pl.ylabel('B [T]');
+		pl.subplot(3,1,3);  pl.plot(self.Angle,self.Radius,Args);  pl.xlabel('Deflection Angle [deg]');  pl.ylabel('Bend Radius [m]');
+
+pl.show()

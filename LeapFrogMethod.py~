@@ -1,0 +1,43 @@
+from numpy import *
+import pylab as pl
+
+m1 = 1.9891e30
+m2 = 5.97219e24
+G = 6.67300e-11
+mu = m1*m2/(m1+m2)
+
+r0 = 149.60e9
+v0 = 29.783e3
+L0 = m2*v0*r0
+
+dt = 3600.0;
+r  =  [r0]
+T  =  [0.0]
+rt =  [0.0]
+Tt =  [v0/r0]
+rtt = [-m1*G/r0/r0]
+wtt = [0.0]
+
+while T[-1] < 2*pi:
+	r.append(r[-1] + rt[-1]*dt + 0.5*rtt[-1]*dt*dt)
+
+	rtt.append(-m1*G/r[-1]**2 + m1*Tt[-1]**2 * r[-1])
+	
+	rt.append(rt[-1] + 0.5*(rtt[-1]+rtt[-2])*dt)
+
+	Tt.append(Tt[-1])
+#	Tt.append(L0/(m1*0.5*(r[-1]+r[-2])**2))
+
+	T.append(T[-1] + Tt[-1]*dt)
+	
+	print T[-1]
+
+x = r*cos(T)
+y = r*sin(T)
+
+pl.plot(x,y)
+pl.show()
+
+
+
+
