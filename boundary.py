@@ -65,7 +65,7 @@ class boundary:
 						IN = False
 						NORM = self.Nvec[i]
 			i=i+1
-		return NORM
+		return IN,NORM
 
 	def Figure3D(self,FIG=1):
 		fig = pl.figure(FIG)

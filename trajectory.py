@@ -15,7 +15,6 @@ class trajectory:
 		# v  = velocity vector [Vx, Vy, Vz]
 		# a  = acceleration vector [ax, ay, az] 
 
-
 		c0 = 2.998e8
 		qm = (1.602e-19)/(A0*1.67e-27)
 
@@ -50,9 +49,9 @@ class trajectory:
 
 				self.v.append( self.v[-1] + 0.5*(self.a[-1]+self.a[-2])*dt )
 
-				NormalV = Vessel.Xboundary(self.r[-2],self.r[-1])
-				print NormalV
-				c1 = not NormalV
+				IN,NormalV = Vessel.Xboundary(self.r[-2],self.r[-1])
+
+				c1 = IN
 				c2 = i*dS < Smin
 				i=i+1;
 				print i
