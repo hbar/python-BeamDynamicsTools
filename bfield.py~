@@ -28,6 +28,11 @@ class bfield:
 		Bx = Btor*sin(Phi)
 		By = Btor*cos(Phi)
 		Bz = self.B0z
-		return([Bx,By,Bz])
+		return(array([Bx,By,Bz]))
+
+	def constant:
+		Bx = 0.0
+		By = self.B0
+		Bz = 0.0
 
 

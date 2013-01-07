@@ -30,4 +30,19 @@ class bfield:
 		Bz = self.B0z
 		return(array([Bx,By,Bz]))
 
+class bfieldc:
+	def __init__(self,B0=1.0,R0=1.0,B0z=0.0,fR=0,fz=0):
+		self.B0 = B0
+		self.B0z = B0z
+		self.R0 = R0
+		self.fR = fR
+		self.fz = fz
+		print 'bfield initialized'
+
+	def local(self,r):
+		Bx = 0.0
+		By = self.B0
+		Bz = 0.0
+		return(array([Bx,By,Bz]))
+
 

@@ -15,16 +15,16 @@ class trajectory:
 		# v  = velocity vector [Vx, Vy, Vz]
 		# a  = acceleration vector [ax, ay, az] 
 
-		c0 = 2.998e8
-		qm = (1.602e-19)/(A0*1.67e-27)
+		c0 = 299792458
+		qm = (1.60217646e-19)/(A0*1.67262158e-27)
 
 		self.A0 = A0
-		self.q0 = 1.602e-19
-		self.m0 = A0*1.67e-27
+		self.q0 = 1.60217646e-19
+		self.m0 = A0 * 1.67262158e-27 # A0*1.67e-27
 
 #		v0 = pl.sqrt(2*E0*1.602e-16/(A0*1.67e-27))
 		self.r = [array(r0)]
-		self.v0 = c0 * sqrt(2*E0/(A0*938.27))
+		self.v0 = c0 * sqrt(2*E0/(A0*938.272046))
 		self.v = [ self.v0 * array(v0)*(1/sqrt(v0[0]**2+v0[1]**2+v0[2]**2)) ]
 		self.a = [ array(a0) ]
 		self.B = [ B.local(r0) ]
@@ -62,11 +62,27 @@ class trajectory:
 		if False:
 			while (c1 or c2) and i<Nmax:
 
-				self.r.append( self.r[-1] + self.v[-1]*dt + 0.5*self.a[-1]*dt*dt)
-				kr1 = 0
-				kr2 = 0
-				kr3 = 0
-				kr4 = 0
+				x = self.r[-1][0]
+				y = self.r[-1][1]
+				z = self.r[-1][2]
+				h = self.ds
+
+#				kx1 = h*
+#				kx2 = h
+#				kx3 = h
+#				kx4 = h
+#
+#				ky1 = h
+#				ky2 = h
+#				ky3 = h
+#				ky4 = h
+#
+#				kz1 = h
+#				kz2 = h
+#				kz3 = h
+#				kz4 = h
+				
+#				self.r.append( )
 
 				self.s.append( self.s[-1] + dS )
 
@@ -87,6 +103,15 @@ class trajectory:
 		fig = pl.figure(FIG)
 		ax = Axes3D(fig)
 		return ax
+
+	def Plot2D(self,FIG=1):
+		x=[]; y=[]; z=[];
+		pl.figure(FIG)
+		for i in range(len(self.r)):
+			x.append(self.r[i][0])
+			y.append(self.r[i][1])
+			z.append(self.r[i][2])
+		pl.plot(x,z)
 
 	def Plot3D(self,ax):
 		x=[]; y=[]; z=[];
