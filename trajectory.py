@@ -2,6 +2,7 @@ from numpy import *
 #import scipy as sp
 import pylab as pl
 from mpl_toolkits.mplot3d import Axes3D
+from numpy.linalg import norm
 
 
 class trajectory:
@@ -49,13 +50,15 @@ class trajectory:
 
 				self.v.append( self.v[-1] + 0.5*(self.a[-1]+self.a[-2])*dt )
 
-				IN,NormalV = Vessel.Xboundary(self.r[-2],self.r[-1])
+				IN,NormalV,TangentV,IncidentV = Vessel.Xboundary(self.r[-2],self.r[-1])
 
 				c1 = IN
 				c2 = i*dS < Smin
 				i=i+1;
 				print i
-			self.NormalV = NormalV
+			self.Target = target(NormalV,TangentV,IncidentV)
+#			self.NormalV = NormalV
+#			self.IncidentV = IncidentV
 			print 'trajectory complete'
 
 		# Runge Kutta Integration:
@@ -146,5 +149,33 @@ class trajectory:
 		pl.subplot(3,1,2); pl.plot(self.s,Vy); pl.ylabel(r'$\beta_y$')
 		pl.subplot(3,1,3); pl.plot(self.s,Vz); pl.ylabel(r'$\beta_z$')
 		pl.xlabel('S-coordinate [m]')
+
+class target:
+	def __init__ (self,NORM,TAN,INC):
+		R = sqrt( NORM[0]**2 + NORM[1]**2 )
+		Z = NORM[2]
+		PHI = arctan( NORM[1]/NORM[0] )
+		self.NormalV = NORM
+		self.IncidentV = INC
+		self.TangentV = TAN
+		self.R = R; self.Z=Z; self.Phi = PHI;
+		e3 = NORM/norm(NORM); self.e3=e3;
+		e2 = TAN/norm(TAN); self.e2=e2;
+		e1 = cross(e2,e3); e1=e1/norm(e1); self.e1=e1;
+		self.Degrees = arccos(dot(NORM,-INC))*180.0/pi
+
+		self.Basis = matrix( [
+		[e1[0], 0.0 ,e2[0], 0.0 ,e3[0], 0.0 ],
+		[ 0.0 ,e1[0], 0.0 ,e2[0], 0.0 ,e3[0]],
+		[e1[1], 0.0 ,e2[1], 0.0 ,e3[1], 0.0 ],
+		[ 0.0 ,e1[1], 0.0 ,e2[1], 0.0 ,e3[1]],
+		[e1[2], 0.0 ,e2[2], 0.0 ,e3[2], 0.0 ],
+		[ 0.0 ,e1[2], 0.0 ,e2[2], 0.0 ,e3[2]] ], float )
+
+
+
+
+
+
 
 

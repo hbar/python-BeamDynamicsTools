@@ -23,9 +23,13 @@ if True:
 		R = T[-1].r[-1] - array([20.0-RL,0,0.0])
 		dr.append( sqrt(R[0]**2+R[1]**2+R[2]**2)*(d0/T[-1].s[-1]) - RL)  # -RL)/d0 ) #/T.s[-1]*d0 - RL)
 		#T.Plot2D()
-	pl.loglog(dS,dr,'.')
+	pl.figure(1); pl.loglog(dS,dr,'.')
 	pl.xlabel(r'Step Size $\Delta$S [m]'); pl.ylabel(r'$\Delta R/S$')
 	pl.title(r'Error / Arc length')
+
+pl.figure(2); pl.loglog(dS,dr/RL,'.')
+pl.xlabel(r'Step Size $\Delta$S [m]'); pl.ylabel(r'${\Delta R}/{R S}$ [1/m]')
+pl.title(r'Normalized Bending Radius Error per Arc Length')
 
 
 

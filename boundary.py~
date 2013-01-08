@@ -1,6 +1,7 @@
 from numpy import *
 import pylab as pl
 from mpl_toolkits.mplot3d import Axes3D
+from numpy.linalg import norm
 
 class boundary:
 
@@ -16,7 +17,7 @@ class boundary:
 			Mvec.append(array([(Rb[i]+Rb[i-1])/2,(Zb[i]+Zb[i-1])/2]))
 			Tvec.append((array([Rb[i]-Rb[i-1],Zb[i]-Zb[i-1]])))
 			Nvec.append((array([-Tvec[-1][1],Tvec[-1][0]])))
-			Nvec[-1] = cw * Nvec[-1] / 10 / sqrt(Nvec[-1][0]**2 + Nvec[-1][1]**2)
+			Nvec[-1] = cw * Nvec[-1] / sqrt(Nvec[-1][0]**2 + Nvec[-1][1]**2)
 		for i in range(len(Rb)):
 			print Cvec[i-1]-Cvec[i-2]
 		self.Cvec = Cvec
@@ -51,10 +52,12 @@ class boundary:
 			i = i+1
 		return IN
 
+	# Xboundary deterines the line drawn between two points r0 and r1 crosses a the boundary.
+	# This function returns: boolean (IN), normal vector, tangent vector, incident vector.
 	def Xboundary(self,r0,r1):
 		x0 = [sqrt(r0[0]*r0[0] + r0[1]*r0[1]) ,r0[2]]
 		x1 = [sqrt(r1[0]*r1[0] + r1[1]*r1[1]) ,r1[2]]
-		IN = True; i=-1; Di1 = []; Di2 = []; Df = []; NORM=[]
+		IN = True; i=-1; Di1 = []; Di2 = []; Df = []; NORM=[]; TAN=[];
 		while (IN == True and i<self.Nv-1):
 			Di1 = x0-self.Cvec[i-1]
 			Di2 = x0-self.Cvec[i]
@@ -63,9 +66,13 @@ class boundary:
 				if dot(Di1,self.Nvec[i])>0 and dot(Di2,self.Nvec[i])>0:
 					if dot(Df,self.Nvec[i])<0 and dot(Df,self.Nvec[i])<0:
 						IN = False
-						NORM = self.Nvec[i]
+						Phi = arctan(r0[1]/r0[0])
+						NORM = array([ self.Nvec[i][0]*cos(Phi), self.Nvec[i][0]*sin(Phi), self.Nvec[i][1] ])
+						TAN = array([ self.Tvec[i][0]*cos(Phi), self.Tvec[i][0]*sin(Phi),self.Tvec[i][1] ]);
+						TAN = TAN/norm(TAN)
+						INC = r1-r0; INC = INC/sqrt( INC[0]**2 + INC[1]**2 + INC[2]**2 )
 			i=i+1
-		return NORM
+		return IN,NORM,TAN,INC
 
 	def Figure3D(self,FIG=1):
 		fig = pl.figure(FIG)
@@ -98,8 +105,6 @@ class boundary:
 		pl.xlim(-1,1); pl.ylim(-1,1)
 		return ax
 		#return xp,yp,zp,xt,yt,zt
-
-
 
 # Test Case
 
