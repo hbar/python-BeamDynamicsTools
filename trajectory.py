@@ -6,7 +6,7 @@ from numpy.linalg import norm
 
 
 class trajectory:
-	def __init__ (self,Vessel,B,dS=1e-3,r0=[1.0,0.0,0.2],v0=[-1.0,0.2,-0.1],a0=[0.0,0.0,0.0],A0=2,E0=0.9,Nmax=10000,Smin=0.25):
+	def __init__ (self,Vessel,B,dS=1e-3,r0=[1.5,0.0,0.1],v0=[-1.0,-0.1,0],a0=[0.0,0.0,0.0],A0=2,E0=0.9,Nmax=10000,Smin=0.25):
 
 		# B = Magnetic Field [T] (bfield class)
 		# Vessel = Defines wall (boundary class)

@@ -28,7 +28,10 @@ class bfield:
 		Bx = Btor*sin(Phi)
 		By = Btor*cos(Phi)
 		Bz = self.B0z
-		return(array([Bx,By,Bz]))
+		B = array([Bx,By,Bz])
+		if R > 1.3:
+			B = array([0,0,Bz])
+		return B
 
 class bfieldc:
 	def __init__(self,B0=1.0,R0=1.0,B0z=0.0,fR=0,fz=0):

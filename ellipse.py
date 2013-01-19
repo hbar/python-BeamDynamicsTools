@@ -25,6 +25,12 @@ class ellipse:
 		self.EmittenceXY = sqrt( det(matrix([[SIG[0,0],SIG[0,2]] ,[SIG[2,0],SIG[2,2]] ])) )
 		self.TwissXY = array([-SIG[0,2],SIG[0,0],SIG[2,2],self.EmittenceXY**2])/self.EmittenceXY
 
+		self.EmittenceXZ = sqrt( det(matrix([[SIG[0,0],SIG[0,5]] ,[SIG[5,0],SIG[5,5]] ])) )
+		self.TwissXZ = array([-SIG[0,5],SIG[0,0],SIG[5,5],self.EmittenceXZ**2])/self.EmittenceXZ
+
+		self.EmittenceYZ = sqrt( det(matrix([[SIG[2,2],SIG[2,5]] ,[SIG[5,2],SIG[5,5]] ])) )
+		self.TwissYZ = array([-SIG[2,5],SIG[2,2],SIG[5,5],self.EmittenceYZ**2])/self.EmittenceYZ
+
 
 	def GenerateXY(self,TWISS,NPoints=1000):
 		Theta = linspace(0,2*pi,NPoints);
@@ -44,16 +50,24 @@ class ellipse:
 
 		pl.figure(FIG)
 		X,Y = self.GenerateXY(self.TwissXX1,NPoints)
-		pl.subplot(2,2,1); pl.plot(X,Y,Mod); pl.xlabel('X [mm]');  pl.ylabel('dx/ds [mrad]');
+		pl.subplot(2,3,1); pl.plot(X,Y,Mod); pl.xlabel('X [mm]');  pl.ylabel('dx/ds [mrad]');
 
 		X,Y = self.GenerateXY(self.TwissYY1,NPoints)
-		pl.subplot(2,2,2); pl.plot(X,Y,Mod); pl.xlabel('Y [mm]');  pl.ylabel('dY/ds [mrad]');
+		pl.subplot(2,3,2); pl.plot(X,Y,Mod); pl.xlabel('Y [mm]');  pl.ylabel('dY/ds [mrad]');
 
 		X,Y = self.GenerateXY(self.TwissZZ1,NPoints)
-		pl.subplot(2,2,3); pl.plot(X,Y,Mod); pl.xlabel('Z [mm]');  pl.ylabel('dZ/ds [mrad]');
+		pl.subplot(2,3,3); pl.plot(X,Y,Mod); pl.xlabel('Z [mm]');  pl.ylabel('dZ/ds [mrad]');
 
+#		pl.figure(FIG+1)
 		X,Y = self.GenerateXY(self.TwissXY,NPoints)
-		pl.subplot(2,2,4); pl.plot(X,Y,Mod); pl.xlabel('X [mm]');  pl.ylabel('Y [mm]');
+		pl.subplot(2,3,4); pl.plot(X,Y,Mod); pl.xlabel('X [mm]');  pl.ylabel('Y [mm]');
+
+		X,Y = self.GenerateXY(self.TwissXZ,NPoints)
+		pl.subplot(2,3,5); pl.plot(X,Y,Mod); pl.xlabel('X [mm]');  pl.ylabel('Z [mm]');
+
+		X,Y = self.GenerateXY(self.TwissYZ,NPoints)
+		pl.subplot(2,3,6); pl.plot(X,Y,Mod); pl.xlabel('Y [mm]');  pl.ylabel('Z [mm]');
+
 #		pl.xlim([-2,2]); pl.ylim([-2,2])
 
 

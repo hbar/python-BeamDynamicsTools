@@ -30,14 +30,14 @@ B0 = [0.1,0.15,0.2,0.25,0.3,0.35,0.4]
 
 if False:
 	for i in range(len(B0)):
-		B = bfield(B0[i],R0=1,B0z=-0.1)
+		B = bfield(B0[i],R0=1,B0z=0.1)
 		T = trajectory(Vessel,B)
 		T.Plot3D(ax)
 		T.PlotB(2)
 		T.PlotV(3)
 
 if True:
-	B =  bfield(-0.05,R0=1,B0z=-0.1)
+	B =  bfield(0.1,R0=1,B0z=0.1)
 	T = trajectory(Vessel,B)
 	T.Plot3D(ax)
 	T.PlotB(2)
