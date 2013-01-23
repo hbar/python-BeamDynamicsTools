@@ -24,6 +24,7 @@ class beam:
 		self.s = Trajectory.s
 		self.dS = Trajectory.dS
 		self.dt = Trajectory.dt
+		self.Basis = Trajectory.Basis
 
 	def Trace(self):
 		Ni = len(self.r)
@@ -31,8 +32,9 @@ class beam:
 		for i in range(Ni):
 			# Mb is the matrix form of Acc = (q/m) v x B
 			B = self.BMatrix(self.v[i],self.B[i])
+			# self.Sigma.append( B * D * self.Sigma[-1] * D.T * B.T)
 			self.Sigma.append( B * D * self.Sigma[-1] * D.T * B.T)
-#			print i
+			print i
 		
 	def Drift(self,ds=1e-3):
 		Mdrift = matrix([
@@ -61,7 +63,7 @@ class beam:
 		Bn = (self.q0/self.m0)/self.v0 * Bin /1e3 #(self.dt/self.v0)
 		Vn = Vin/self.v0
 
-		print norm(Bn)
+#		print norm(Bn)
 
 		Fxy =  Vn[0]*Bn[1]
 		Fyx = -Vn[1]*Bn[0]
@@ -70,7 +72,7 @@ class beam:
 		Fzx =  Vn[2]*Bn[0]
 		Fxz = -Vn[0]*Bn[2]
 
-		print Fxy,Fyx,Fyz,Fzy,Fzx,Fxz
+#		print Fxy,Fyx,Fyz,Fzy,Fzx,Fxz
 
 		Mb = matrix([
 		[ 1  , 0 , 0  , 0 , 0  , 0 ],

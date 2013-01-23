@@ -28,9 +28,10 @@ class bfield:
 		Bx = Btor*sin(Phi)
 		By = Btor*cos(Phi)
 		Bz = self.B0z
-		B = array([Bx,By,Bz])
 		if R > 1.3:
-			B = array([0,0,Bz])
+			B = array([0.0,0.0,Bz])
+		else:
+			B = array([Bx,By,Bz])
 		return B
 
 class bfieldc:

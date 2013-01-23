@@ -57,9 +57,11 @@ class trajectory:
 				i=i+1;
 				print i
 			self.Target = target(NormalV,TangentV,IncidentV)
-#			self.NormalV = NormalV
-#			self.IncidentV = IncidentV
+
 			print 'trajectory complete'
+
+			self.BeamBasis()
+			print 'Beam Coordinates Complete'
 
 		# Runge Kutta Integration:
 		if False:
@@ -69,23 +71,6 @@ class trajectory:
 				y = self.r[-1][1]
 				z = self.r[-1][2]
 				h = self.ds
-
-#				kx1 = h*
-#				kx2 = h
-#				kx3 = h
-#				kx4 = h
-#
-#				ky1 = h
-#				ky2 = h
-#				ky3 = h
-#				ky4 = h
-#
-#				kz1 = h
-#				kz2 = h
-#				kz3 = h
-#				kz4 = h
-				
-#				self.r.append( )
 
 				self.s.append( self.s[-1] + dS )
 
@@ -101,6 +86,18 @@ class trajectory:
 				print i
 			print 'trajectory complete'
 
+	def BeamBasis(self):
+		Ni = len(self.v);
+		e3 = [self.v[0]/norm(self.v[0])]
+		e2 = [cross(e3[0],array([0,0,1]))]; e2[0]=e2[0]/norm(e2[0])
+		e1 = [cross(e2[0],e3[0])]
+		self.Basis=[BasisM(e1[0],e2[0],e3[0])]
+		for i in range(1,Ni):
+			e3.append(self.v[i]/norm(self.v[i]))
+			e2.append( cross(e3[-1],e1[-1]) );  e2[-1]=e2[-1]/norm(e2[-1])
+			e1.append( cross(e2[-1],e3[-1]) )
+			self.Basis.append(BasisM(e1[-1],e2[-1],e3[-1]))
+			print i
 
 	def Figure3D(self,FIG=1):
 		fig = pl.figure(FIG)
@@ -163,16 +160,18 @@ class target:
 		e2 = TAN/norm(TAN); self.e2=e2;
 		e1 = cross(e2,e3); e1=e1/norm(e1); self.e1=e1;
 		self.Degrees = arccos(dot(NORM,-INC))*180.0/pi
-
-		self.Basis = matrix( [
-		[e1[0], 0.0 ,e2[0], 0.0 ,e3[0], 0.0 ],
-		[ 0.0 ,e1[0], 0.0 ,e2[0], 0.0 ,e3[0]],
-		[e1[1], 0.0 ,e2[1], 0.0 ,e3[1], 0.0 ],
-		[ 0.0 ,e1[1], 0.0 ,e2[1], 0.0 ,e3[1]],
-		[e1[2], 0.0 ,e2[2], 0.0 ,e3[2], 0.0 ],
-		[ 0.0 ,e1[2], 0.0 ,e2[2], 0.0 ,e3[2]] ], float )
+		self.Basis = BasisM(e1,e2,e3)
 
 
+def BasisM(e1,e2,e3):
+	Basis = matrix( [
+	[e1[0], 0.0 ,e2[0], 0.0 ,e3[0], 0.0 ],
+	[ 0.0 ,e1[0], 0.0 ,e2[0], 0.0 ,e3[0]],
+	[e1[1], 0.0 ,e2[1], 0.0 ,e3[1], 0.0 ],
+	[ 0.0 ,e1[1], 0.0 ,e2[1], 0.0 ,e3[1]],
+	[e1[2], 0.0 ,e2[2], 0.0 ,e3[2], 0.0 ],
+	[ 0.0 ,e1[2], 0.0 ,e2[2], 0.0 ,e3[2]] ], float )
+	return Basis
 
 
 
