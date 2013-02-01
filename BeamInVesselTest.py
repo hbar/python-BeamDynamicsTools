@@ -37,7 +37,7 @@ if False:
 		T.PlotV(3)
 
 if True:
-	B =  bfield(0.1,R0=1,B0z=0.0)
+	B =  bfield(0.2,R0=1,B0z=0.2)
 	T = trajectory(Vessel,B)
 	T.Plot3D(ax)
 	T.PlotB(2)

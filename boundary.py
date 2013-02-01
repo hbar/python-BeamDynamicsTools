@@ -92,6 +92,7 @@ class boundary:
 				z.append(self.Zb[j-1])
 			ax.plot(x,y,z,Color)
 			xp.append(x); yp.append(y); zp.append(z)
+#		d=1.5; ax.plot([-d,-d,-d,d,d,d],[-d,-d,d,-d,d,d],[-d,d,-d,d,-d,d],'.')
 		
 		Nc = Nt*10
 		Phi = linspace(PhiMin,PhiMax,Nc)

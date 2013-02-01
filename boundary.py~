@@ -57,7 +57,7 @@ class boundary:
 	def Xboundary(self,r0,r1):
 		x0 = [sqrt(r0[0]*r0[0] + r0[1]*r0[1]) ,r0[2]]
 		x1 = [sqrt(r1[0]*r1[0] + r1[1]*r1[1]) ,r1[2]]
-		IN = True; i=-1; Di1 = []; Di2 = []; Df = []; NORM=[]; TAN=[];
+		IN = True; i=-1; Di1 = []; Di2 = []; Df = []; NORM=[]; TAN=[]; INC=[];
 		while (IN == True and i<self.Nv-1):
 			Di1 = x0-self.Cvec[i-1]
 			Di2 = x0-self.Cvec[i]
@@ -92,6 +92,7 @@ class boundary:
 				z.append(self.Zb[j-1])
 			ax.plot(x,y,z,Color)
 			xp.append(x); yp.append(y); zp.append(z)
+		d=1.5; ax.plot([-d,-d,-d,d,d,d],[-d,-d,d,-d,d,d],[-d,d,-d,d,-d,d],'.')
 		
 		Nc = Nt*10
 		Phi = linspace(PhiMin,PhiMax,Nc)

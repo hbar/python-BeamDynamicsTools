@@ -16,7 +16,7 @@ class trajectory:
 		# v  = velocity vector [Vx, Vy, Vz]
 		# a  = acceleration vector [ax, ay, az] 
 
-		c0 = 299792458
+		c0 = 299792458; self.c0 = c0
 		qm = (1.60217646e-19)/(A0*1.67262158e-27)
 
 		self.A0 = A0
@@ -25,10 +25,11 @@ class trajectory:
 
 #		v0 = pl.sqrt(2*E0*1.602e-16/(A0*1.67e-27))
 		self.r = [array(r0)]
-		self.v0 = c0 * sqrt(2*E0/(A0*938.272046))
-		self.v = [ self.v0 * array(v0)*(1/sqrt(v0[0]**2+v0[1]**2+v0[2]**2)) ]
+#		self.v0 = c0 * sqrt(2.0*E0/(A0*938.272046))
+		self.v0 = sqrt(2.0*E0*1e6*self.q0/(self.m0))
+		self.v = [ self.v0 * array(v0)/norm(v0) ]
 		self.a = [ array(a0) ]
-		self.B = [ B.local(r0) ]
+		self.B = [ array(B.local(r0)) ]
 		self.s = [ 0.0 ]
 		self.dS = dS
 		dt = dS/self.v0
@@ -44,11 +45,11 @@ class trajectory:
 
 				self.s.append( self.s[-1] + dS )
 
-				self.B.append( B.local(self.r[-1]) )
+				self.B.append( array(B.local(self.r[-1])) )
 
 				self.a.append( qm * cross(self.v[-1],self.B[-1]) )
 
-				self.v.append( self.v[-1] + 0.5*(self.a[-1]+self.a[-2])*dt )
+				self.v.append( self.v[-1] + 0.5*(self.a[-1]+self.a[-2])*dt )				
 
 				IN,NormalV,TangentV,IncidentV = Vessel.Xboundary(self.r[-2],self.r[-1])
 
@@ -56,9 +57,8 @@ class trajectory:
 				c2 = i*dS < Smin
 				i=i+1;
 				print i
-			self.Target = target(NormalV,TangentV,IncidentV)
-#			self.NormalV = NormalV
-#			self.IncidentV = IncidentV
+#			self.Target = target(NormalV,TangentV,IncidentV)
+
 			print 'trajectory complete'
 
 			self.BeamBasis()
@@ -90,20 +90,17 @@ class trajectory:
 	def BeamBasis(self):
 		Ni = len(self.v);
 		e3 = [self.v[0]/norm(self.v[0])]
-		e2 = [cross(e3[0],array([0,0,1]))]; e2[0]=e2[0]/norm(e2[0])
+		e2 = [cross(e3[0],array([0,-1,0]))]; e2[0]=e2[0]/norm(e2[0])
 		e1 = [cross(e2[0],e3[0])]
-		self.Basis=[BasisM(e1[0],e2[0],e3[0])]
+		self.BasisM3=[Basis3(e1[0],e2[0],e3[0])]
+		self.BasisM6=[Basis6(e1[0],e2[0],e3[0])]
 		for i in range(1,Ni):
 			e3.append(self.v[i]/norm(self.v[i]))
 			e2.append( cross(e3[-1],e1[-1]) );  e2[-1]=e2[-1]/norm(e2[-1])
 			e1.append( cross(e2[-1],e3[-1]) )
-			self.Basis.append(BasisM(e1[-1],e2[-1],e3[-1]))
+			self.BasisM3.append(Basis3(e1[-1],e2[-1],e3[-1]))
+			self.BasisM6.append(Basis6(e1[-1],e2[-1],e3[-1]))
 			print i
-
-	def Figure3D(self,FIG=1):
-		fig = pl.figure(FIG)
-		ax = Axes3D(fig)
-		return ax
 
 	def Plot2D(self,FIG=1):
 		x=[]; y=[]; z=[];
@@ -113,6 +110,11 @@ class trajectory:
 			y.append(self.r[i][1])
 			z.append(self.r[i][2])
 		pl.plot(x,z)
+
+	def Figure3D(self,FIG=1):
+		fig = pl.figure(FIG)
+		ax = Axes3D(fig)
+		return ax
 
 	def Plot3D(self,ax):
 		x=[]; y=[]; z=[];
@@ -161,10 +163,18 @@ class target:
 		e2 = TAN/norm(TAN); self.e2=e2;
 		e1 = cross(e2,e3); e1=e1/norm(e1); self.e1=e1;
 		self.Degrees = arccos(dot(NORM,-INC))*180.0/pi
-		self.Basis = BasisM(e1,e2,e3)
+		self.BasisM3 = Basis3(e1,e2,e3)
+		self.BasisM6 = Basis6(e1,e2,e3)
 
 
-def BasisM(e1,e2,e3):
+def Basis3(e1,e2,e3):
+	Basis = matrix( [
+	[e1[0],e2[0],e3[0]],
+	[e1[1],e2[1],e3[1]],
+	[e1[2],e2[2],e3[2]]], float )
+	return Basis
+
+def Basis6(e1,e2,e3):
 	Basis = matrix( [
 	[e1[0], 0.0 ,e2[0], 0.0 ,e3[0], 0.0 ],
 	[ 0.0 ,e1[0], 0.0 ,e2[0], 0.0 ,e3[0]],
@@ -173,7 +183,6 @@ def BasisM(e1,e2,e3):
 	[e1[2], 0.0 ,e2[2], 0.0 ,e3[2], 0.0 ],
 	[ 0.0 ,e1[2], 0.0 ,e2[2], 0.0 ,e3[2]] ], float )
 	return Basis
-
 
 
 
