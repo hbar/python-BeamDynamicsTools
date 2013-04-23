@@ -7,11 +7,13 @@ class beam:
 	# inputs:
 	# sigma = 6x6 sigma matrix
 	# s0 = 3x3 matrix for local beam coordinate system
-	def __init__(self,Trajectory,Sigma0):
+	def __init__(self,Beam,Trajectory,Sigma0):
 		self.Sigma = [Sigma0]
 
 		self.q0 = Trajectory.q0
 		self.m0 = Trajectory.m0
+		self.I0	= Trajectory.I0
+		self.Frequency = Trajectory.Frequency
 #		self.Z0 = Trajectory.z0
 		self.A0 = Trajectory.A0
 #		self.Beta = Trajectory.Beta
@@ -125,4 +127,84 @@ class beam:
 		[ 0  ,Fxy, 0  ,Fyx, 0  , 1 ]],float)
 #		Mb = matrix(identity(6))
 		return Mb
+
+	def SpaceCharge(self,SigmaIN,dS)
+		Sigma = matrix(SigmaIN)
+
+		# Rotate upright in XY Plane
+		ThetaXY = 0.5 * arctan(2*Sigma[0,2]/(Sigma[2,2]-Sigma[0,0]))
+		C = cos(Theta); S = sin(ThetaXY) 
+		Rxy = matrix([
+		[  C  ,  0  , -S  ,  0  , 0  ,  0  ],
+		[  0  ,  C  ,  0  , -S  , 0  ,  0  ],
+		[  S  ,  0  ,  C  ,  0  , 0  ,  0  ],
+		[  0  ,  S  ,  0  ,  C  , 0  ,  0  ],
+		[  0  ,  0  ,  0  ,  0  , 1  ,  0  ],
+		[  0  ,  0  ,  0  ,  0  , 0  ,  1  ]],float)
+		Sigma = Rxy * Sigma * Rxy.T
+
+		# Rotate upright in YZ Plane
+		ThetaYZ = 0.5 * arctan(2*Sigma[2,4]/(Sigma[4,4]-Sigma[2,2]))
+		C = cos(ThetaYZ); S = sin(ThetaYZ) 
+		Ryz = matrix([
+		[  1  ,  0  ,  0  ,  0  ,  0  ,  0  ],
+		[  0  ,  1  ,  0  ,  0  ,  0  ,  0  ],
+		[  0  ,  0  ,  C  ,  0  , -S  ,  0  ],
+		[  0  ,  0  ,  0  ,  C  ,  0  , -S  ],
+		[  0  ,  0  ,  S  ,  0  ,  C  ,  0  ],
+		[  0  ,  0  ,  0  ,  S  ,  0  ,  C  ]],float)
+		Sigma = Ryz * Sigma * Ryz.T
+
+		# Rotate upright in XZ Plane
+		ThetaZX = 0.5 * arctan(2*Sigma[4,0]/(Sigma[0,0]-Sigma[4,4]))
+		Rzx = matrix([
+		[  C  ,  0  ,  0  ,  0  , -S  ,  0  ],
+		[  0  ,  C  ,  0  ,  0  ,  0  , -S  ],
+		[  0  ,  0  ,  1  ,  0  ,  0  ,  0  ],
+		[  0  ,  0  ,  0  ,  1  ,  0  ,  0  ],
+		[  S  ,  0  ,  0  ,  0  ,  C  ,  0  ],
+		[  0  ,  S  ,  0  ,  0  ,  0  ,  C  ] ],float)
+		Sigma = Rzx * Sigma * Rzx.T
+
+		# Beam semiaxes
+		rx = 1.0
+		ry = 1.0
+		rz = 1.0
+		# normalized radial component for form factor fit
+		p = self.gamma*rz/sqrt(rx*ry)
+
+		# Form factor f polyfit Coefficient
+		C0 = [0.32685993, -1.10422029, 1.64157723, -1.52987752, 0.99919503]
+		f = polyval(C0,p)
+
+		# Constants for E-Field Calcuation
+		k = 1.0/(4*pi*8.85e-12)
+		Q = 3.0*self.I0/(self.Frequency)
+
+		# Calculate E-Field Components
+		Ex = (k*Q/self.gamma**2) * (1.0 - f) / (rx*(rx+ry)*rz) 
+		Ey = (k*Q/self.gamma**2) * (1.0 - f) / (ry*(rx+ry)*rz)
+		Ez = (k*Q) * f/(rx*ry*rz)
+
+		# Constant to convert E-field to delta Xi'
+		d = (self.q * dS) / (self.m0 * self.c0**2 * self.beta)
+
+
+		# Apply SPace Charge Impulses to momentum		
+		ME = matrix([
+		[ 1  , 0  , 0  , 0  , 0  ,  0  ],
+		[d*Ex, 1  , 0  , 0  , 0  ,  0  ],
+		[ 0  , 0  , 1  , 0  , 0  ,  0  ],
+		[ 0  , 0  ,d*Ey, 1  , 0  ,  0  ],
+		[ 0  , 0  , 0  , 0  , 1  ,  0  ],
+		[ 0  , 0  , 0  , 0  ,d*Ez,  1  ]],float)
+		Sigma = ME * Sigma * ME.T
+
+		# Rotate back to orignial orientation
+		Sigma = (Mxy.T * Myz.T * Mzx.T) * Sigma * (Mzx * Myz * Mxy)
+		return Sigma
+
+
+
+
 

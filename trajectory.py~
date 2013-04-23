@@ -6,7 +6,7 @@ from numpy.linalg import norm
 
 
 class trajectory:
-	def __init__ (self,Vessel,B,dS=1e-3,r0=[1.5,0.0,0.1],v0=[-1.0,-0.1,0],a0=[0.0,0.0,0.0],A0=2,E0=0.9,Nmax=10000,Smin=0.25):
+	def __init__ (self,Vessel,B,dS=1e-3,r0=[1.5,0.0,0.1],v0=[-1.0,-0.1,0],a0=[0.0,0.0,0.0],A0=2,E0=0.9e6,I0=1e-3,Freq=425e6,Nmax=10000,Smin=0.25):
 
 		# B = Magnetic Field [T] (bfield class)
 		# Vessel = Defines wall (boundary class)
@@ -21,12 +21,15 @@ class trajectory:
 
 		self.A0 = A0
 		self.q0 = 1.60217646e-19
-		self.m0 = A0 * 1.67262158e-27 # A0*1.67e-27
+		self.m0 = A0 * 1.67262158e-27
+		self.I0 = I0
+		self.Frequency = Freq
+
 
 #		v0 = pl.sqrt(2*E0*1.602e-16/(A0*1.67e-27))
 		self.r = [array(r0)]
 #		self.v0 = c0 * sqrt(2.0*E0/(A0*938.272046))
-		self.v0 = sqrt(2.0*E0*1e6*self.q0/(self.m0))
+		self.v0 = sqrt(2.0*E0*self.q0/(self.m0))
 		self.v = [ self.v0 * array(v0)/norm(v0) ]
 		self.a = [ array(a0) ]
 		self.B = [ array(B.local(r0)) ]
@@ -49,8 +52,14 @@ class trajectory:
 
 				self.a.append( qm * cross(self.v[-1],self.B[-1]) )
 
-				self.v.append( self.v[-1] + 0.5*(self.a[-1]+self.a[-2])*dt )				
+				self.v.append( self.v[-1] + 0.5*(self.a[-1]+self.a[-2])*dt )
 
+				# Normalized Relativistic Parameters
+				self.Beta.append(self.v[-1]/c0)
+				self.beta.append(norm(self.Beta[-1]))
+				self.gamma.append( 1.0 / (1.0-self.beta[-1]**2)
+
+				# Check to see if beam crosses boundary
 				IN,NormalV,TangentV,IncidentV = Vessel.Xboundary(self.r[-2],self.r[-1])
 
 				c1 = IN

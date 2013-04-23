@@ -52,13 +52,13 @@ class ellipse:
 		f.text(.5, .95, Title, horizontalalignment='center')
 
 		X,Y = self.GenerateXY(self.TwissXX1,NPoints)
-		pl.subplot(2,3,1); pl.plot(X,Y,Mod); pl.xlabel('X [mm]');  pl.ylabel('dx/ds [mrad]');
+		pl.subplot(2,3,1); pl.plot(X,Y,Mod); pl.xlabel('X [mm]');  pl.ylabel(r'$\Delta$Px / P [mrad]');
 
 		X,Y = self.GenerateXY(self.TwissYY1,NPoints)
-		pl.subplot(2,3,2); pl.plot(X,Y,Mod); pl.xlabel('Y [mm]');  pl.ylabel('dY/ds [mrad]');
+		pl.subplot(2,3,2); pl.plot(X,Y,Mod); pl.xlabel('Y [mm]');  pl.ylabel(r'$\Delta$Py / P [mrad]');
 
 		X,Y = self.GenerateXY(self.TwissZZ1,NPoints)
-		pl.subplot(2,3,3); pl.plot(X,Y,Mod); pl.xlabel('Z [mm]');  pl.ylabel('dP/P [mrad]');
+		pl.subplot(2,3,3); pl.plot(X,Y,Mod); pl.xlabel('Z [mm]');  pl.ylabel(r'$\Delta$Pz / P [mrad]');
 
 #		pl.figure(FIG+1)
 		X,Y = self.GenerateXY(self.TwissXY,NPoints)

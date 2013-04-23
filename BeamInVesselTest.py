@@ -4,6 +4,7 @@ from bfield import *
 from trajectory import *
 from beam import *
 from ellipse import *
+import pylab as pl
 
 # boundary(Rb,Zb)
 #Rb = [ 0.2 , 0.25, 0.4 , 0.6 , 0.8 , 0.8 , 0.6 , 0.4 , 0.25, 0.2 ]
@@ -37,7 +38,7 @@ if False:
 		T.PlotV(3)
 
 if True:
-	B =  bfield(0.2,R0=1,B0z=0.2)
+	B =  bfield(0.1,R0=1,B0z=0.07)
 	T = trajectory(Vessel,B)
 	T.Plot3D(ax)
 	T.PlotB(2)
@@ -60,6 +61,7 @@ if True:
 	Em2 = ellipse(Beam.Sigma[int(len(Beam.Sigma)*0.66)]); Em2.Plot()
 	Ef = ellipse(Beam.Sigma[-1]); Ef.Plot()
 
+	pl.legend((r'$\Delta$s = 0.0 m',r'$\Delta$s = 0.5 m',r'$\Delta$s = 1.0 m','Target'))
 
 
 pl.show()

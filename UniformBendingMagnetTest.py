@@ -52,7 +52,7 @@ if True:
 	Beam.Trace()
 
 	pl.figure
-	STR = r'1m Radius 90$^o$ Bend in the X-Z plane in Uniform B$_y$- Field'
+	STR = r'1m Radius 90$^o$ Bend in Uniform B$_x$- Field'
 	Ei = ellipse(Beam.Sigma[0]); Ei.Plot()
 	Em1 = ellipse(Beam.Sigma[int(len(Beam.Sigma)*0.33)]); Em1.Plot()
 	Em2 = ellipse(Beam.Sigma[int(len(Beam.Sigma)*0.66)]); Em2.Plot()
