@@ -31,6 +31,9 @@ class trajectory:
 #		self.v0 = c0 * sqrt(2.0*E0/(A0*938.272046))
 		self.v0 = sqrt(2.0*E0*self.q0/(self.m0))
 		self.v = [ self.v0 * array(v0)/norm(v0) ]
+		self.Beta = [self.v[-1]/c0]
+		self.beta = [norm(v0)/c0]
+		self.gamma = [1.0 / (1.0-self.beta[-1]**2)]
 		self.a = [ array(a0) ]
 		self.B = [ array(B.local(r0)) ]
 		self.s = [ 0.0 ]
@@ -57,7 +60,7 @@ class trajectory:
 				# Normalized Relativistic Parameters
 				self.Beta.append(self.v[-1]/c0)
 				self.beta.append(norm(self.Beta[-1]))
-				self.gamma.append( 1.0 / (1.0-self.beta[-1]**2)
+				self.gamma.append( 1.0 / (1.0-self.beta[-1]**2))
 
 				# Check to see if beam crosses boundary
 				IN,NormalV,TangentV,IncidentV = Vessel.Xboundary(self.r[-2],self.r[-1])

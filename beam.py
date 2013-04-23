@@ -7,7 +7,7 @@ class beam:
 	# inputs:
 	# sigma = 6x6 sigma matrix
 	# s0 = 3x3 matrix for local beam coordinate system
-	def __init__(self,Beam,Trajectory,Sigma0):
+	def __init__(self,Trajectory,Sigma0):
 		self.Sigma = [Sigma0]
 
 		self.q0 = Trajectory.q0
@@ -128,7 +128,7 @@ class beam:
 #		Mb = matrix(identity(6))
 		return Mb
 
-	def SpaceCharge(self,SigmaIN,dS)
+	def SpaceCharge(self,SigmaIN,dS):
 		Sigma = matrix(SigmaIN)
 
 		# Rotate upright in XY Plane
