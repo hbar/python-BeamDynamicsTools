@@ -96,7 +96,7 @@ class bfieldTF:
 
 class bfieldVF:
 
-	def __init__ (self, B0=1.0, RCoil=[array([1.5,0.75]),array([1.5,-0.75])]):
+	def __init__ (self, B0=1.0, RCoil=[array([1.504188,0.440817]),array([1.504188,-0.440817])]):
 		self.RCoil = RCoil
 		self.B0 = B0
 

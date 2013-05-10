@@ -53,17 +53,18 @@ class beam:
 	def ReverseTrace(self,SigmaF):
 		Ni = len(self.r)
 		D = self.Drift(self.dS)
-		self.TransferM = []
-		
+		RevTransferM = []
+		RevSigma = []
 		for i in range(Ni-1,-1,-1):
 			# Mb is the matrix form of Acc = (q/m) v x B
 			S = self.BasisM3[i] #matrix(identity(6))
 			B = self.BMatrix(S,self.B[i])
 			M = inv(B)
-			self.TransferM.append(M)
-			self.Sigma.append( M * self.Sigma[-1] * M.T )
+			RevTransferM.append(M)
+			RevSigma.append( M * RevSigma[-1] * M.T )
 			print i
-
+		self.RevSigma.append(RevSigma)
+		self.RevTransferM.append(RevTransferM)
 
 	def Drift(self,ds=1e-3):
 		Mdrift = matrix([

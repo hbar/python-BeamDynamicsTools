@@ -57,14 +57,21 @@ if True:
 
 	Beam = beam(T,S0)
 
+	# Trace Beam and Plot Ellises
 	Beam.Trace()
-
 	Ei = ellipse(Beam.Sigma[0]); Ei.Plot()
 	Em1 = ellipse(Beam.Sigma[int(len(Beam.Sigma)*0.33)]); Em1.Plot()
 	Em2 = ellipse(Beam.Sigma[int(len(Beam.Sigma)*0.66)]); Em2.Plot()
 	Ef = ellipse(Beam.Sigma[-1]); Ef.Plot()
 
-	pl.legend((r'$\Delta$s = 0.0 m',r'$\Delta$s = 0.5 m',r'$\Delta$s = 1.0 m','Target'))
+	# Reverse Trace Beam and Plot Ellises
+	Beam.ReverseTrace(Beam.Sigma[-1])
+	Ei = ellipse(Beam.Sigma[0]); Ei.Plot()
+	Em1 = ellipse(Beam.Sigma[int(len(Beam.Sigma)*0.33)]); Em1.Plot()
+	Em2 = ellipse(Beam.Sigma[int(len(Beam.Sigma)*0.66)]); Em2.Plot()
+	Ef = ellipse(Beam.Sigma[-1]); Ef.Plot()
+
+	#pl.legend((r'$\Delta$s = 0.0 m',r'$\Delta$s = 0.5 m',r'$\Delta$s = 1.0 m','Target'))
 
 
 pl.show()
