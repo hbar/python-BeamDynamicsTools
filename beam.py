@@ -1,7 +1,7 @@
 from numpy import *
 #import scipy as sp
 import pylab as pl
-from numpy.linalg import norm
+from numpy.linalg import inv,norm
 
 class beam:
 	# inputs:
@@ -28,6 +28,11 @@ class beam:
 		self.dt = Trajectory.dt
 		self.BasisM3 = Trajectory.BasisM3
 		self.BasisM6 = Trajectory.BasisM6
+
+		# lists of matrices for reverse calculations
+		self.RevSigma = []
+		self.RevTransferM = []
+
 #		self.e1=Trajectory.e1
 #		self.e2=Trajectory.e2
 #		self.e3=Trajectory.e3
@@ -45,6 +50,21 @@ class beam:
 			self.Sigma.append( M * self.Sigma[-1] * M.T )
 			print i
 		
+	def ReverseTrace(self,SigmaF):
+		Ni = len(self.r)
+		D = self.Drift(self.dS)
+		self.TransferM = []
+		
+		for i in range(Ni-1,-1,-1):
+			# Mb is the matrix form of Acc = (q/m) v x B
+			S = self.BasisM3[i] #matrix(identity(6))
+			B = self.BMatrix(S,self.B[i])
+			M = inv(B)
+			self.TransferM.append(M)
+			self.Sigma.append( M * self.Sigma[-1] * M.T )
+			print i
+
+
 	def Drift(self,ds=1e-3):
 		Mdrift = matrix([
 		[1,  ds, 0 , 0 , 0 , 0 ],

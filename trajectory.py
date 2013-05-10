@@ -6,7 +6,7 @@ from numpy.linalg import norm
 
 
 class trajectory:
-	def __init__ (self,Vessel,B,dS=1e-3,r0=[1.5,0.0,0.1],v0=[-1.0,-0.1,0],a0=[0.0,0.0,0.0],A0=2,E0=0.9e6,I0=1e-3,Freq=425e6,Nmax=10000,Smin=0.25):
+	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=[1.5,0.0,0.1],v0=[-1.0,-0.1,0],a0=[0.0,0.0,0.0],A0=2,E0=0.9e6,I0=1e-3,Freq=425e6,Nmax=10000,Smin=0.25):
 
 		# B = Magnetic Field [T] (bfield class)
 		# Vessel = Defines wall (boundary class)
@@ -36,6 +36,7 @@ class trajectory:
 		self.gamma = [1.0 / (1.0-self.beta[-1]**2)]
 		self.a = [ array(a0) ]
 		self.B = [ array(B.local(r0)) ]
+		self.B = [ array(B.local(r0)) ]
 		self.s = [ 0.0 ]
 		self.dS = dS
 		dt = dS/self.v0
@@ -51,7 +52,7 @@ class trajectory:
 
 				self.s.append( self.s[-1] + dS )
 
-				self.B.append( array(B.local(self.r[-1])) )
+				self.B.append( array(B.local(self.r[-1])) + array(Bv.local(self.r[-1])))
 
 				self.a.append( qm * cross(self.v[-1],self.B[-1]) )
 
@@ -138,15 +139,17 @@ class trajectory:
 		return ax
 
 	def PlotB(self,FIG=2):
-		Bx=[]; By=[]; Bz=[];
+		Bx=[]; By=[]; Bz=[]; Bmag=[]
 		pl.figure(FIG)
 		for i in range(len(self.B)):
 			Bx.append(self.B[i][0])
 			By.append(self.B[i][1])
 			Bz.append(self.B[i][2])
-		pl.subplot(3,1,1); pl.plot(self.s,Bx); pl.ylabel(r'Bx [T]'); pl.title('B-Field Components Along Trajectory')
-		pl.subplot(3,1,2); pl.plot(self.s,By); pl.ylabel(r'By [T]')
-		pl.subplot(3,1,3); pl.plot(self.s,Bz); pl.ylabel(r'Bz [T]')
+			Bmag.append(norm(self.B[i]))
+		pl.subplot(4,1,1); pl.plot(self.s,Bx); pl.ylabel(r'Bx [T]'); pl.title('B-Field Components Along Trajectory')
+		pl.subplot(4,1,2); pl.plot(self.s,By); pl.ylabel(r'By [T]')
+		pl.subplot(4,1,3); pl.plot(self.s,Bz); pl.ylabel(r'Bz [T]')
+		pl.subplot(4,1,4); pl.plot(self.s,Bmag); pl.ylabel(r'|B| [T]')
 		pl.xlabel('S-coordinate [m]')
 
 	def PlotV(self,FIG=3):

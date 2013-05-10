@@ -1,5 +1,5 @@
-#import scipy as sp
 from numpy import *
+from scipy.special import *
 
 # Br = B0*R0/R * (1 + f(r,z,phi))
 # Bz = BZ0
@@ -91,4 +91,37 @@ class bfieldTF:
 				break
 		return B
 
+# ======= Realistic VF Field ==================================================
+# ======= Imported From BFieldDevelopment.py on 4/29/2013 =====================
+
+class bfieldVF:
+
+	def __init__ (self, B0=1.0, RCoil=[array([1.5,0.75]),array([1.5,-0.75])]):
+		self.RCoil = RCoil
+		self.B0 = B0
+
+	def local(self,R):
+	#	RCoil=[array([1.0,0.0])]
+		r = sqrt(R[0]**2 + R[1]**2)
+		z1 = R[2]
+		theta = arctan(R[1]/R[0])
+		Br=0.0; Bz=0.0; BrR=0.0;
+		for n in range(len(self.RCoil)):
+			r0 = self.RCoil[n][0]
+			z0 = self.RCoil[n][1]
+			z = z1-z0
+			k = sqrt( 4*r*r0 / ( (r+r0)**2 + z**2) )
+			IE = ellipe(k)
+			IK = ellipk(k)
+
+			Br = Br + (1.0/r) * (z/sqrt( (r+r0)**2 + z**2) ) * (-IK + IE*(r0**2 + r**2 + z**2)/((r0-r)**2 + z**2) )
+
+			Bz = Bz + (1.0/sqrt( (r+r0)**2 + z**2) ) * (IK + IE*(r0**2 - r**2 - z**2)/((r0-r)**2 + z**2) )
+
+			if ( (r-r0)**2 + z**2 < 0.2**2 ):
+				Br = 0; Bz = 0;
+				break
+
+		BV = self.B0 * array([ Br*cos(theta) , Br*sin(theta) , Bz ])
+		return BV
 
