@@ -1,3 +1,5 @@
+#Trajectory.py
+
 from numpy import *
 #import scipy as sp
 import pylab as pl
@@ -6,7 +8,7 @@ from numpy.linalg import norm
 
 
 class trajectory:
-	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=[1.5,0.0,0.1],v0=[-1.0,-0.1,0],a0=[0.0,0.0,0.0],A0=2,E0=0.9e6,I0=1e-3,Freq=425e6,Nmax=10000,Smin=0.25):
+	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=[1.2,0.0,0.1],v0=[-1.0,-0.1,0],a0=[0.0,0.0,0.0],A0=2,E0=0.9e6,I0=1e-3,Freq=425e6,Nmax=10000,Smin=0.5):
 
 		# B = Magnetic Field [T] (bfield class)
 		# Vessel = Defines wall (boundary class)
@@ -32,31 +34,160 @@ class trajectory:
 		self.v0 = sqrt(2.0*E0*self.q0/(self.m0))
 		self.v = [ self.v0 * array(v0)/norm(v0) ]
 		self.Beta = [self.v[-1]/c0]
-		self.beta = [norm(v0)/c0]
+		self.beta = [norm(self.Beta[-1])]
 		self.gamma = [1.0 / (1.0-self.beta[-1]**2)]
 		self.a = [ array(a0) ]
 		self.B = [ array(B.local(r0)) ]
 		self.B = [ array(B.local(r0)) ]
 		self.s = [ 0.0 ]
-		self.dS = dS
 		dt = dS/self.v0
 		self.dt = dt
+		self.dS = [ 0.0 ];
 
 		c1=True; c2=True; i = 0
 		
 		# Leapfrog Integration:
-		if True:
+		if False:
 			while (c1 or c2) and i<Nmax:
 
 				self.r.append( self.r[-1] + self.v[-1]*dt + 0.5*self.a[-1]*dt*dt)
 
 				self.s.append( self.s[-1] + dS )
 
-				self.B.append( array(B.local(self.r[-1])) + array(Bv.local(self.r[-1])))
+				self.B.append( B.local(self.r[-1]) + Bv.local(self.r[-1]) )
 
 				self.a.append( qm * cross(self.v[-1],self.B[-1]) )
 
 				self.v.append( self.v[-1] + 0.5*(self.a[-1]+self.a[-2])*dt )
+
+				# Normalized Relativistic Parameters
+				self.Beta.append(self.v[-1]/c0)
+				self.beta.append(norm(self.Beta[-1]))
+				self.gamma.append( 1.0 / (1.0-self.beta[-1]**2))
+
+				# Check to see if beam crosses boundary
+				IN,NormalV,TangentV,IncidentV = Vessel.Xboundary(self.r[-2],self.r[-1])
+
+				c1 = IN
+				c2 = i*dS < Smin
+				i=i+1;
+				print i
+#			self.Target = target(NormalV,TangentV,IncidentV)
+
+			print 'trajectory complete'
+
+			self.BeamBasis()
+			print 'Beam Coordinates Complete'
+		
+		# Radius of Curvature method with perpendicular projection of B and constant dTheta = dS/R(B)
+		BMag=0.0; vMag=0.0; hPara=zeros(3,float); hPerp=zeros(3,float)
+		if True:
+			while (c1 or c2) and i<Nmax:
+
+				self.B.append( B.local(self.r[-1]) + Bv.local(self.r[-1]) )
+
+				BMag = norm(self.B[-1])
+
+				vMag = norm(self.v[-1])
+
+				# parallel to velocity unit vector 
+				hPara = self.v[-1] / vMag
+
+				# Vector along bending Radius
+				hRadius = cross(self.v[-1],self.B[-1]); hRadius = hRadius/norm(hRadius)
+
+				# perpendicular to B unit vector				
+				hPerp = cross( hRadius, hPara )
+
+				# Magnitude of perpendicular projection of B
+				BPerp = dot(self.B[-1],hPerp)
+
+				# Cyclotron Frequency
+				Omega = self.q0*BPerp/self.m0
+				dTheta = 0.001 # Omega*self.dt
+
+				# Larmor radius
+				rL =  (self.m0*vMag) / (self.q0*BPerp)
+				print rL, Omega, (rL*dTheta)
+				# Change in r
+
+				drPara = rL * sin(dTheta) * hPara
+
+				drRad  = rL * (cos(dTheta) - 1.0) * hRadius
+
+				vPara = vMag*cos(dTheta) * hPara
+
+				vRad = vMag*sin(dTheta) * hRadius
+
+				self.r.append( self.r[-1] + drPara + drRad)
+
+				self.s.append( self.s[-1] + (rL*dTheta) )
+
+				self.dS.append( self.s[-1] - self.s[-2] )
+
+				self.a.append( qm * cross(self.v[-1],self.B[-1]) )
+
+				self.v.append( vPara + vRad )
+
+				# Normalized Relativistic Parameters
+				self.Beta.append(self.v[-1]/c0)
+				self.beta.append(norm(self.Beta[-1]))
+				self.gamma.append( 1.0 / (1.0-self.beta[-1]**2))
+
+				# Check to see if beam crosses boundary
+				IN,NormalV,TangentV,IncidentV = Vessel.Xboundary(self.r[-2],self.r[-1])
+
+				c1 = IN
+				c2 = self.s[-1] < Smin
+				i=i+1;
+				print i
+#			self.Target = target(NormalV,TangentV,IncidentV)
+
+			print 'trajectory complete'
+
+			self.BeamBasis()
+			print 'Beam Coordinates Complete'
+			print self.BasisM3
+		# Boris Method with constant dTheta = dS/R(B)
+		if False:
+			while (c1 or c2) and i<Nmax:
+
+				self.B.append( array(B.local(self.r[-1])) + array(Bv.local(self.r[-1])))
+				BMag = norm(self.B[-1])
+
+				# parallel to B unit vector 
+				hPara = self.B[-1] / BMag
+
+				# perpendicular to B unit vector				
+				hPerp = (V - (V*hPara)*hPara); hPerp = hPerp/norm(hPerp)
+
+				# Vector along bending Radius
+				hRadius = cross(hPara,hPerp)
+
+				# Cyclotron Frequency
+				Omega = self.q0*BMag/self.m0
+				dTheta = Omega*self.dt
+
+				# Larmor radius
+				rL =  (self.m0*dot(self.v[-1],hPerp)) / (self.q0*BMag)
+
+				# Change in r
+
+				drPara = self.dt*dot(self.v[-1],hPara) * hPara
+
+				drPerp = (rL*sin(dTheta)) * hPerp
+
+				drRad = rL*(cos(dTheta) - 1.0) * hRad
+
+				self.r.append( self.r[-1] + drPara + drPerp + drRad)
+
+				self.s.append( self.s[-1] + norm( self.r[-1]-self.r[-2] ) )
+
+				self.a.append( qm * cross(self.v[-1],self.B[-1]) )
+
+				dv = dot(self.v[-1],hPara)*hPara + dot(self.v[-1],hPerp)*(cos(dTheta)*hPerp - sin(dTheta)*hRad )
+
+				self.v.append( self.v[-1] + dv )
 
 				# Normalized Relativistic Parameters
 				self.Beta.append(self.v[-1]/c0)

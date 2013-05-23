@@ -40,8 +40,8 @@ if False:
 
 if True:
 #	B = bfield(0.1,R0=1,B0z=0.07)
-	B = bfieldTF(B0=0.5)
-	Bv = bfieldVF(B0=0.05)
+	B = bfieldTF(B0=0.45)
+	Bv = bfieldVF(B0=0.025)
 	T = trajectory(Vessel,B,Bv)
 	T.Plot3D(ax)
 	T.PlotB(2)
@@ -64,12 +64,16 @@ if True:
 	Em2 = ellipse(Beam.Sigma[int(len(Beam.Sigma)*0.66)]); Em2.Plot()
 	Ef = ellipse(Beam.Sigma[-1]); Ef.Plot()
 
+	pl.figure(); pl.plot(Beam.s); pl.title('s')
+	pl.figure(); pl.plot(Beam.dS); pl.title('dS')
+ 	pl.figure(); pl.plot(Beam.beta); pl.title('beta')
+
 	# Reverse Trace Beam and Plot Ellises
-	Beam.ReverseTrace(Beam.Sigma[-1])
-	Ei = ellipse(Beam.Sigma[0]); Ei.Plot()
-	Em1 = ellipse(Beam.Sigma[int(len(Beam.Sigma)*0.33)]); Em1.Plot()
-	Em2 = ellipse(Beam.Sigma[int(len(Beam.Sigma)*0.66)]); Em2.Plot()
-	Ef = ellipse(Beam.Sigma[-1]); Ef.Plot()
+#	Beam.ReverseTrace(Beam.Sigma[-1])
+#	Ei = ellipse(Beam.RevSigma[0][0]); Ei.Plot()
+#	Em1 = ellipse(Beam.RevSigma[0][int(len(Beam.RevSigma[0])*0.33)]); Em1.Plot()
+#	Em2 = ellipse(Beam.RevSigma[0][int(len(Beam.RevSigma[0])*0.66)]); Em2.Plot()
+#	Ef = ellipse(Beam.RevSigma[0][-1]); Ef.Plot()
 
 	#pl.legend((r'$\Delta$s = 0.0 m',r'$\Delta$s = 0.5 m',r'$\Delta$s = 1.0 m','Target'))
 

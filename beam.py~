@@ -1,3 +1,5 @@
+# Beam.py
+
 from numpy import *
 #import scipy as sp
 import pylab as pl
@@ -21,6 +23,8 @@ class beam:
 		self.r = Trajectory.r
 		self.v0 = Trajectory.v0
 		self.v = Trajectory.v
+		self.Beta = Trajectory.Beta
+		self.beta = Trajectory.beta
 		self.a = Trajectory.a
 		self.B = Trajectory.B
 		self.s = Trajectory.s
@@ -39,12 +43,12 @@ class beam:
 
 	def Trace(self):
 		Ni = len(self.r)
-		D = self.Drift(self.dS)
 		self.TransferM = []
 		for i in range(Ni):
+			D = self.Drift(self.dS[i])
 			# Mb is the matrix form of Acc = (q/m) v x B
 			S = self.BasisM3[i] #matrix(identity(6))
-			B = self.BMatrix(S,self.B[i])
+			B = self.BMatrix(S,self.B[i],self.dS[i])
 			M = B
 			self.TransferM.append(M)
 			self.Sigma.append( M * self.Sigma[-1] * M.T )
@@ -52,13 +56,13 @@ class beam:
 		
 	def ReverseTrace(self,SigmaF):
 		Ni = len(self.r)
-		D = self.Drift(self.dS)
 		RevTransferM = []
-		RevSigma = []
+		RevSigma = [SigmaF]
 		for i in range(Ni-1,-1,-1):
+			D = self.Drift(self.dS[i])
 			# Mb is the matrix form of Acc = (q/m) v x B
 			S = self.BasisM3[i] #matrix(identity(6))
-			B = self.BMatrix(S,self.B[i])
+			B = self.BMatrix(S,self.B[i],self.dS[i])
 			M = inv(B)
 			RevTransferM.append(M)
 			RevSigma.append( M * RevSigma[-1] * M.T )
@@ -89,14 +93,13 @@ class beam:
 #
 #		return Mb
 
-	def BMatrix(self,Basis,Bin):
+	def BMatrix(self,Basis,Bin,dS):
 
 		Bperp = matrix([[dot(Bin,Basis[:,0])],[dot(Bin,Basis[:,1])],[0.0]])
 
 		B0 = norm(Bperp) 
 		if B0!=0:
 			r = (self.m0*self.v0)/(self.q0*B0) 
-			dS = self.dS
 			da = dS/r
 			C = cos(da)
 			S = sin(da)

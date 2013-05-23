@@ -55,7 +55,7 @@ class bfieldc:
 
 class bfieldTF:
 	# Generates Toroidal Field Coils
-	def __init__(self, B0=1.0, R0=0.66, Phi0=2*pi/40,  Ncoils=20, Rmin=0.3, Rmax=1.2): 
+	def __init__(self, B0=1.0, R0=0.66, Phi0=2*pi/40,  Ncoils=20, Rmin=0.1947965, Rmax=1.195229): 
 
 		TF = []
 		self.B0 = B0
