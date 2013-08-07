@@ -42,7 +42,7 @@ if True:
 #	B = bfield(0.1,R0=1,B0z=0.07)
 	B = bfieldTF(B0=0.1)
 	Bv = bfieldVF(B0=0.0001)
-	T = trajectory(Vessel,B,Bv,I0=1)
+	T = trajectory(Vessel,B,Bv)
 	T.Plot3D(ax)
 	T.PlotB(2)
 	T.PlotV(3)

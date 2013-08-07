@@ -46,13 +46,27 @@ class ellipse:
 			YPoints[i] = Radius*(m21*cos(Theta[i]) + m22*sin(Theta[i]))
 		return XPoints,YPoints
 
-	def Plot(self,FIG=0,NPoints=1000,Mod='-',Title = ' '):
+	def ProjectXY(XPoints,YPoints,Axz,Ayz): #Axz = angle in XZ plane
+		for i in range(len(XPoints)):
+			XPoints[i] = XPoints[i]/cos(Axz)/sin(Ayz)
+			YPoints[i] = YPoints[i]/cos(Ayz)/sin(Axz)
+		return XPoints,YPoints
+
+	def PlotProjectionXY(self,Axz=0,Ayz=0,FIG=0,NPoints=1000,Mod='-',Title = ' '):
+		f=pl.figure(FIG)
+		X,Y = self.GenerateXY(self.TwissXY,NPoints)
+		X = X/cos(Axz)
+		Y = Y/cos(Ayz)
+		pl.plot(X,Y,Mod); pl.xlabel('X [mm]');  pl.ylabel('Y [mm]');
+		axes().set_aspect('equal')
+
+	def PlotALL(self,FIG=0,NPoints=1000,Mod='-',Title = ' '):
 
 		f=pl.figure(FIG)
 		f.text(.5, .95, Title, horizontalalignment='center')
 
 		X,Y = self.GenerateXY(self.TwissXX1,NPoints)
-		pl.subplot(2,3,1); pl.plot(X,Y,Mod); pl.xlabel('X [mm]');  pl.ylabel(r'$\Delta$Px / P [mrad]');
+		pl.subplot(2,3,1); pl.plot(X,Y,Mod); pl.xlabel('X [mm]');  pl.ylabel(r'$\Delta$Px / P [mrad]'); pl.axes().set_aspect('equal')
 
 		X,Y = self.GenerateXY(self.TwissYY1,NPoints)
 		pl.subplot(2,3,2); pl.plot(X,Y,Mod); pl.xlabel('Y [mm]');  pl.ylabel(r'$\Delta$Py / P [mrad]');
@@ -75,7 +89,6 @@ class ellipse:
 		
 		pl.subplots_adjust( hspace=0.35 )
 		pl.subplots_adjust( wspace=0.35 )
-
 
 #		pl.xlim([-2,2]); pl.ylim([-2,2])
 

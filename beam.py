@@ -26,6 +26,7 @@ class beam:
 		self.v = Trajectory.v
 		self.Beta = Trajectory.Beta
 		self.beta = Trajectory.beta
+		self.gamma = Trajectory.gamma
 		self.a = Trajectory.a
 		self.B = Trajectory.B
 		self.s = Trajectory.s
@@ -33,6 +34,8 @@ class beam:
 		self.dt = Trajectory.dt
 		self.BasisM3 = Trajectory.BasisM3
 		self.BasisM6 = Trajectory.BasisM6
+		self.NormalV = Trajectory.NormalV
+		self.IncidentV = Trajectory.IncidentV
 
 		# lists of matrices for reverse calculations
 		self.RevSigma = []
@@ -50,7 +53,9 @@ class beam:
 			# Mb is the matrix form of Acc = (q/m) v x B
 			S = self.BasisM3[i] #matrix(identity(6))
 			B = self.BMatrix(S,self.B[i],self.dS[i])
-			M = B
+			#print B
+			Q = self.SpaceCharge(self.Sigma[i],self.dS[i],self.beta[i],self.gamma[i])
+			M = B*Q
 			self.TransferM.append(M)
 			self.Sigma.append( M * self.Sigma[-1] * M.T )
 			print i
@@ -153,12 +158,12 @@ class beam:
 #		Mb = matrix(identity(6))
 		return Mb
 
-	def SpaceCharge(self,SigmaIN,dS):
+	def SpaceCharge(self,SigmaIN,dS,beta,gamma):
 		Sigma = matrix(SigmaIN)
 
 		# Rotate upright in XY Plane
 		ThetaXY = 0.5 * arctan(2*Sigma[0,2]/(Sigma[2,2]-Sigma[0,0]))
-		C = cos(Theta); S = sin(ThetaXY) 
+		C = cos(ThetaXY); S = sin(ThetaXY) 
 		Rxy = matrix([
 		[  C  ,  0  , -S  ,  0  , 0  ,  0  ],
 		[  0  ,  C  ,  0  , -S  , 0  ,  0  ],
@@ -166,7 +171,7 @@ class beam:
 		[  0  ,  S  ,  0  ,  C  , 0  ,  0  ],
 		[  0  ,  0  ,  0  ,  0  , 1  ,  0  ],
 		[  0  ,  0  ,  0  ,  0  , 0  ,  1  ]],float)
-		Sigma = Rxy * Sigma * Rxy.T
+#		Sigma = Rxy * Sigma * Rxy.T
 
 		# Rotate upright in YZ Plane
 		ThetaYZ = 0.5 * arctan(2*Sigma[2,4]/(Sigma[4,4]-Sigma[2,2]))
@@ -178,10 +183,12 @@ class beam:
 		[  0  ,  0  ,  0  ,  C  ,  0  , -S  ],
 		[  0  ,  0  ,  S  ,  0  ,  C  ,  0  ],
 		[  0  ,  0  ,  0  ,  S  ,  0  ,  C  ]],float)
-		Sigma = Ryz * Sigma * Ryz.T
+#		Sigma = Ryz * Sigma * Ryz.T
 
 		# Rotate upright in XZ Plane
+		C = 1.0; S = 0.0;
 		ThetaZX = 0.5 * arctan(2*Sigma[4,0]/(Sigma[0,0]-Sigma[4,4]))
+		C = cos(ThetaZX); S = sin(ThetaZX)
 		Rzx = matrix([
 		[  C  ,  0  ,  0  ,  0  , -S  ,  0  ],
 		[  0  ,  C  ,  0  ,  0  ,  0  , -S  ],
@@ -189,14 +196,15 @@ class beam:
 		[  0  ,  0  ,  0  ,  1  ,  0  ,  0  ],
 		[  S  ,  0  ,  0  ,  0  ,  C  ,  0  ],
 		[  0  ,  S  ,  0  ,  0  ,  0  ,  C  ] ],float)
-		Sigma = Rzx * Sigma * Rzx.T
+#		Sigma = Rzx * Sigma * Rzx.T
 
 		# Beam semiaxes
-		rx = 1.0
-		ry = 1.0
-		rz = 1.0
+		rx = 0.005
+		ry = 0.005
+		rz = 0.005
+
 		# normalized radial component for form factor fit
-		p = self.gamma*rz/sqrt(rx*ry)
+		p = gamma*rz/sqrt(rx*ry)
 
 		# Form factor f polyfit Coefficient
 		C0 = [0.32685993, -1.10422029, 1.64157723, -1.52987752, 0.99919503]
@@ -207,13 +215,12 @@ class beam:
 		Q = 3.0*self.I0/(self.Frequency)
 
 		# Calculate E-Field Components
-		Ex = (k*Q/self.gamma**2) * (1.0 - f) / (rx*(rx+ry)*rz) 
-		Ey = (k*Q/self.gamma**2) * (1.0 - f) / (ry*(rx+ry)*rz)
+		Ex = (k*Q/gamma**2) * (1.0 - f) / (rx*(rx+ry)*rz) 
+		Ey = (k*Q/gamma**2) * (1.0 - f) / (ry*(rx+ry)*rz)
 		Ez = (k*Q) * f/(rx*ry*rz)
 
 		# Constant to convert E-field to delta Xi'
-		d = (self.q * dS) / (self.m0 * self.c0**2 * self.beta)
-
+		d = (self.q0 * dS) / (self.m0 * self.c0**2 * beta)
 
 		# Apply SPace Charge Impulses to momentum		
 		ME = matrix([
@@ -223,13 +230,20 @@ class beam:
 		[ 0  , 0  ,d*Ey, 1  , 0  ,  0  ],
 		[ 0  , 0  , 0  , 0  , 1  ,  0  ],
 		[ 0  , 0  , 0  , 0  ,d*Ez,  1  ]],float)
-		Sigma = ME * Sigma * ME.T
+#		Sigma = ME * Sigma * ME.T
+#		print d*Ex,d*Ey,d*Ez
+
+#		print Rxy
+#		print Ryz
+#		print Rzx
+#		print ME
+#		print Sigma
+#		print ME
+#		print ThetaXY, ThetaYZ, ThetaZX
 
 		# Rotate back to orignial orientation
-		Sigma = (Mxy.T * Myz.T * Mzx.T) * Sigma * (Mzx * Myz * Mxy)
-		return Sigma
-
-
+#		Sigma = (Rxy.T * Ryz.T * Rzx.T) * Sigma * (Rzx * Ryz * Rxy)
+		return (Rzx.T * Ryz.T * Rxy.T) * ME * ( Rxy *Ryz * Rzx )
 
 
 

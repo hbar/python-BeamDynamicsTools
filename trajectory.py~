@@ -6,9 +6,17 @@ import pylab as pl
 from mpl_toolkits.mplot3d import Axes3D
 from numpy.linalg import norm
 
+# (x,y,z) = (1.798m, -0.052m, 0.243m)
+#  alpha = 12.6 degrees (X-Z plane)
+#  beta = 8.0 degrees (X-Y plane)
+
+alpha=12.6/180.0*pi; beta=8.0/180.0*pi; 
+Rinjection = [1.798, 0.052, 0.243]
+Vinjection = [-cos(beta)*cos(alpha), sin(beta)*cos(alpha), -sin(alpha)]
+#Vinjection = [-1,0,0]
 
 class trajectory:
-	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=[1.2,0.0,0.1],v0=[-1.0,-0.1,0],a0=[0.0,0.0,0.0],A0=2,E0=0.9e6,I0=1e-3,Freq=425e6,Nmax=10000,Smin=0.5):
+	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=Rinjection,v0=Vinjection,a0=[0.0,0.0,0.0],A0=2,E0=0.9e6,I0=1e-3,Freq=425e6,Nmax=10000,Smin=0.5):
 
 		# B = Magnetic Field [T] (bfield class)
 		# Vessel = Defines wall (boundary class)
@@ -38,7 +46,6 @@ class trajectory:
 		self.gamma = [1.0 / (1.0-self.beta[-1]**2)]
 		self.a = [ array(a0) ]
 		self.B = [ array(B.local(r0)) ]
-		self.B = [ array(B.local(r0)) ]
 		self.s = [ 0.0 ]
 		dt = dS/self.v0
 		self.dt = dt
@@ -47,8 +54,8 @@ class trajectory:
 		c1=True; c2=True; i = 0
 		
 		# Leapfrog Integration:
-		if False:
-			while (c1 or c2) and i<Nmax:
+		if True:
+			while (c1 or c2) and i<10:#i<Nmax:
 
 				self.r.append( self.r[-1] + self.v[-1]*dt + 0.5*self.a[-1]*dt*dt)
 
@@ -59,6 +66,8 @@ class trajectory:
 				self.a.append( qm * cross(self.v[-1],self.B[-1]) )
 
 				self.v.append( self.v[-1] + 0.5*(self.a[-1]+self.a[-2])*dt )
+
+				self.dS.append( self.s[-1] - self.s[-2] )
 
 				# Normalized Relativistic Parameters
 				self.Beta.append(self.v[-1]/c0)
@@ -81,10 +90,10 @@ class trajectory:
 		
 		# Radius of Curvature method with perpendicular projection of B and constant dTheta = dS/R(B)
 		BMag=0.0; vMag=0.0; hPara=zeros(3,float); hPerp=zeros(3,float)
-		if True:
+		if False:
 			while (c1 or c2) and i<Nmax:
 
-				self.B.append( B.local(self.r[-1]) + Bv.local(self.r[-1])))
+				self.B.append( B.local(self.r[-1]) + Bv.local(self.r[-1]) )
 
 				BMag = norm(self.B[-1])
 
@@ -208,28 +217,8 @@ class trajectory:
 			self.BeamBasis()
 			print 'Beam Coordinates Complete'
 
-		# Runge Kutta Integration:
-		if False:
-			while (c1 or c2) and i<Nmax:
-
-				x = self.r[-1][0]
-				y = self.r[-1][1]
-				z = self.r[-1][2]
-				h = self.ds
-
-				self.s.append( self.s[-1] + dS )
-
-				self.B.append( B.local(self.r[-1]) )
-
-				self.a.append( qm * cross(self.v[-1],self.B[-1]) )
-
-				self.v.append( self.v[-1] + 0.5*(self.a[-1]+self.a[-2])*dt )
-
-				c1 = Vessel.Xboundary(self.r[-2],self.r[-1])
-				c2 = i*dS < Smin
-				i=i+1;
-				print i
-			print 'trajectory complete'
+		self.NormalV = NormalV
+		self.IncidentV = IncidentV
 
 	def BeamBasis(self):
 		Ni = len(self.v);
