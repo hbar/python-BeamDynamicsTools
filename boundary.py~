@@ -2,6 +2,7 @@ from numpy import *
 import pylab as pl
 from mpl_toolkits.mplot3d import Axes3D
 from numpy.linalg import norm,det
+import matplotlib.pyplot as plt
 
 class boundary:
 
@@ -39,6 +40,22 @@ class boundary:
 		pl.xlim(0.3-1,0.3+1)
 		pl.ylim(-1,1)
 
+	def Border(self,Type='poloidal'):
+		if Type=='poloidal'
+			RB=[]; ZB=[];
+			for i in range(len(self.Rb)):
+				RB.append(self.Rb[i])
+				ZB.append(self.Zb[i])
+			RB.append(self.Rb[0])
+			ZB.append(self.Zb[0])
+			pl.plot(RB,ZB,'k')
+
+		if Type=='top'
+			for i in range(len(self.Rb)):
+				x,y=Circle(self.Rb[i])
+				pl.plot(x,y,'k')
+
+
 	def InVolume(self,r):
 		x0 = [sqrt(r[0]*r[0] + r[1]*r[1]) ,r[2]]
 		IN = True; i=-1;
@@ -57,7 +74,7 @@ class boundary:
 	def Xboundary(self,r0,r1):
 		x0 = [sqrt(r0[0]*r0[0] + r0[1]*r0[1]) ,r0[2]]
 		x1 = [sqrt(r1[0]*r1[0] + r1[1]*r1[1]) ,r1[2]]
-		IN = True; i=-1; Di1 = []; Di2 = []; Df = []; NORM=[]; TAN=[]; INC=[];
+		IN = True; i=-1; Di1 = []; Di2 = []; Df = []; NORM=[]; TAN=[]; INC=[]; RT = r1
 		while (IN == True and i<self.Nv-1):
 			Di1 = x0-self.Cvec[i-1]
 			Di2 = x0-self.Cvec[i]
@@ -71,8 +88,9 @@ class boundary:
 						TAN = array([ self.Tvec[i][0]*cos(Phi), self.Tvec[i][0]*sin(Phi),self.Tvec[i][1] ]);
 						TAN = TAN/norm(TAN)
 						INC = r1-r0; INC = INC/sqrt( INC[0]**2 + INC[1]**2 + INC[2]**2 )
+						RT = r1
 			i=i+1
-		return IN,NORM,TAN,INC
+		return IN,NORM,TAN,INC,RT
 
 	def Figure3D(self,FIG=1):
 		fig = pl.figure(FIG)
@@ -92,7 +110,12 @@ class boundary:
 				z.append(self.Zb[j-1])
 			ax.plot(x,y,z,Color)
 			xp.append(x); yp.append(y); zp.append(z)
-#		d=1.5; ax.plot([-d,-d,-d,d,d,d],[-d,-d,d,-d,d,d],[-d,d,-d,d,-d,d],'.')
+		
+		d1=1.25; d2=1.8; dz=(d2+d1)/2.0
+		ax.plot(
+		[-d1,-d1,-d1,d2,d2,d2],
+		[-dz,-dz,dz,-dz,dz,dz],
+		[-dz,dz,-dz,dz,-dz,dz],'.')
 		
 		Nc = Nt*10
 		Phi = linspace(PhiMin,PhiMax,Nc)
@@ -130,6 +153,11 @@ def Intersection(a1,a2,b1,b2):
 
 	return array([xOut,yOut])
 
+def Circle(R,Nt=100):
+	t = linspace(0,2*pi,Nt)
+	x = R*cos(t)
+	y = R*sin(t)
+	return x,y
 
 Rb = [ 0.2 , 0.25, 0.4 , 0.6 , 0.8 , 0.8 , 0.6 , 0.4 , 0.25, 0.2 ]
 Zb = [-0.55,-0.6 ,-0.6 ,-0.5 ,-0.2 , 0.2 , 0.5 , 0.6 , 0.6 , 0.55]

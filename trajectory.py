@@ -5,6 +5,7 @@ from numpy import *
 import pylab as pl
 from mpl_toolkits.mplot3d import Axes3D
 from numpy.linalg import norm
+from ellipse import *
 
 # (x,y,z) = (1.798m, -0.052m, 0.243m)
 #  alpha = 12.6 degrees (X-Z plane)
@@ -12,11 +13,12 @@ from numpy.linalg import norm
 
 alpha=12.6/180.0*pi; beta=8.0/180.0*pi; 
 Rinjection = [1.798, 0.052, 0.243]
-Vinjection = [-cos(beta)*cos(alpha), sin(beta)*cos(alpha), -sin(alpha)]
+Vinjection = [-cos(alpha)*cos(beta), cos(alpha)*sin(beta), -sin(alpha)]
+dLB = 2.0e-3 # scale length for B gradient
 #Vinjection = [-1,0,0]
 
 class trajectory:
-	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=Rinjection,v0=Vinjection,a0=[0.0,0.0,0.0],A0=2,E0=0.9e6,I0=1e-3,Freq=425e6,Nmax=10000,Smin=0.5):
+	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=Rinjection,v0=Vinjection,a0=[0.0,0.0,0.0],A0=2,E0=0.9e6,I0=1e-3,Freq=425e6,Nmax=5000,Smin=0.0):
 
 		# B = Magnetic Field [T] (bfield class)
 		# Vessel = Defines wall (boundary class)
@@ -50,6 +52,11 @@ class trajectory:
 		dt = dS/self.v0
 		self.dt = dt
 		self.dS = [ 0.0 ];
+		self.k = [0.0];
+		self.Rc = []
+		self.gradB = [0.0]
+		self.gradBk = [0.0]
+		self.gradBn = [0.0]
 
 		c1=True; c2=True; i = 0
 		
@@ -75,17 +82,37 @@ class trajectory:
 				self.gamma.append( 1.0 / (1.0-self.beta[-1]**2))
 
 				# Check to see if beam crosses boundary
-				IN,NormalV,TangentV,IncidentV = Vessel.Xboundary(self.r[-2],self.r[-1])
+				IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
 
+				#record bending radius
+#				self.k.append(qm * cross(self.v[-1],self.B[-1])/self.v0**2)
+				self.k.append(norm(self.a[-1]/self.v0**2))
+				self.Rc.append(1.0/self.k[-1])
+
+				# B Record Gradients
+				vecR = -1.0*(self.a[-1])/norm(self.a[-1]);
+				vecB = self.B[-1]/norm(self.B[-1])
+				Br2 = norm(B.local(self.r[-1]+vecR*dLB))
+				Br1 = norm(B.local(self.r[-1]-vecR*dLB))
+				Bb2 = norm(B.local(self.r[-1]+vecB*dLB))
+				Bb1 = norm(B.local(self.r[-1]-vecB*dLB))
+				self.gradB.append((Br2-Br1)/(2.0*dLB)) #( array( [(Br2-Br1)/(2.0*dLB) , (Bb2-Bb1)/(2.0*dLB)] ) )
+				self.gradBk.append(self.gradB[-1] * qm/(c0*self.v0) ) #(qm/(self.gamma[-1]*self.beta[-1]*c0**2))
+				self.gradBn.append( -1.0 * self.Rc[-1]/norm(self.B[-1]) * (Br2-Br1)/(2.0*dLB) )
+
+				# Conditional statements for continuing iteration
 				c1 = IN
-				c2 = i*dS < Smin
+				c2 = self.s[-1] < Smin
 				i=i+1;
 				print i
+#				print sqrt(self.r[-1][0]**2+self.r[-1][1]**2),self.r[-1][2]
+
 #			self.Target = target(NormalV,TangentV,IncidentV)
 
 			print 'trajectory complete'
-
+			self.Target = target(NormalV,TangentV,IncidentV,RT)
 			self.BeamBasis()
+			self.Target.SigmaBasis = self.BasisM6[-1]
 			print 'Beam Coordinates Complete'
 		
 		# Radius of Curvature method with perpendicular projection of B and constant dTheta = dS/R(B)
@@ -144,7 +171,7 @@ class trajectory:
 				self.gamma.append( 1.0 / (1.0-self.beta[-1]**2))
 
 				# Check to see if beam crosses boundary
-				IN,NormalV,TangentV,IncidentV = Vessel.Xboundary(self.r[-2],self.r[-1])
+				IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
 
 				c1 = IN
 				c2 = self.s[-1] < Smin
@@ -153,7 +180,7 @@ class trajectory:
 #			self.Target = target(NormalV,TangentV,IncidentV)
 
 			print 'trajectory complete'
-
+			self.Target = target(NormalV,TangentV,IncidentV,RT)
 			self.BeamBasis()
 			print 'Beam Coordinates Complete'
 			print self.BasisM3
@@ -204,7 +231,7 @@ class trajectory:
 				self.gamma.append( 1.0 / (1.0-self.beta[-1]**2))
 
 				# Check to see if beam crosses boundary
-				IN,NormalV,TangentV,IncidentV = Vessel.Xboundary(self.r[-2],self.r[-1])
+				IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
 
 				c1 = IN
 				c2 = i*dS < Smin
@@ -213,9 +240,10 @@ class trajectory:
 #			self.Target = target(NormalV,TangentV,IncidentV)
 
 			print 'trajectory complete'
-
 			self.BeamBasis()
 			print 'Beam Coordinates Complete'
+			self.Target = target(NormalV,TangentV,IncidentV,RT)
+			print 'Target Complete'
 
 		self.NormalV = NormalV
 		self.IncidentV = IncidentV
@@ -235,14 +263,20 @@ class trajectory:
 			self.BasisM6.append(Basis6(e1[-1],e2[-1],e3[-1]))
 			print i
 
-	def Plot2D(self,FIG=1):
-		x=[]; y=[]; z=[];
-		pl.figure(FIG)
+	def Plot2D(self,Type='poloidal'):
+		x=[]; y=[]; z=[]; R=[]
+#		pl.figure(FIG)
 		for i in range(len(self.r)):
 			x.append(self.r[i][0])
 			y.append(self.r[i][1])
 			z.append(self.r[i][2])
-		pl.plot(x,z)
+			R.append(sqrt(x[-1]**2+y[-1]**2))
+		if Type=='poloidal':
+			PLOT = pl.plot(R,z)
+		if Type=='top':
+			PLOT = pl.plot(x,y)
+		return PLOT
+
 
 	def Figure3D(self,FIG=1):
 		fig = pl.figure(FIG)
@@ -286,20 +320,43 @@ class trajectory:
 		pl.xlabel('S-coordinate [m]')
 
 class target:
-	def __init__ (self,NORM,TAN,INC):
-		R = sqrt( NORM[0]**2 + NORM[1]**2 )
-		Z = NORM[2]
-		PHI = arctan( NORM[1]/NORM[0] )
-		self.NormalV = NORM
-		self.IncidentV = INC
-		self.TangentV = TAN
+	def __init__ (self,NORM,TAN,INC,RT):
+		self.XYZ = RT
+		R = sqrt( RT[0]**2 + RT[1]**2 )
+		Z = RT[2]
+		PHI = arctan( RT[1]/RT[0] )
+		self.NormalV = NORM # Normal to Tile
+		self.IncidentV = INC # Incident Vector
+		self.TangentV = TAN # Poloidal Direction
 		self.R = R; self.Z=Z; self.Phi = PHI;
-		e3 = NORM/norm(NORM); self.e3=e3;
-		e2 = TAN/norm(TAN); self.e2=e2;
-		e1 = cross(e2,e3); e1=e1/norm(e1); self.e1=e1;
+		e3 = NORM/norm(NORM); self.NormalV = e3 #self.e3=e3;
+		e2 = TAN/norm(TAN); self.PoloidalV = e2 #self.e2=e2; #Poloidal Direction
+		e1 = cross(e3,e2); e1=e1/norm(e1); self.ToroidalV = e1 #self.e1=e1; self.e1=e1; # Toroidal Direction
+
+		NormXY = array([NORM[0],NORM[1]]); NormXY/norm(NormXY)
+		IncXY = -1.0*array([INC[0],INC[1]]); IncXY/norm(IncXY)
+		self.Test = [NormXY,IncXY]
+		self.HAngle = arccos(dot(NormXY,IncXY))
+
+		NormRZ = array([sqrt(NORM[0]**2+NORM[1]**2),NORM[2]])
+		IncRZ = array([sqrt(INC[0]**2+INC[1]**2),INC[2]])
+		self.VAngle = arccos(dot(NormRZ,IncRZ))
+
 		self.Degrees = arccos(dot(NORM,-INC))*180.0/pi
 		self.BasisM3 = Basis3(e1,e2,e3)
 		self.BasisM6 = Basis6(e1,e2,e3)
+		self.TargetBasis = Basis6(e1,e2,e3)
+		self.Sigma = eye(6,6)
+		self.SigmaProj = eye(6,6)
+		self.SigmaBasis = eye(6,6)
+		self.Ellipse = False
+		self.ProjEllipse = False
+
+		def ProjectSigma(self,SB=self.SigmaBasis,ST=self.TargetBasis): 
+			self.SigmaProj = ST * SB * self.Sigma * SB.T * ST.T
+
+		def Projection(self):
+			self.Ellipse.PlotXY(0*self.VAngle,0*self.HAngle)
 
 
 def Basis3(e1,e2,e3):

@@ -46,19 +46,58 @@ class ellipse:
 			YPoints[i] = Radius*(m21*cos(Theta[i]) + m22*sin(Theta[i]))
 		return XPoints,YPoints
 
-	def ProjectXY(XPoints,YPoints,Axz,Ayz): #Axz = angle in XZ plane
-		for i in range(len(XPoints)):
-			XPoints[i] = XPoints[i]/cos(Axz)/sin(Ayz)
-			YPoints[i] = YPoints[i]/cos(Ayz)/sin(Axz)
-		return XPoints,YPoints
 
-	def PlotProjectionXY(self,Axz=0,Ayz=0,FIG=0,NPoints=1000,Mod='-',Title = ' '):
-		f=pl.figure(FIG)
+
+#	def ProjectXY(XPoints,YPoints,Axz,Ayz): #Axz = angle in XZ plane
+#		for i in range(len(XPoints)):
+#			XPoints[i] = XPoints[i]/cos(Axz)/sin(Ayz)
+#			YPoints[i] = YPoints[i]/cos(Ayz)/sin(Axz)
+#		return XPoints,YPoints
+#
+#	def PlotProjectionXY(self,Axz=0,Ayz=0,FIG=0,NPoints=1000,Mod='-',Title = ' ',Label=''):
+##		f=pl.figure(FIG)
+#		X,Y = self.GenerateXY(self.TwissXY,NPoints)
+#		X = X/cos(Axz)
+#		Y = Y/cos(Ayz)
+#		pl.plot(X,Y,Mod,label=Label); pl.xlabel('X [mm]');  pl.ylabel('Y [mm]');
+
+	def PlotXY(self,NPoints=1000,L=30.0,Mod='-',Label='',Title = ' ',Scale=1.0):
+
 		X,Y = self.GenerateXY(self.TwissXY,NPoints)
-		X = X/cos(Axz)
-		Y = Y/cos(Ayz)
-		pl.plot(X,Y,Mod); pl.xlabel('X [mm]');  pl.ylabel('Y [mm]');
-		axes().set_aspect('equal')
+		pl.plot(Scale*X,Scale*Y,Mod,label=Label); pl.xlabel('X [mm]');  pl.ylabel('Y [mm]');
+#		pl.xlim(-L,L); pl.ylim(-L,L)
+
+	def ProjectXY(self,SigmaBasis,TargetBasis,Scale=1.0, Label='',Title = ' ',NPoints=1000,Mod='-'):
+		X,Y = self.GenerateXY(self.TwissXY,NPoints)
+		Bs = matrix(SigmaBasis[:,[0,1]]);
+		Bt = matrix(TargetBasis[:,[0,1]]);
+		Ms = Scale*eye(2)
+		Xp=[]; Yp=[];
+		Bdot = Bt * Bs.T		
+		Bproj = matrix(zeros((2,2),float))
+		for i in [0,1]:
+			for j in [0,1]:
+				Bproj[i,j] = 1.0/(Bdot[i,j])
+		b11 = 1.0/(Bt[:,0].T*Bs[:,0])**2
+		b22 = 1.0/(Bt[:,1].T*Bs[:,1])**2
+		Bproj =  matrix([[b11[0,0],0.0],[0.0,b22[0,0]]])
+#		Ang = 
+#		print Bproj
+		for i in range(len(X)):
+			V = transpose(matrix([X[i],Y[i]]));
+#			Vp = Bproj * (Bt.T * Bs) * Bs * V
+#			Vp = Mrot * Bproj *V
+#			Vp =Bt.T * Bs * V
+			Vp = Ms * inv(Bs.T * Bt) * V
+			Xp.append(Vp[0,0])
+			Yp.append(-Vp[1,0])
+		pl.plot(Xp,Yp,Mod,label=Label); pl.xlabel('X [mm]');  pl.ylabel('Y [mm]');
+		self.ProjectionX = array(Xp)
+		self.ProjectionY = array(Yp)
+		
+	def PrintProjection(self,FileName='ProjectionXY'):
+		Output = transpose(vstack(self.ProjectionX,self.ProjectionY) )
+		savetxt(FileName,Output)
 
 	def PlotALL(self,FIG=0,NPoints=1000,Mod='-',Title = ' '):
 
@@ -66,7 +105,7 @@ class ellipse:
 		f.text(.5, .95, Title, horizontalalignment='center')
 
 		X,Y = self.GenerateXY(self.TwissXX1,NPoints)
-		pl.subplot(2,3,1); pl.plot(X,Y,Mod); pl.xlabel('X [mm]');  pl.ylabel(r'$\Delta$Px / P [mrad]'); pl.axes().set_aspect('equal')
+		pl.subplot(2,3,1); pl.plot(X,Y,Mod); pl.xlabel('X [mm]');  pl.ylabel(r'$\Delta$Px / P [mrad]'); 
 
 		X,Y = self.GenerateXY(self.TwissYY1,NPoints)
 		pl.subplot(2,3,2); pl.plot(X,Y,Mod); pl.xlabel('Y [mm]');  pl.ylabel(r'$\Delta$Py / P [mrad]');

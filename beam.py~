@@ -4,6 +4,8 @@ from numpy import *
 #import scipy as sp
 import pylab as pl
 from numpy.linalg import inv,norm
+from ellipse import *
+from trajectory import *
 
 class beam:
 	# inputs:
@@ -30,12 +32,15 @@ class beam:
 		self.a = Trajectory.a
 		self.B = Trajectory.B
 		self.s = Trajectory.s
+		self.k = Trajectory.k
+		self.Rc = Trajectory.Rc
 		self.dS = Trajectory.dS
 		self.dt = Trajectory.dt
 		self.BasisM3 = Trajectory.BasisM3
 		self.BasisM6 = Trajectory.BasisM6
 		self.NormalV = Trajectory.NormalV
 		self.IncidentV = Trajectory.IncidentV
+		self.Target = Trajectory.Target
 
 		# lists of matrices for reverse calculations
 		self.RevSigma = []
@@ -59,7 +64,10 @@ class beam:
 			self.TransferM.append(M)
 			self.Sigma.append( M * self.Sigma[-1] * M.T )
 			print i
-		
+		self.Target.Sigma = self.Sigma[-1]
+		self.Target.TargetBasis = self.BasisM6
+#		self.Target.Ellipse = ellipse(self.Sigma[-1])
+
 	def ReverseTrace(self,SigmaF):
 		Ni = len(self.r)
 		RevTransferM = []
@@ -199,9 +207,9 @@ class beam:
 #		Sigma = Rzx * Sigma * Rzx.T
 
 		# Beam semiaxes
-		rx = 0.01
-		ry = 0.01
-		rz = 0.01
+		rx = 0.005
+		ry = 0.005
+		rz = 0.005
 
 		# normalized radial component for form factor fit
 		p = gamma*rz/sqrt(rx*ry)
