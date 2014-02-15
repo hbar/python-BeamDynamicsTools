@@ -15,6 +15,16 @@ S1 = matrix([
 [ 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 4.679517649000000290e+01, 8.473947224080001206e+01],
 [ 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 8.473947224080001206e+01, 1.572014440000000093e+02]],float)
 
+S1 = matrix(loadtxt('SigmaFinal/SigmaInj.txt'))
+
+#S1 = matrix([
+#[0.5771000, 0.3980000, 0.000000, 0.000000, 0.000000, 0.000000],
+#[0.3980000, 171.8262, 0.000000, 0.000000, 0.000000, 0.000000],
+#[0.000000, 0.000000, 0.3439000, -.2715000, 0.000000, 0.000000],
+#[0.000000, 0.000000, -.2715000, 238.3722, 0.000000, 0.000000],
+#[0.000000, 0.000000, 0.000000, 0.000000, 1.297156, 2.343722],
+#[0.000000, 0.000000, 0.000000, 0.000000, 2.343722, 134.9344]])
+
 # boundary(Rb,Zb)
 #Rb = [ 0.2 , 0.25, 0.4 , 0.6 , 0.8 , 0.8 , 0.6 , 0.4 , 0.25, 0.2 ]
 #Zb = [-0.55,-0.6 ,-0.6 ,-0.5 ,-0.2 , 0.2 , 0.5 , 0.6 , 0.6 , 0.55]
@@ -36,7 +46,7 @@ B = bfieldTF(B0=0.3)
 #T = trajectory(Vessel,B)
 
 ax = Vessel.Figure3D(1)
-Vessel.Plot3D(ax)
+#Vessel.Plot3D(ax)
 B0 = [0.1,0.15,0.2,0.25,0.3,0.35,0.4]
 
 if False:
@@ -101,6 +111,10 @@ if False:
 
 	#pl.legend((r'$\Delta$s = 0.0 m',r'$\Delta$s = 0.5 m',r'$\Delta$s = 1.0 m','Target'))
 
+if False:
+	In = array([ 0.0 ])
+	Bn = array([ 0.0 ])
+
 if True:
 #   Inputs for 4 B-field settings 
 	In = array([0.0,1600.0,3120,4450.0])
@@ -137,33 +151,82 @@ if False:
 	0.1618181818,
 	0.1745454545])
 
+# List of All TF currents used
+if False: 
+	In = array([
+	0.00,
+	0.62,
+	1.11,
+#	1.57,
+	1.58,
+	1.60,
+#	1.62,
+	1.78,
+	2.40,
+	3.00,
+#	3.12,
+#	3.20,
+	3.26,
+#	3.28,
+#	3.29,
+	3.46,
+	4.00,
+	4.38,
+#	4.45,
+	4.48])*1000.0
+
+	Bn = CalculateB0(In)
+
+# =============================================================================
+# ======= Calculate Trajectories ==============================================
+# =============================================================================
+
 if True:
-	Angle=[]; Coordinates=[];
+	AngleComponents=[]; Coordinates=[]; Parameters=[]; AIMSBeam=[]
 	Path = 'Output/'
-	for i in range(len(Bn)):
+	for i in [0,1,2,3]:#range(len(Bn)):
 		B = bfieldTF(B0=Bn[i])
 		Bv = bfieldVF(B0=0.00000)
 		T = trajectory(Vessel,B,Bv)
-		AIMSBeam = beam(T,S1)
-		AIMSBeam.Trace()
-		savetxt(Path+'Curvature_I_'+str(int(In[i]))+'.txt',T.k)
-		savetxt(Path+'SCoord_I_'+str(int(In[i]))+'.txt',T.s)
-		savetxt(Path+'GradB_I_'+str(int(In[i]))+'.txt',T.gradB)
-		savetxt(Path+'GradBk_I_'+str(int(In[i]))+'.txt',T.gradBn)
-		savetxt(Path+'GradBn_I_'+str(int(In[i]))+'.txt',T.gradBk)
-		savetxt(Path+'TargetBasis_I_'+str(int(In[i]))+'.txt',T.Target.TargetBasis)
-		savetxt(Path+'SigmaBasis_I_'+str(int(In[i]))+'.txt',T.Target.SigmaBasis)
-		savetxt(Path+'SigmaFinal_I_'+str(int(In[i]))+'.txt',AIMSBeam.Target.Sigma)
-		Angle.append([T.Target.VAngle,T.Target.HAngle])
+		Beam = beam(T,S1)
+		Beam.Trace()
+		AIMSBeam.append(Beam)
+
+		#Save Sigma Matrix
+		savetxt('SigmaFinal/'+'SigmaFinal_I_'+str(int(In[i]))+'.txt',AIMSBeam[-1].Target.Sigma)
+
+		# Save field and geometric parameters along trajectory
+		T.SaveFieldParameters(TFCurrent=In[i],Path='Output/')
+		T.Target.SaveTargetParameters(TFCurrent=In[i],Path='Output/')
+
+		# append lists of Target Quantities
+		AngleComponents.append([T.Target.VAngle,T.Target.HAngle])
 		Coordinates.append([T.Target.R,T.Target.Z,T.Target.Phi])
-#		T.Plot3D(ax); T.Target.Plot3D
+		Parameters.append(T.Target.GetDetectionParameters())
+
+		# Plot 3D results
+		T.Plot3D(ax);
+		T.Target.Plot3D(ax);
+		T.Limits3D(ax);
+
+		# Plot 2D projections of Trajectories
 		pl.figure(10); T.Plot2D()
 		pl.figure(11); T.Plot2D('top')
 	pl.figure(10); Vessel.Border(); pl.xlim(0.2,1.4); pl.ylim(-0.7,0.5)
 	pl.xlabel('R [m]'); pl.ylabel('Z [m]'); pl.title('Poloidal Projection')
 	pl.figure(11); Vessel.Border('top'); pl.xlim(0,1.2); pl.ylim(-0.6,0.6)
 	pl.xlabel('x [m]'); pl.ylabel('y [m]'); pl.title('Midplane Projection')
-	savetxt(Path+'TargetAngle_Vert_Horiz.txt',Angle)
+
+	# Save Angular and Detection Quantities
+	savetxt(Path+'TargetAngle_Vert_Horiz.txt',AngleComponents)
 	savetxt(Path+'TargetCoordinates.txt',Coordinates)
+	Header0 = '(0) I0 [A], (1) B0 [T], (2) X [m] , (3) Y [m], (4) Z [m], (5) incident angle [rad], (6) Detection Angle [rad], (7) optical path length [m] , (8) Detection Angle [rad], (9) Detection Angle [deg], (10) Detector Eff'
+	savetxt(Path+'DetectionParameters.txt', (array(Parameters)), header=Header0)
+	
+
+	Vessel.Plot3D(ax)
+
+
+
 
 pl.show()

@@ -97,7 +97,7 @@ class boundary:
 		ax = Axes3D(fig)
 		return ax
 
-	def Plot3D(self,ax,Nt=16,Color='b',PhiMin=-pi/8,PhiMax=3*pi/2):
+	def Plot3D(self,ax,Nt=16,Color='b',PhiMin=-pi/8,PhiMax=pi/2):
 		#Phi = linspace(0,2*pi*(1-1/Nt),Nt)
 		Phi = linspace(PhiMin,PhiMax,Nt)
 		xp=[]; yp=[]; zp=[];
@@ -108,15 +108,15 @@ class boundary:
 				x.append(cos(Phi[i])*self.Rb[j-1])
 				y.append(sin(Phi[i])*self.Rb[j-1])
 				z.append(self.Zb[j-1])
-			ax.plot(x,y,z,Color)
+			if i == 0 or i==Nt-1:
+				ax.plot(x,y,z,'k',linewidth=3)
+			else:
+				ax.plot(x,y,z,Color)
 			xp.append(x); yp.append(y); zp.append(z)
 		
-		d1=1.25; d2=1.8; dz=(d2+d1)/2.0
-		ax.plot(
-		[-d1,-d1,-d1,d2,d2,d2],
-		[-dz,-dz,dz,-dz,dz,dz],
-		[-dz,dz,-dz,dz,-dz,dz],'.')
-		
+
+#		d1=1.25; d2=1.8; dz=(d2+d1)/2.0
+	
 		Nc = Nt*10
 		Phi = linspace(PhiMin,PhiMax,Nc)
 		xt=[]; yt=[]; zt=[];

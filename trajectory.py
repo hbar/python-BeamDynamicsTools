@@ -6,6 +6,7 @@ import pylab as pl
 from mpl_toolkits.mplot3d import Axes3D
 from numpy.linalg import norm
 from ellipse import *
+from AngleCorrection import *
 
 # (x,y,z) = (1.798m, -0.052m, 0.243m)
 #  alpha = 12.6 degrees (X-Z plane)
@@ -18,9 +19,9 @@ dLB = 2.0e-3 # scale length for B gradient
 #Vinjection = [-1,0,0]
 
 class trajectory:
-	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=Rinjection,v0=Vinjection,a0=[0.0,0.0,0.0],A0=2,E0=0.9e6,I0=1e-3,Freq=425e6,Nmax=5000,Smin=0.0):
+	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=Rinjection,v0=Vinjection,a0=[0.0,0.0,0.0],A0=2,E0=0.9e6,I0=1e-3,Freq=425e6,Nmax=3*1571,Smin=0.0,Target=True):
 
-		# B = Magnetic Field [T] (bfield class)
+		# B = Magnetic Field [T] (bfieldTF class)
 		# Vessel = Defines wall (boundary class)
 		# A0 = atomic mass [amu]
 		# E0 = beam energy [MeV]
@@ -30,12 +31,16 @@ class trajectory:
 
 		c0 = 299792458; self.c0 = c0
 		qm = (1.60217646e-19)/(A0*1.67262158e-27)
+		BFieldTF = B
+		BFieldVF = Bv
 
 		self.A0 = A0
 		self.q0 = 1.60217646e-19
 		self.m0 = A0 * 1.67262158e-27
 		self.I0 = I0
 		self.Frequency = Freq
+		self.BFieldTF = B
+		self.BFieldVF = Bv
 
 
 #		v0 = pl.sqrt(2*E0*1.602e-16/(A0*1.67e-27))
@@ -51,12 +56,14 @@ class trajectory:
 		self.s = [ 0.0 ]
 		dt = dS/self.v0
 		self.dt = dt
-		self.dS = [ 0.0 ];
+		self.dS = [ 1.0e-3 ];
 		self.k = [0.0];
 		self.Rc = []
 		self.gradB = [0.0]
 		self.gradBk = [0.0]
 		self.gradBn = [0.0]
+		self.gradBx = [0.0]
+		self.gradBy = [0.0]
 
 		c1=True; c2=True; i = 0
 		
@@ -99,6 +106,8 @@ class trajectory:
 				self.gradB.append((Br2-Br1)/(2.0*dLB)) #( array( [(Br2-Br1)/(2.0*dLB) , (Bb2-Bb1)/(2.0*dLB)] ) )
 				self.gradBk.append(self.gradB[-1] * qm/(c0*self.v0) ) #(qm/(self.gamma[-1]*self.beta[-1]*c0**2))
 				self.gradBn.append( -1.0 * self.Rc[-1]/norm(self.B[-1]) * (Br2-Br1)/(2.0*dLB) )
+				self.gradBx.append((Br2-Br1)/(2.0*dLB))
+				self.gradBy.append((Bb2-Bb1)/(2.0*dLB))
 
 				# Conditional statements for continuing iteration
 				c1 = IN
@@ -108,12 +117,12 @@ class trajectory:
 #				print sqrt(self.r[-1][0]**2+self.r[-1][1]**2),self.r[-1][2]
 
 #			self.Target = target(NormalV,TangentV,IncidentV)
-
-			print 'trajectory complete'
-			self.Target = target(NormalV,TangentV,IncidentV,RT)
 			self.BeamBasis()
-			self.Target.SigmaBasis = self.BasisM6[-1]
-			print 'Beam Coordinates Complete'
+			print 'trajectory complete'
+			if Target==True:
+				self.Target = target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
+				self.Target.SigmaBasis = self.BasisM6[-1]
+				print 'Beam Coordinates Complete'
 		
 		# Radius of Curvature method with perpendicular projection of B and constant dTheta = dS/R(B)
 		BMag=0.0; vMag=0.0; hPara=zeros(3,float); hPerp=zeros(3,float)
@@ -180,7 +189,7 @@ class trajectory:
 #			self.Target = target(NormalV,TangentV,IncidentV)
 
 			print 'trajectory complete'
-			self.Target = target(NormalV,TangentV,IncidentV,RT)
+			self.Target = target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
 			self.BeamBasis()
 			print 'Beam Coordinates Complete'
 			print self.BasisM3
@@ -242,7 +251,7 @@ class trajectory:
 			print 'trajectory complete'
 			self.BeamBasis()
 			print 'Beam Coordinates Complete'
-			self.Target = target(NormalV,TangentV,IncidentV,RT)
+			self.Target = target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
 			print 'Target Complete'
 
 		self.NormalV = NormalV
@@ -289,8 +298,14 @@ class trajectory:
 			x.append(self.r[i][0])
 			y.append(self.r[i][1])
 			z.append(self.r[i][2])
-		ax.plot(x,y,z,'r')
+		ax.plot(x,y,z,'r',linewidth=2)
+		ax.scatter(x[-1],y[-1],z[-1],s=15,c='r')
 		return ax
+
+	def Limits3D(self,ax,box=1.5,offsetX=0.5,offsetY=0.5,offsetZ=0):
+		ax.set_xlim3d(-box/2+offsetX,box/2+offsetX)
+		ax.set_ylim3d(-box/2+offsetY,box/2+offsetY)
+		ax.set_zlim3d(-box/2+offsetZ,box/2+offsetZ)
 
 	def PlotB(self,FIG=2):
 		Bx=[]; By=[]; Bz=[]; Bmag=[]
@@ -319,11 +334,24 @@ class trajectory:
 		pl.subplot(3,1,3); pl.plot(self.s,Vz); pl.ylabel(r'$\beta_z$')
 		pl.xlabel('S-coordinate [m]')
 
+	def SaveFieldParameters(self,TFCurrent,Path='Output/'):
+		# Save field and geometric parameters along trajector
+		savetxt(Path+'Curvature_I_'+str(int(TFCurrent))+'.txt',self.k)
+		savetxt(Path+'SCoord_I_'+str(int(TFCurrent))+'.txt',self.s)
+		savetxt(Path+'GradB_I_'+str(int(TFCurrent))+'.txt',self.gradB)
+		savetxt(Path+'GradBk_I_'+str(int(TFCurrent))+'.txt',self.gradBn)
+		savetxt(Path+'GradBn_I_'+str(int(TFCurrent))+'.txt',self.gradBk)
+
 class target:
-	def __init__ (self,NORM,TAN,INC,RT):
+	def __init__ (self,NORM,TAN,INC,BFieldTF,BFieldVF,RT,Rdet=[1.3075, -0.2457, -0.05900]):
+		self.X = RT[0]; self.Y = RT[1]; self.Z = RT[2]
 		self.XYZ = RT
+		self.XYZdetector = Rdet
+		self.B0 = BFieldTF.B0
+		self.B0z = BFieldVF.B0
+		self.I0 = BFieldTF.I0
 		R = sqrt( RT[0]**2 + RT[1]**2 )
-		Z = RT[2]
+		self.X = RT[0]; self.Y = RT[1]; Z = RT[2]
 		PHI = arctan( RT[1]/RT[0] )
 		self.NormalV = NORM # Normal to Tile
 		self.IncidentV = INC # Incident Vector
@@ -332,17 +360,39 @@ class target:
 		e3 = NORM/norm(NORM); self.NormalV = e3 #self.e3=e3;
 		e2 = TAN/norm(TAN); self.PoloidalV = e2 #self.e2=e2; #Poloidal Direction
 		e1 = cross(e3,e2); e1=e1/norm(e1); self.ToroidalV = e1 #self.e1=e1; self.e1=e1; # Toroidal Direction
+		self.DetectionLength = norm(self.XYZ-self.XYZdetector)
+		self.DetectionVec = (self.XYZdetector-self.XYZ)/self.DetectionLength
+		self.DetectorAngle = arccos( dot(self.DetectionVec,array([1.0,0.0,0.0])) )
+		self.DetectionDegree = self.DetectorAngle * 180.0/pi
+		self.DetectionEff = AngularEff(self.DetectorAngle)	
 
+		# Draw detection line
+		dl = linspace(0.0,1.0,101);
+		self.LineVector=[]; self.LineX=[]; self.LineY=[]; self.LineZ=[];
+		for i in range(len(dl)):
+			RLine = RT + (dl[i]*self.DetectionLength)*self.DetectionVec
+			self.LineVector.append(RLine)
+			self.LineX.append(RLine[0])
+			self.LineY.append(RLine[1])
+			self.LineZ.append(RLine[2])
+		self.LineX = array(self.LineX)
+		self.LineY = array(self.LineY)
+		self.LineZ = array(self.LineZ)
+
+		# Angular parameters and vectors
+		self.BeamTargetAngle = pi-arccos(dot(NORM,INC))
+		self.GammaTargetAngle = arccos(dot(NORM,self.DetectionVec))
+		self.DetectionTargetAngle = arccos(dot(self.DetectionVec,INC))
 		NormXY = array([NORM[0],NORM[1]]); NormXY/norm(NormXY)
 		IncXY = -1.0*array([INC[0],INC[1]]); IncXY/norm(IncXY)
 		self.Test = [NormXY,IncXY]
 		self.HAngle = arccos(dot(NormXY,IncXY))
-
 		NormRZ = array([sqrt(NORM[0]**2+NORM[1]**2),NORM[2]])
 		IncRZ = array([sqrt(INC[0]**2+INC[1]**2),INC[2]])
 		self.VAngle = arccos(dot(NormRZ,IncRZ))
-
 		self.Degrees = arccos(dot(NORM,-INC))*180.0/pi
+
+		# Basis vectors/matrices and initialize sigma matrices
 		self.BasisM3 = Basis3(e1,e2,e3)
 		self.BasisM6 = Basis6(e1,e2,e3)
 		self.TargetBasis = Basis6(e1,e2,e3)
@@ -357,6 +407,37 @@ class target:
 
 		def Projection(self):
 			self.Ellipse.PlotXY(0*self.VAngle,0*self.HAngle)
+
+	def SaveTargetParameters(self,TFCurrent,Path='Output/'):
+		savetxt(Path+'SigmaBasis_I_'+str(int(TFCurrent))+'.txt',self.SigmaBasis)
+		savetxt(Path+'TargetBasis_I_'+str(int(TFCurrent))+'.txt',self.TargetBasis)
+
+
+	# 3D plotting function of beam
+	def Plot3D(self,ax):
+		x=[]; y=[]; z=[];
+		ax.plot(self.LineX,self.LineY,self.LineZ,'g',linewidth=2)
+		ax.scatter(self.LineX[-1],self.LineY[-1],self.LineZ[-1],s=30,c='c')
+		return ax
+
+	# Retrieve [X, Y, Z, incident angle, detection angle, optical path length]
+#	Header = '(0) I0 [A], (1) B0 [T], (2) X [m] , (3) Y [m], (4) Z [m], (5) R [m], (6) Phi [deg], (7) incident angle [rad], (8) Emission Angle [rad], (9) COM Emission Angle, (10) optical path length [m] (11) Detector Angle, (12) Detector Eff'
+	def GetDetectionParameters(self):
+		return [
+		self.I0,
+		self.B0,
+		self.X,
+		self.Y,
+		self.Z,
+		self.R,
+		self.Phi*180.0/pi,
+		self.BeamTargetAngle,
+		self.GammaTargetAngle,
+		self.DetectionTargetAngle,
+		self.DetectionLength,
+		self.DetectorAngle,
+		self.DetectionEff]
+
 
 
 def Basis3(e1,e2,e3):

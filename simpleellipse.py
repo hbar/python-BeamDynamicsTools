@@ -22,10 +22,6 @@ class ellipse:
 		self.WidthY = sqrt(self.TwissYY1[1]*self.TwissYY1[3])
 		self.WidthZ = sqrt(self.TwissZZ1[1]*self.TwissZZ1[3])
 
-		self.DivergenceX = sqrt(self.TwissXX1[2]*self.TwissXX1[3])
-		self.DivergenceY = sqrt(self.TwissYY1[2]*self.TwissYY1[3])
-		self.DivergenceZ = sqrt(self.TwissZZ1[2]*self.TwissZZ1[3])
-
 		self.EmittenceXY = sqrt( det(matrix([[SIG[0,0],SIG[0,2]] ,[SIG[2,0],SIG[2,2]] ])) )
 		self.TwissXY = array([-SIG[0,2],SIG[0,0],SIG[2,2],self.EmittenceXY**2])/self.EmittenceXY
 
@@ -35,11 +31,6 @@ class ellipse:
 		self.EmittenceYZ = sqrt( det(matrix([[SIG[2,2],SIG[2,4]] ,[SIG[4,2],SIG[4,4]] ])) )
 		self.TwissYZ = array([-SIG[2,4],SIG[2,2],SIG[4,4],self.EmittenceYZ**2])/self.EmittenceYZ
 
-	def SpatialWidth(self):
-		return self.WidthX,self.WidthY,self.WidthZ
-
-	def AngularWidth(self):
-		return self.DivergenceX, self.DivergenceY, self.DivergenceZ
 
 	def GenerateXY(self,TWISS,NPoints=1000):
 		Theta = linspace(0,2*pi,NPoints);
@@ -55,19 +46,6 @@ class ellipse:
 			YPoints[i] = Radius*(m21*cos(Theta[i]) + m22*sin(Theta[i]))
 		return XPoints,YPoints
 
-	def MismatchFactor(self,E1,Type=1):
-
-		def MFactor(Twiss0,Twiss1,Type):
-			R = Twiss0[1]*Twiss1[2] + Twiss0[2]*Twiss1[1] - 2.0*Twiss0[0]*Twiss1[0]
-			M = (0.5*(R+sqrt(R**2 - 4.0)) )**(0.5*Type) - 1.0
-			return M
-
-		Mx = MFactor(self.TwissXX1,E1.TwissXX1,Type)
-		My = MFactor(self.TwissYY1,E1.TwissYY1,Type)
-		Mz = MFactor(self.TwissZZ1,E1.TwissZZ1,Type)
-		Mxy = MFactor(self.TwissXY,E1.TwissXY,Type)
-
-		return [Mx, My, Mz, Mxy]
 
 
 #	def ProjectXY(XPoints,YPoints,Axz,Ayz): #Axz = angle in XZ plane
@@ -83,39 +61,11 @@ class ellipse:
 #		Y = Y/cos(Ayz)
 #		pl.plot(X,Y,Mod,label=Label); pl.xlabel('X [mm]');  pl.ylabel('Y [mm]');
 
-	def PlotXY(self,NPoints=1000,L=30.0,Mod='-',Label='',Title = ' ',Scale=1.0,Rotate=False):
+	def PlotXY(self,NPoints=1000,L=30.0,Mod='-',Label='',Title = ' ',Scale=1.0):
+
 		X,Y = self.GenerateXY(self.TwissXY,NPoints)
-		if Rotate==True: 
-			Y,X = self.GenerateXY(self.TwissXY,NPoints); Y=(-1)*Y
-		PLOT = pl.plot(Scale*X,Scale*Y,Mod,label=Label); pl.xlabel('X [mm]');  pl.ylabel('Y [mm]');
-		L = max([max(X),max(Y)]) * 1.2
-		pl.xlim(-L,L); pl.ylim(-L,L);
+		pl.plot(Scale*X,Scale*Y,Mod,label=Label); pl.xlabel('X [mm]');  pl.ylabel('Y [mm]');
 #		pl.xlim(-L,L); pl.ylim(-L,L)
-		return PLOT
-
-	def PlotXX1(self,NPoints=1000,L=30.0,Mod='-',Label='',Title = ' ',Scale=1.0):
-		X,X1 = self.GenerateXY(self.TwissXX1,NPoints)
-		PLOT = pl.plot(Scale*X,Scale*X1,Mod,label=Label)
-		pl.xlabel('X [mm]'); pl.ylabel(r'X$^\prime$ [mrad]')
-		L = max([max(X),max(X1)]) * 1.2
-		pl.xlim(-L,L); pl.ylim(-L,L);
-		return PLOT
-
-	def PlotYY1(self,NPoints=1000,L=30.0,Mod='-',Label='',Title = ' ',Scale=1.0):
-		Y,Y1 = self.GenerateXY(self.TwissYY1,NPoints)
-		PLOT = pl.plot(Scale*Y,Scale*Y1,Mod,label=Label)
-		pl.xlabel('Y [mm]'); pl.ylabel(r'Y$^\prime$ [mrad]')
-		L = max([max(Y),max(Y1)]) * 1.2
-		pl.xlim(-L,L); pl.ylim(-L,L); 
-		return PLOT
-
-	def PlotZZ1(self,NPoints=1000,L=30.0,Mod='-',Label='',Title = ' ',Scale=1.0):
-		Z,Z1 = self.GenerateXY(self.TwissZZ1,NPoints)
-		PLOT = pl.plot(Scale*Z,Scale*Z1,Mod,label=Label)
-		pl.xlabel(r'$\ell$ [mm]'); pl.ylabel(r'$\Delta$P/P [mrad]')
-		L = max([max(Z),max(Z1)]) * 1.2
-		pl.xlim(-L,L); pl.ylim(-L,L);
-		return PLOT
 
 	def ProjectXY(self,SigmaBasis,TargetBasis,Scale=1.0, Label='',Title = ' ',NPoints=1000,Mod='-'):
 		X,Y = self.GenerateXY(self.TwissXY,NPoints)
@@ -142,12 +92,7 @@ class ellipse:
 			Xp.append(Vp[0,0])
 			Yp.append(-Vp[1,0])
 		pl.plot(Xp,Yp,Mod,label=Label); pl.xlabel('X [mm]');  pl.ylabel('Y [mm]');
-		self.ProjectionX = array(Xp)
-		self.ProjectionY = array(Yp)
 		
-	def PrintProjection(self,FileName='ProjectionXY'):
-		Output = transpose(vstack((self.ProjectionX,self.ProjectionY)) )
-		savetxt(FileName,Output)
 
 	def PlotALL(self,FIG=0,NPoints=1000,Mod='-',Title = ' '):
 

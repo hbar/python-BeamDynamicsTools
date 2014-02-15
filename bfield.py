@@ -41,6 +41,7 @@ class bfieldc:
 		self.R0 = R0
 		self.fR = fR
 		self.fz = fz
+		self.I0 = CalculateI0(self.B0,R0=0.66,NCoils=120.0)
 		print 'bfield initialized'
 
 	def local(self,r):
@@ -63,6 +64,7 @@ class bfieldTF:
 		self.Ncoils = Ncoils 
 		self.Rmin = Rmin
 		self.Rmax = Rmax
+		self.I0 = CalculateI0(self.B0,R0=0.66,NCoils=120.0)
 
 		for n in range(Ncoils): # Outer Legs of TF
 			TF.append( array([Rmax*cos(2*pi*n/Ncoils+Phi0) , Rmax*sin(2*pi*n/Ncoils+Phi0) ,-1.0]) )
@@ -124,4 +126,20 @@ class bfieldVF:
 
 		BV = self.B0 * array([ Br*cos(theta) , Br*sin(theta) , Bz ])
 		return BV
+
+
+# =============================================================================
+# ======= Function to convert I into B0 =======================================
+# =============================================================================
+
+def CalculateB0(I0,R0=0.66,NCoils=120.0):
+	mu = 4.0e-7*pi 
+	B0 = (mu/(2*pi)) * I0 * NCoils / R0
+	return B0
+
+def CalculateI0(B0,R0=0.66,NCoils=120.0):
+	mu = 4.0e-7*pi 
+	I0 = ((2*pi)/mu) * (R0/NCoils) * B0
+	return I0
+
 
