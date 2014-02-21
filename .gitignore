@@ -1,4 +1,4 @@
 *.py~
 *.txt~
 *.pyc
-Output/
+Output/*

@@ -3,3 +3,4 @@ rm *.txt~
 rm *.pyc
 rm .gitignore~
 rm *.sh~
+rm *.md~
