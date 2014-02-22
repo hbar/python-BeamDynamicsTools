@@ -1,4 +1,10 @@
 *.py~
 *.txt~
 *.pyc
-output/*
+output/geometry/*
+output/sigma/*
+.gitignore~
+*.sh~
+*.md~
+*.pyc
+*~

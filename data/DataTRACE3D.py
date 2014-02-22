@@ -1,10 +1,13 @@
+import sys
+sys.path.append('../lib/')
+
 from numpy import *
 from matplotlib.pyplot import *
 from numpy.linalg import inv
 from ConversionFunctions import *
 from ellipse import *
 
-Path0 = 'SigmaFinal/'
+Path0 = 'sigma_trace3d/'
 
 Sinjection = matrix([
 [2.8834 , 0.000 , 0.000 , 0.0000 , 0.000 , 0.000],
@@ -143,23 +146,23 @@ Sigma3120,dS = ConvertT3D(S3120); Sigma3120NG,dS = ConvertT3D(S3120NG);
 Sigma4450,dS = ConvertT3D(S4450); Sigma4450NG,dS = ConvertT3D(S4450NG);
 SigmaBend90,dS = ConvertT3D(Bend90);
 
-savetxt(Path0+'SigmaInj.txt',SigmaInj); savetxt(Path0+'SigmaInjLC.txt',SigmaInjLC)
+savetxt(Path0+'SigmaInjection.dat',SigmaInj); savetxt(Path0+'SigmaInjectionLC.dat',SigmaInjLC)
 
-savetxt(Path0+'Trace3DSigma_I_0.txt',Sigma0000);
-savetxt(Path0+'Trace3DSigma_I_0LC.txt',Sigma0000LC)
+savetxt(Path0+'Trace3DSigma_I_0.dat',Sigma0000);
+savetxt(Path0+'Trace3DSigma_I_0LC.dat',Sigma0000LC)
 
-savetxt(Path0+'Trace3DSigma_I_1600.txt',Sigma1600);
-savetxt(Path0+'Trace3DSigma_I_1600LC.txt',Sigma1600LC)
-savetxt(Path0+'Trace3DSigma_I_1600NG.txt',Sigma1600NG)
+savetxt(Path0+'Trace3DSigma_I_1600.dat',Sigma1600);
+savetxt(Path0+'Trace3DSigma_I_1600LC.dat',Sigma1600LC)
+savetxt(Path0+'Trace3DSigma_I_1600NG.dat',Sigma1600NG)
 
-savetxt(Path0+'Trace3DSigma_I_3120.txt',Sigma3120);
-savetxt(Path0+'Trace3DSigma_I_3120NG.txt',Sigma3120NG);
+savetxt(Path0+'Trace3DSigma_I_3120.dat',Sigma3120);
+savetxt(Path0+'Trace3DSigma_I_3120NG.dat',Sigma3120NG);
 
-savetxt(Path0+'Trace3DSigma_I_4450.txt',Sigma4450);
-savetxt(Path0+'Trace3DSigma_I_4450NG.txt',Sigma4450NG);
+savetxt(Path0+'Trace3DSigma_I_4450.dat',Sigma4450);
+savetxt(Path0+'Trace3DSigma_I_4450NG.dat',Sigma4450NG);
 
 
-savetxt(Path0+'Trace3DSigmaBend90.txt',SigmaBend90);
+savetxt(Path0+'Trace3DSigmaBend90.dat',SigmaBend90);
 
 
 if True: 

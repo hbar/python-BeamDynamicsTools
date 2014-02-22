@@ -1,4 +1,6 @@
 # Beam In Vessel Test
+import sys
+sys.path.append('../lib/')
 from boundary import *
 from bfield import *
 from trajectory import *
@@ -19,7 +21,7 @@ S1 = matrix([
 #Rb = [ 0.2 , 0.25, 0.4 , 0.6 , 0.8 , 0.8 , 0.6 , 0.4 , 0.25, 0.2 ]
 #Zb = [-0.55,-0.6 ,-0.6 ,-0.5 ,-0.2 , 0.2 , 0.5 , 0.6 , 0.6 , 0.55]
 
-DATA = loadtxt('CmodCoordinatesRZ.txt')
+DATA = loadtxt('../data/CmodCoordinatesRZ.txt')
 Rb=[]; Zb=[];
 for i in range(len(DATA[:,0])):
 	Rb.append(DATA[i,0])
@@ -139,7 +141,7 @@ if False:
 
 if True:
 	Angle=[]; Coordinates=[];
-	Path = 'Output/'
+	Path = '../output/'
 	for i in range(len(Bn)):
 		B = bfieldTF(B0=Bn[i])
 		Bv = bfieldVF(B0=0.00000)

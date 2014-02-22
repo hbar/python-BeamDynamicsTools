@@ -1,4 +1,6 @@
 # Beam In Vessel Test
+import sys
+sys.path.append('../lib/')
 from boundary import *
 from bfield import *
 from trajectory import *
@@ -7,15 +9,16 @@ from ellipse import *
 import pylab as pl
 
 # Input Sigma Matrix
-S1 = matrix([
-[ 1.502802755999999818e+01,-1.284540872159999791e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00],
-[-1.284540872159999791e+00, 1.759299135999999919e+01, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00],
-[ 0.000000000000000000e+00, 0.000000000000000000e+00, 2.312744280999999802e+01,-1.934440661508000048e+01, 0.000000000000000000e+00, 0.000000000000000000e+00],
-[ 0.000000000000000000e+00, 0.000000000000000000e+00,-1.934440661508000048e+01, 1.971182403999999977e+01, 0.000000000000000000e+00, 0.000000000000000000e+00],
-[ 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 4.679517649000000290e+01, 8.473947224080001206e+01],
-[ 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 8.473947224080001206e+01, 1.572014440000000093e+02]],float)
 
-S1 = matrix(loadtxt('SigmaFinal/SigmaInj.txt'))
+S1 = matrix(loadtxt('../data/SigmaInjection.dat'))
+
+#S1 = matrix([
+#[ 1.502802755999999818e+01,-1.284540872159999791e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00],
+#[-1.284540872159999791e+00, 1.759299135999999919e+01, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00],
+#[ 0.000000000000000000e+00, 0.000000000000000000e+00, 2.312744280999999802e+01,-1.934440661508000048e+01, 0.000000000000000000e+00, 0.000000000000000000e+00],
+#[ 0.000000000000000000e+00, 0.000000000000000000e+00,-1.934440661508000048e+01, 1.971182403999999977e+01, 0.000000000000000000e+00, 0.000000000000000000e+00],
+#[ 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 4.679517649000000290e+01, 8.473947224080001206e+01],
+#[ 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 8.473947224080001206e+01, 1.572014440000000093e+02]],float)
 
 #S1 = matrix([
 #[0.5771000, 0.3980000, 0.000000, 0.000000, 0.000000, 0.000000],
@@ -29,7 +32,7 @@ S1 = matrix(loadtxt('SigmaFinal/SigmaInj.txt'))
 #Rb = [ 0.2 , 0.25, 0.4 , 0.6 , 0.8 , 0.8 , 0.6 , 0.4 , 0.25, 0.2 ]
 #Zb = [-0.55,-0.6 ,-0.6 ,-0.5 ,-0.2 , 0.2 , 0.5 , 0.6 , 0.6 , 0.55]
 
-DATA = loadtxt('CmodCoordinatesRZ.txt')
+DATA = loadtxt('../data/CmodCoordinatesRZ.dat')
 Rb=[]; Zb=[];
 for i in range(len(DATA[:,0])):
 	Rb.append(DATA[i,0])
@@ -183,7 +186,7 @@ if False:
 
 if True:
 	AngleComponents=[]; Coordinates=[]; Parameters=[]; AIMSBeam=[]
-	Path = 'Output/'
+	Path = '../output/'
 	for i in [0,1,2,3]:#range(len(Bn)):
 		B = bfieldTF(B0=Bn[i])
 		Bv = bfieldVF(B0=0.00000)
@@ -193,11 +196,11 @@ if True:
 		AIMSBeam.append(Beam)
 
 		#Save Sigma Matrix
-		savetxt('SigmaFinal/'+'SigmaFinal_I_'+str(int(In[i]))+'.txt',AIMSBeam[-1].Target.Sigma)
+		savetxt(Path+'sigma/'+'SigmaFinal_I_'+str(int(In[i]))+'.dat',AIMSBeam[-1].Target.Sigma)
 
 		# Save field and geometric parameters along trajectory
-		T.SaveFieldParameters(TFCurrent=In[i],Path='Output/')
-		T.Target.SaveTargetParameters(TFCurrent=In[i],Path='Output/')
+		T.SaveFieldParameters(TFCurrent=In[i],Path='../output/geometry/')
+		T.Target.SaveTargetParameters(TFCurrent=In[i],Path='../output/geometry/')
 
 		# append lists of Target Quantities
 		AngleComponents.append([T.Target.VAngle,T.Target.HAngle])
@@ -218,15 +221,12 @@ if True:
 	pl.xlabel('x [m]'); pl.ylabel('y [m]'); pl.title('Midplane Projection')
 
 	# Save Angular and Detection Quantities
-	savetxt(Path+'TargetAngle_Vert_Horiz.txt',AngleComponents)
-	savetxt(Path+'TargetCoordinates.txt',Coordinates)
+	savetxt(Path+'geometry/TargetAngle_Vert_Horiz.dat',AngleComponents)
+	savetxt(Path+'geometry/TargetCoordinates.dat',Coordinates)
 	Header0 = '(0) I0 [A], (1) B0 [T], (2) X [m] , (3) Y [m], (4) Z [m], (5) incident angle [rad], (6) Detection Angle [rad], (7) optical path length [m] , (8) Detection Angle [rad], (9) Detection Angle [deg], (10) Detector Eff'
-	savetxt(Path+'DetectionParameters.txt', (array(Parameters)), header=Header0)
+	savetxt(Path+'geometry/DetectionParameters.dat', (array(Parameters)), header=Header0)
 	
 
 	Vessel.Plot3D(ax)
-
-
-
 
 pl.show()

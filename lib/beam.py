@@ -127,7 +127,7 @@ class beam:
 #		ky = QP * (self.gradBx[IND]);
 		ky = QP * (self.gradBy[IND]);
 		Kappay = QP * By
-		Ky = (ky + Kappay**2); print kx,ky#'Ky %0.000f' %Ky   #/1000.0; print Ky
+		Ky = (ky + Kappay**2); #print kx,ky#'Ky %0.000f' %Ky   #/1000.0; print Ky
  		Ay = sqrt(abs(Ky))
 
 		if norm(self.B[IND]) != 0:

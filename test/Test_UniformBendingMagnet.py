@@ -1,3 +1,7 @@
+
+import sys
+sys.path.append('../lib/')
+
 from numpy import *
 from boundary import *
 from bfield import *
