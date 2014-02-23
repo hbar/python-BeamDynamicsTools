@@ -2,6 +2,12 @@
 
 Ion beam trajectory and envelope dynamics code written to simulate ion beams in complex magnetic fields. 
 
+Examples
+========
+`example1.py`
+
+Simulation of trajectory and envelope dynamics calculation for 4 typical beam trajectories for AIMS analysis in the Alcator C-Mod tokamak.
+
 classes
 ==========
 Classes are found in /lib/
@@ -10,7 +16,7 @@ trajectory class
 ----------
 Calculates beam centroid trajectory based on initial beam parameters, magnetic field, and boundary.
 
-trajectory(Vessel,B,Bv,dS=1e-3,r0,v0,a0,A0,E0,I0,Freq,Nmax,Smin):
+`trajectory(Vessel,B,Bv,dS=1e-3,r0,v0,a0,A0,E0,I0,Freq,Nmax,Smin)`
 - B =  Magnetic Field from toroidal field coils (bfieldTF class) (unit:Tesla)
 - Bv = Magnetic Field from vertical cield coils (bfieldVF class) (unit:Tesla)
 - Vessel = Defines wall (boundary class)
@@ -26,17 +32,18 @@ trajectory(Vessel,B,Bv,dS=1e-3,r0,v0,a0,A0,E0,I0,Freq,Nmax,Smin):
 
 beam class
 ----
-beam(Trajectory,Sigma0)
--tools for calculating the evolution of the beam envelope sigma matrix along the trajectory
+tools for calculating the evolution of the beam envelope sigma matrix along the trajectory
+
+`beam(Trajectory,Sigma0)`
 - Trajectory = input trajectory (trajectory class)
 - Sigma0 = initial 6x6 sigma matrix defining beam envelope
 - self.Trace() = Calcuates evolution of sigma matrix Sigma0 along the trajectory
 
 target class
 -----------
-Records geometry of the beam as it intersects with the wall and calulates detection geometry.
+Records geometry of the beam as it intersects with the wall and calculates detection geometry.
 
-target(NORM,TAN,INC,BFieldTF,BFieldVF,RT,Rdet=[1.3075, -0.2457, -0.05900])
+`target(NORM,TAN,INC,BFieldTF,BFieldVF,RT,Rdet=[1.3075, -0.2457, -0.05900])`
 - NORM, TAN, INC = normal, tangent, and incident beam vector on target (from trajectory calculation).
 - BFieldTF = Toroidal Magnetic Field, (unit:Tesla), (bfieldTF class)
 - BFieldVF = Vertical Magnetic Field, (unit:Tesla), (bfieldVF class)
@@ -45,7 +52,7 @@ bfieldTF class
 --------
 Generates a set of toroidal field coils
 
-bfieldTF(B0=1.0, R0=0.66, Phi0=2*pi/40, Ncoils=20, Rmin=0.1947965, Rmax=1.195229)
+`bfieldTF(B0=1.0, R0=0.66, Phi0=2*pi/40, Ncoils=20, Rmin=0.1947965, Rmax=1.195229)`
 - B0 = toroidal field on axis at R0, (unit:Tesla)
 - R0 = major radius of torus
 - Phi0 = Toroidal offset of first TF coil leg
@@ -58,16 +65,16 @@ bfieldVF class
 --------------
 Generates a set of horizontal current loops used to caluclate a vertical field.
 
-bfieldVF(B0=1.0, RCoil=[array([1.504188,0.440817]),array([1.504188,-0.440817])]):
+`bfieldVF(B0=1.0, RCoil=[array([1.504188,0.440817]),array([1.504188,-0.440817])])`
 - B0 = toroidal field on axis at R0, (unit:Tesla)
 - RCoil = list of horizontal current loops centered at [0,0] defined by [R,Z]
 - self.local([x,y,z]) returns local B-field vector
 
 boundary class
 -------------
-Deines a toroidally symmetric boundary from a set of R and Z points.  This is used to detect the intersecion of the beam with the wall.
+Defines a toroidally symmetric boundary from a set of R and Z points.  This is used to detect the intersection of the beam with the wall.
 
-boundary(Rb,Zb,cw=-1)
+`boundary(Rb,Zb,cw=-1)`
 - Rb,Zb = lists of radial and vertical positions used to define a toroidally symmetric boundary
 - cw = determines if Rb,Zb points are connected clockwise or counter clockwise.  Determines if boundary is convex or concave
 

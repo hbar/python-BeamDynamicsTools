@@ -9,8 +9,8 @@ from ellipse import *
 import pylab as pl
 
 # Input Sigma Matrix
-
 S1 = matrix(loadtxt('../data/SigmaInjection.dat'))
+
 
 #S1 = matrix([
 #[ 1.502802755999999818e+01,-1.284540872159999791e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00],

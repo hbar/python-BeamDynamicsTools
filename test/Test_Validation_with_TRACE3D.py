@@ -2,7 +2,7 @@ from numpy import *
 from matplotlib.pyplot import *
 from ellipse import *
 
-Path0 = '../output/SigmaFinal/'
+Path0 = '../output/sigma_trace3d/igmaFinal/'
 FileList = ['SigmaFinal_I_0.txt','SigmaFinal_I_1600.txt','SigmaFinal_I_3120.txt','SigmaFinal_I_4450.txt']
 FileListT3D = ['Trace3DSigma_I_0.txt','Trace3DSigma_I_1600NG.txt','Trace3DSigma_I_3120NG.txt','Trace3DSigma_I_4450NG.txt']
 Color=['b','g','r','c']
