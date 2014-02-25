@@ -63,7 +63,7 @@ Generates a set of toroidal field coils
 
 bfieldVF class
 --------------
-Generates a set of horizontal current loops used to caluclate a vertical field.
+Generates a set of horizontal current loops used to calculate a vertical field.
 
 `bfieldVF(B0=1.0, RCoil=[array([1.504188,0.440817]),array([1.504188,-0.440817])])`
 - B0 = toroidal field on axis at R0, (unit:Tesla)

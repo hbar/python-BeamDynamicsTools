@@ -7,7 +7,7 @@ from numpy.linalg import inv,norm
 from ellipse import *
 from trajectory import *
 
-class beam:
+class beam(trajectory):
 	# inputs:
 	# sigma = 6x6 sigma matrix
 	# s0 = 3x3 matrix for local beam coordinate system
