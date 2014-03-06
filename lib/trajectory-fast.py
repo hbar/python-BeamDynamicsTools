@@ -7,7 +7,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from numpy.linalg import norm
 from ellipse import *
 from AngleCorrection import *
-import timeit
+
 
 #======= Default injection geometry ==================
 # (x,y,z) = (1.798m, -0.052m, 0.243m)
@@ -21,8 +21,7 @@ dLB = 2.0e-3 # scale length for B gradient
 #====== \Default injection geometry ==================
 
 class trajectory:
-	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=Rinjection,v0=Vinjection,a0=[0.0,0.0,0.0],A0=2,E0=0.9e6,I0=1e-3,Freq=425e6,Nmax=5000,Smin=1.2,Target=True):
-		start = timeit.default_timer()
+	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=Rinjection,v0=Vinjection,a0=[0.0,0.0,0.0],A0=2,E0=0.9e6,I0=1e-3,Freq=425e6,Nmax=3*1571,Smin=0.0,Target=True):
 
 		# B = Magnetic Field [T] (bfieldTF class)
 		# Vessel = Defines wall (boundary class)
@@ -40,7 +39,6 @@ class trajectory:
 		self.m0 = A0 * 1.67262158e-27
 		self.I0 = I0
 		self.Frequency = Freq
-		self.E0 = E0
 
 		# Magnetic coil sets
 		self.BFieldTF = B
@@ -75,15 +73,22 @@ class trajectory:
 		# Plotting attributes
 		self.LineColor = 'r'
 		self.LineWidth = 2
-		self.LineStyle = '-'
 
-		c1=True; c2=True; i = 0
+		c1=True; c2=True; i = 1
 		
+		r = zeros((Nmax,3),float); r1
+		s = zeros(Nmax,float)
+		B = zeros((Nmax,3),float)
+		v = zeros((Nmax,3),float)
+		B = zeros((Nmax,3),float)
+
+
 		# Leapfrog Integration:
 		if True:
 			while (c1 or c2) and i<Nmax:
 
-				self.r.append( self.r[-1] + self.v[-1]*dt + 0.5*self.a[-1]*dt*dt)
+				#self.r.append( self.r[-1] + self.v[-1]*dt + 0.5*self.a[-1]*dt*dt)
+				r[i] = 				
 
 				self.s.append( self.s[-1] + dS )
 
@@ -101,8 +106,7 @@ class trajectory:
 				self.gamma.append( 1.0 / (1.0-self.beta[-1]**2))
 
 				# Check to see if beam crosses boundary
-				if self.s > Smin:
-					IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
+				IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
 
 				#record bending radius
 #				self.k.append(qm * cross(self.v[-1],self.B[-1])/self.v0**2)
@@ -126,14 +130,12 @@ class trajectory:
 				c1 = IN
 				c2 = self.s[-1] < Smin
 				i=i+1;
-#				print i
+				print i
 #				print sqrt(self.r[-1][0]**2+self.r[-1][1]**2),self.r[-1][2]
 
 #			self.Target = target(NormalV,TangentV,IncidentV)
 			self.BeamBasis()
-			stop = timeit.default_timer()
-			self.RunTime = stop-start
-			print 'trajectory complete, S = %0.3f m, B0 = %0.4f T, RunTime = %0.1f s' % (self.s[-1],self.BFieldTF.B0,self.RunTime )
+			print 'trajectory complete'
 			if Target==True:
 				self.Target = target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
 				self.Target.SigmaBasis = self.BasisM6[-1]
@@ -152,7 +154,7 @@ class trajectory:
 			e1.append( cross(e2[-1],e3[-1]) )
 			self.BasisM3.append(Basis3(e1[-1],e2[-1],e3[-1]))
 			self.BasisM6.append(Basis6(e1[-1],e2[-1],e3[-1]))
-			#print i
+			print i
 
 	def Plot2D(self,Type='poloidal'):
 		x=[]; y=[]; z=[]; R=[]
@@ -162,11 +164,10 @@ class trajectory:
 			y.append(self.r[i][1])
 			z.append(self.r[i][2])
 			R.append(sqrt(x[-1]**2+y[-1]**2))
-		S1 = self.LineStyle + self.LineColor
 		if Type=='poloidal':
-			PLOT = pl.plot(R,z,S1,linewidth=self.LineWidth)
+			PLOT = pl.plot(R,z)
 		if Type=='top':
-			PLOT = pl.plot(x,y,S1,linewidth=self.LineWidth)
+			PLOT = pl.plot(x,y)
 		return PLOT
 
 

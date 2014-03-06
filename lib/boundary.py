@@ -14,13 +14,16 @@ class boundary:
 		self.Rb = Rb
 		self.Zb = Zb
 		for i in range(len(Rb)):
-			Cvec.append(array([Rb[i],Zb[i]]))
-			Mvec.append(array([(Rb[i]+Rb[i-1])/2,(Zb[i]+Zb[i-1])/2]))
-			Tvec.append((array([Rb[i]-Rb[i-1],Zb[i]-Zb[i-1]])))
-			Nvec.append((array([-Tvec[-1][1],Tvec[-1][0]])))
-			Nvec[-1] = cw * Nvec[-1] / sqrt(Nvec[-1][0]**2 + Nvec[-1][1]**2)
-		for i in range(len(Rb)):
-			print Cvec[i-1]-Cvec[i-2]
+			Corner = array([Rb[i],Zb[i]])
+			MidPoint = array([(Rb[i]+Rb[i-1])/2,(Zb[i]+Zb[i-1])/2])
+			Tangent = array([Rb[i]-Rb[i-1],Zb[i]-Zb[i-1]]); Tangent=Tangent/norm(Tangent)
+			Normal = array([-Tangent[1],Tangent[0]]); Normal = Normal/norm(Normal)
+
+			Cvec.append(Corner); 
+			Mvec.append(MidPoint); 
+			Tvec.append(Tangent); 
+			Nvec.append(cw*Normal); 
+#			print Corner[i-1]-Corner[i-2]
 		self.Cvec = Cvec
 		self.Mvec = Mvec
 		self.Tvec = Tvec
@@ -55,7 +58,6 @@ class boundary:
 				x,y=Circle(self.Rb[i])
 				pl.plot(x,y,'k')
 
-
 	def InVolume(self,r):
 		x0 = [sqrt(r[0]*r[0] + r[1]*r[1]) ,r[2]]
 		IN = True; i=-1;
@@ -72,14 +74,14 @@ class boundary:
 	# Xboundary deterines the line drawn between two points r0 and r1 crosses a the boundary.
 	# This function returns: boolean (IN), normal vector, tangent vector, incident vector.
 	def Xboundary(self,r0,r1):
-		x0 = [sqrt(r0[0]*r0[0] + r0[1]*r0[1]) ,r0[2]]
-		x1 = [sqrt(r1[0]*r1[0] + r1[1]*r1[1]) ,r1[2]]
+		x0 = array([sqrt(r0[0]**2 + r0[1]**2) ,r0[2]])
+		x1 = array([sqrt(r1[0]**2 + r1[1]**2) ,r1[2]])
 		IN = True; i=-1; Di1 = []; Di2 = []; Df = []; NORM=[]; TAN=[]; INC=[]; RT = r1
-		while (IN == True and i<self.Nv-1):
-			Di1 = x0-self.Cvec[i-1]
-			Di2 = x0-self.Cvec[i]
+		while (IN == True and i<self.Nv):
+			Di1 = x0-self.Cvec[i-1]; Di1 = Di1/norm(Di1)
+			Di2 = x0-self.Cvec[i]; Di1 = Di1/norm(Di1)
 			Df = x1-self.Cvec[i-1]
-			if dot(Di1,self.Tvec[i-1])>0 and dot(Di2,self.Tvec[i-1])<0:
+			if dot(Di1,self.Tvec[i])>0 and dot(Di2,self.Tvec[i])<0:
 				if dot(Di1,self.Nvec[i])>0 and dot(Di2,self.Nvec[i])>0:
 					if dot(Df,self.Nvec[i])<0 and dot(Df,self.Nvec[i])<0:
 						IN = False
@@ -113,7 +115,6 @@ class boundary:
 			else:
 				ax.plot(x,y,z,Color)
 			xp.append(x); yp.append(y); zp.append(z)
-		
 
 #		d1=1.25; d2=1.8; dz=(d2+d1)/2.0
 	
@@ -159,11 +160,11 @@ def Circle(R,Nt=100):
 	y = R*sin(t)
 	return x,y
 
-Rb = [ 0.2 , 0.25, 0.4 , 0.6 , 0.8 , 0.8 , 0.6 , 0.4 , 0.25, 0.2 ]
-Zb = [-0.55,-0.6 ,-0.6 ,-0.5 ,-0.2 , 0.2 , 0.5 , 0.6 , 0.6 , 0.55]
+#Rb = [ 0.2 , 0.25, 0.4 , 0.6 , 0.8 , 0.8 , 0.6 , 0.4 , 0.25, 0.2 ]
+#Zb = [-0.55,-0.6 ,-0.6 ,-0.5 ,-0.2 , 0.2 , 0.5 , 0.6 , 0.6 , 0.55]
 
 
-Wall = boundary(Rb,Zb)
+#Wall = boundary(Rb,Zb)
 #Wall.Plot2D(1)
 
 #TestInVolume(Wall,1000)
