@@ -21,7 +21,7 @@ dLB = 2.0e-3 # scale length for B gradient
 #====== \Default injection geometry ==================
 
 class trajectory:
-	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=Rinjection,v0=Vinjection,a0=[0.0,0.0,0.0],A0=2,E0=0.9e6,I0=1e-3,Freq=425e6,Nmax=5000,Smin=1.2,Target=True):
+	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=Rinjection,v0=Vinjection,a0=[0.0,0.0,0.0],A0=2,E0=0.9e6,I0=1e-3,Freq=425e6,Nmax=5000,Smin=1.1,Target=True):
 		start = timeit.default_timer()
 
 		# B = Magnetic Field [T] (bfieldTF class)
@@ -101,7 +101,13 @@ class trajectory:
 				self.gamma.append( 1.0 / (1.0-self.beta[-1]**2))
 
 				# Check to see if beam crosses boundary
-				if self.s > Smin:
+				IN = True
+				c3 = self.s > Smin
+#				c4 = self.r[-1][0] <  0.5
+#				c5 = self.r[-1][2] >  0.3
+#				c6 = self.r[-1][2] < -0.3
+#				if c3 and c4 and (c5 or c6):
+				if c3:
 					IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
 
 				#record bending radius

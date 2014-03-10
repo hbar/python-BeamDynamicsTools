@@ -1,6 +1,6 @@
 import sys
 sys.path.append('../lib/')
-from boundaryNEW import *
+from boundary import *
 from bfield import *
 from trajectory import *
 from beam import *
@@ -11,10 +11,11 @@ import pylab as pl
 # (x,y,z) = (1.798m, -0.052m, 0.243m)
 #  alpha = 12.6 degrees (X-Z plane)
 #  beta = 8.0 degrees (X-Y plane)
-alpha=12.6/180.0*pi # array([8,10,12,14])/180.0*pi;
+alpha=23.0/180.0*pi # array([8,10,12,14])/180.0*pi;
+print alpha
 beta=8.0/180.0*pi; 
 Rinjection = [1.798, 0.052, 0.243]
-Vinjection = []
+Vinjection = [-cos(alpha)*cos(beta), cos(alpha)*sin(beta), -sin(alpha)]
 #Energy = [0.594e6, 0.740e6, 0.900e6]
 Energy = linspace(0.594e6,0.900e6,10)
 
@@ -32,20 +33,27 @@ Vessel.Plot3D(ax)
 # Inputs for four B-field settings 
 #In = array([ 0.0, 1600.0 ,3120 ,4450.0])
 #Bn = array([ 0.0, 0.05818182, 0.11345455, 0.16181818 ])
-Bn = array([0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40])
+Bn = array([0.0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40,0.45])
+#Bn = array([0.10,0.20, 0.30, 0.40])
 
 AngleComponents=[]; Coordinates=[]; Parameters=[]; Trajectory=[]
 OutputPath = '../output/'
-Color=['k','g','r','c','b','m','g','r','c','b','m']
+Color=['k','g','r','c','b','m','g','r','c','b','m','g']
+print len(Energy)*len(Bn)*10.0/60.0
 for j in range(len(Energy)):
-	for i in [4]:#range(len(Bn)):
+	for i in range(len(Bn)):
 		B = bfieldTF(B0=Bn[i])
 		Bv = bfieldVF(B0=0.00000)
-		T = trajectory(Vessel,B,Bv,E0=Energy[j],Target=False)
-		T.LineColor = Color[i]
+		T = trajectory(Vessel,B,Bv,v0=Vinjection,E0=Energy[j],Target=False)
+		T.LineColor = Color[i]; T.LineWidth = 1.0
+		if j==0:
+			T.LineWidth = 2
+		if j==9:
+			T.LineWidth = 4
 		if j==4:
+			T.LineWidth = 2
 			T.LineColor = 'k'
-			self.LineStyle = '--'
+			T.LineStyle = '--'
 		Trajectory.append(T)
 
 	# Save target parameters
@@ -66,7 +74,7 @@ Trajectory[-1].Limits3D(ax);
 
 # Construct Legend
 Leg = []
-for i in [0]:#range(len(Bn)):
+for i in range(len(Bn)):
 	Leg.append('B = %0.2f' % Trajectory[i].BFieldTF.B0)
 
 # Plot 2D projections of Trajectories (Poloidal View)
