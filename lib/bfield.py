@@ -3,6 +3,7 @@ from scipy.special import *
 
 # Br = B0*R0/R * (1 + f(r,z,phi))
 # Bz = BZ0
+mu = 4*pi*1e-7
 
 class bfield:
 	# Br =  ra
@@ -98,9 +99,21 @@ class bfieldTF:
 
 class bfieldVF:
 
-	def __init__ (self, B0=1.0, RCoil=[array([1.504188,0.440817]),array([1.504188,-0.440817])]):
-		self.RCoil = RCoil
-		self.B0 = B0
+	def __init__ (self, B0=nan , I0=nan, RCoil=[array([1.504188,0.440817]),array([1.504188,-0.440817])]):
+
+		self.RCoil = RCoil; self.B0=B0; self.I0=I0
+		r0 = self.RCoil[0][0]
+		self.r0 = r0
+		self.nCoil = len(RCoil)
+
+		if isnan(I0) and (not isnan(B0)):
+			self.B0 = B0
+			self.I0 = ( (5.0/4.0)**(3.0/2.0) * (B0*r0/mu) ) #/n0 #(2*r0)/(mu*self.B0)
+
+		if isnan(B0) and (not isnan(I0)) :
+			self.I0 = I0
+			self.B0 = mu*I0/(2.0*r0)
+
 
 	def local(self,R):
 	#	RCoil=[array([1.0,0.0])]
@@ -120,11 +133,11 @@ class bfieldVF:
 
 			Bz = Bz + (1.0/sqrt( (r+r0)**2 + z**2) ) * (IK + IE*(r0**2 - r**2 - z**2)/((r0-r)**2 + z**2) )
 
-			if ( (r-r0)**2 + z**2 < 0.2**2 ):
-				Br = 0; Bz = 0;
-				break
+#			if ( (r-r0)**2 + z**2 < 0.2**2 ):
+#				Br = 0; Bz = 0;
+#				break
 
-		BV = self.B0 * array([ Br*cos(theta) , Br*sin(theta) , Bz ])
+		BV = (mu*self.I0)/(2.0*r0)/self.nCoil * array([ Br*cos(theta) , Br*sin(theta) , Bz ])
 		return BV
 
 

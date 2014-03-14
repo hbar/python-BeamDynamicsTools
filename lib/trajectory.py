@@ -14,7 +14,7 @@ import timeit
 #  alpha = 12.6 degrees (X-Z plane)
 #  beta = 8.0 degrees (X-Y plane)
 alpha=12.6/180.0*pi; beta=8.0/180.0*pi; 
-Rinjection = [1.798, 0.052, 0.243]
+Rinjection = [1.798, -0.052, 0.243]
 Vinjection = [-cos(alpha)*cos(beta), cos(alpha)*sin(beta), -sin(alpha)]
 dLB = 2.0e-3 # scale length for B gradient
 #Vinjection = [-1,0,0]
@@ -139,7 +139,7 @@ class trajectory:
 			self.BeamBasis()
 			stop = timeit.default_timer()
 			self.RunTime = stop-start
-			print 'trajectory complete, S = %0.3f m, B0 = %0.4f T, RunTime = %0.1f s' % (self.s[-1],self.BFieldTF.B0,self.RunTime )
+			print 'trajectory complete, S = %0.3f m, B0 = %0.4f T, B0 = %0.4f T, RunTime = %0.1f s' % (self.s[-1],self.BFieldTF.B0,self.BFieldVF.B0,self.RunTime )
 			if Target==True:
 				self.Target = target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
 				self.Target.SigmaBasis = self.BasisM6[-1]
@@ -168,11 +168,10 @@ class trajectory:
 			y.append(self.r[i][1])
 			z.append(self.r[i][2])
 			R.append(sqrt(x[-1]**2+y[-1]**2))
-		S1 = self.LineStyle + self.LineColor
 		if Type=='poloidal':
-			PLOT = pl.plot(R,z,S1,linewidth=self.LineWidth)
+			PLOT = pl.plot(R,z,color=self.LineColor,linestyle=self.LineStyle,linewidth=self.LineWidth)
 		if Type=='top':
-			PLOT = pl.plot(x,y,S1,linewidth=self.LineWidth)
+			PLOT = pl.plot(x,y,color=self.LineColor,linestyle=self.LineStyle,linewidth=self.LineWidth)
 		return PLOT
 
 
@@ -187,7 +186,7 @@ class trajectory:
 			x.append(self.r[i][0])
 			y.append(self.r[i][1])
 			z.append(self.r[i][2])
-		ax.plot(x,y,z,self.LineColor,linewidth=self.LineWidth)
+		ax.plot(x,y,z,color=self.LineColor,linewidth=self.LineWidth)
 		ax.scatter(x[-1],y[-1],z[-1],s=15,c=self.LineColor)
 		return ax
 
