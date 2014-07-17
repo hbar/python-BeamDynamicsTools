@@ -12,10 +12,10 @@ import matplotlib as mpl
 # (x,y,z) = (1.798m, -0.052m, 0.243m)
 #  alpha = 12.6 degrees (X-Z plane)
 #  beta = 8.0 degrees (X-Y plane)
-#alpha0 = 12.6
-#beta0 = 8.0
+alpha0 = 12.6
+beta0 = 8.0
 
-alpha = alpha0/180.0*pi; beta = beta0/180.0*pi; 
+alpha = alpha0/180.0*pi; beta = beta0/180.0*pi;
 print alpha, beta
 Rinjection = [1.798, -0.052, 0.243]
 Vinjection = [-cos(alpha)*cos(beta), cos(alpha)*sin(beta), -sin(alpha)]
@@ -38,10 +38,13 @@ Vessel.Plot3D(ax)
 #Bn = array([ 0.0, 0.05818182, 0.11345455, 0.16181818 ])
 #Bn = array([0.10,0.20, 0.30, 0.40])
 #Bn = array([0.0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40,0.45])
-Bn = linspace(0.0,0.45,19)
+#Bn = linspace(0.0,0.45,19)
+Bn = linspace(-0.45,0.45,50)
+#Bn = array([0.0])
 
 #Generate Color Map
-CMAP = mpl.colors.LinearSegmentedColormap.from_list('mycolors',['black','red','orange'])
+#CMAP = mpl.colors.LinearSegmentedColormap.from_list('mycolors',['black','red','orange'])
+CMAP = mpl.colors.LinearSegmentedColormap.from_list('mycolors',['green','blue','black','red','orange'])
 
 AngleComponents=[]; Coordinates=[]; Parameters=[]; Trajectory=[]
 OutputPath = '../output/'
@@ -50,7 +53,7 @@ OutputPath = '../output/'
 for i in range(len(Bn)):
 	B = bfieldTF(B0=Bn[i])
 	Bv = bfieldVF(B0=0.00000)
-	T = trajectory(Vessel,B,Bv,v0=Vinjection,E0=Energy,Target=False)
+	T = trajectory(Vessel,B,Bv,v0=Vinjection,E0=Energy,Target=True)
 	T.LineColor = CMAP(1.0*i/len(Bn)); 
 	T.LineWidth = 2.0
 	Trajectory.append(T)
@@ -68,7 +71,7 @@ for i in range(len(Bn)):
 for i in range(len(Trajectory)):
 	Trajectory[i].Plot3D(ax);
 	#		Trajectory[i].Target.Plot3D(ax);
-Trajectory[-1].Limits3D(ax);
+#Trajectory[-1].Limits3D(ax);
 
 # Construct Legend
 Leg = []
@@ -105,11 +108,13 @@ if False:
 	savetxt(OutputPath+'geometry/DetectionParameters.dat', (array(Parameters)), header=Header0)
 
 if True:
-	FigName = 'TrajectoryProjections_alpha%2.2f_beta%2.2f' %(alpha0,beta0)
+	FigName = 'TrajectoryProjections_alpha%2.2f_beta%2.2f_'%(alpha0,beta0)# + B.Method
 	FigPath = '/home/hbar/Dropbox/Research/AIMS/Magnet supply upgrade/Beam Modeling Results - Toroidal Field Sweep/'
+	Trajectory[-1].Target.SaveTargetParameters(Path=FigPath+'Test_alpha%2.2f_beta%2.2f_UpDown'%(alpha0,beta0))
 
-pl.savefig(FigPath + FigName+'.pdf')
-pl.savefig(FigPath + FigName+'.png')
+
+pl.savefig(FigPath + FigName+'_UpDown.pdf')
+pl.savefig(FigPath + FigName+'_UpDown.png')
 print 'File saved: ' + FigName
 
 #pl.show()

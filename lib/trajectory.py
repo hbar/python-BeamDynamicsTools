@@ -14,8 +14,10 @@ import timeit
 #  alpha = 12.6 degrees (X-Z plane)
 #  beta = 8.0 degrees (X-Y plane)
 alpha=12.6/180.0*pi; beta=8.0/180.0*pi; 
+
 Rinjection = [1.798, -0.052, 0.243]
 Vinjection = [-cos(alpha)*cos(beta), cos(alpha)*sin(beta), -sin(alpha)]
+
 dLB = 2.0e-3 # scale length for B gradient
 #Vinjection = [-1,0,0]
 #====== \Default injection geometry ==================
@@ -144,7 +146,80 @@ class trajectory:
 				self.Target = target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
 				self.Target.SigmaBasis = self.BasisM6[-1]
 				print 'Beam Coordinates Complete'
-		
+
+
+#==============================================================================
+		# Euler Integration:
+		if False:
+			while (c1 or c2) and i<Nmax:
+			#for i in range(Nmax):
+
+				self.r.append( self.r[-1] + self.v[-1]*dt)
+
+				self.s.append( self.s[-1] + dS )
+
+				self.B.append( B.local(self.r[-1]) + Bv.local(self.r[-1]) )
+
+				self.a.append( qm * cross(self.v[-1],self.B[-1]) )
+
+				self.v.append( self.v[-1] + (self.a[-1])*dt )
+
+				self.dS.append( self.s[-1] - self.s[-2] )
+
+				# Normalized Relativistic Parameters
+				self.Beta.append(self.v[-1]/c0)
+				self.beta.append(norm(self.Beta[-1]))
+				self.gamma.append( 1.0 / (1.0-self.beta[-1]**2))
+
+				# Check to see if beam crosses boundary
+				IN = True
+				c3 = self.s > Smin
+#				c4 = self.r[-1][0] <  0.5
+#				c5 = self.r[-1][2] >  0.3
+#				c6 = self.r[-1][2] < -0.3
+#				if c3 and c4 and (c5 or c6):
+				if c3:
+					IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
+
+				#record bending radius
+#				self.k.append(qm * cross(self.v[-1],self.B[-1])/self.v0**2)
+				self.k.append(norm(self.a[-1]/self.v0**2))
+				self.Rc.append(1.0/self.k[-1])
+
+				# B Record Gradients
+				vecR = -1.0*(self.a[-1])/norm(self.a[-1]);
+				vecB = self.B[-1]/norm(self.B[-1])
+				Br2 = norm(B.local(self.r[-1]+vecR*dLB))
+				Br1 = norm(B.local(self.r[-1]-vecR*dLB))
+				Bb2 = norm(B.local(self.r[-1]+vecB*dLB))
+				Bb1 = norm(B.local(self.r[-1]-vecB*dLB))
+				self.gradB.append((Br2-Br1)/(2.0*dLB)) #( array( [(Br2-Br1)/(2.0*dLB) , (Bb2-Bb1)/(2.0*dLB)] ) )
+				self.gradBk.append(self.gradB[-1] * qm/(c0*self.v0) ) #(qm/(self.gamma[-1]*self.beta[-1]*c0**2))
+				self.gradBn.append( -1.0 * self.Rc[-1]/norm(self.B[-1]) * (Br2-Br1)/(2.0*dLB) )
+				self.gradBx.append((Br2-Br1)/(2.0*dLB))
+				self.gradBy.append((Bb2-Bb1)/(2.0*dLB))
+
+				# Conditional statements for continuing iteration
+				c1 = IN
+				c2 = self.s[-1] < Smin
+				i=i+1;
+#				if not (c1 or c2):
+#					break
+#				print i
+#				print sqrt(self.r[-1][0]**2+self.r[-1][1]**2),self.r[-1][2]
+
+#			self.Target = target(NormalV,TangentV,IncidentV)
+			self.BeamBasis()
+			stop = timeit.default_timer()
+			self.RunTime = stop-start
+			print 'trajectory complete, S = %0.3f m, B0 = %0.4f T, B0 = %0.4f T, RunTime = %0.1f s' % (self.s[-1],self.BFieldTF.B0,self.BFieldVF.B0,self.RunTime )
+			if Target==True:
+				self.Target = target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
+				self.Target.SigmaBasis = self.BasisM6[-1]
+				print 'Beam Coordinates Complete'
+
+#==============================================================================
+
 	def BeamBasis(self):
 		Ni = len(self.v);
 		e3 = [self.v[0]/norm(self.v[0])]
@@ -296,10 +371,16 @@ class target:
 		def Projection(self):
 			self.Ellipse.PlotXY(0*self.VAngle,0*self.HAngle)
 
+	# Calculate distance to another target
+	def Distance(self,Traj1):
+		R0 = self.XYZ
+		R1 = Traj1.Target.XYZ
+		return norm(R0-R1)
+		
+
 	def SaveTargetParameters(self,TFCurrent,Path='Output/'):
 		savetxt(Path+'SigmaBasis_I_'+str(int(TFCurrent))+'.txt',self.SigmaBasis)
 		savetxt(Path+'TargetBasis_I_'+str(int(TFCurrent))+'.txt',self.TargetBasis)
-
 
 	# 3D plotting function of beam
 	def Plot3D(self,ax):
@@ -325,6 +406,16 @@ class target:
 		self.DetectionLength,
 		self.DetectorAngle,
 		self.DetectionEff]
+
+	def SaveTargetParameters(self,Path='Output/'):
+#		Header0 = '(0) I0 [A], (1) B0 [T], (2) X [m] , (3) Y [m], (4) Z [m], (5) incident angle [rad], (6) Detection Angle [rad], (7) optical path length [m] , (8) Detection Angle [rad], (9) Detection Angle [deg], (10) Detector Eff'
+		Header0 = '(0) I0 [A], \n(1) B0 [T], \n(2) X [m] , \n(3) Y [m], \n(4) Z [m], \n(5) incident angle [rad], \n(6) Detection Angle [rad], \n(7) optical path length [m] , \n(8) Detection Angle [rad], \n(9) Detection Angle [deg], \n(10) Detector Eff\n\n'
+
+		Parameters = array(self.GetDetectionParameters())
+#		Label = 'I0 [A]','B0 [T]','X [m]','Y [m]', 'Z [m]', 'incident angle [rad]','Detection Angle [rad]', 'Gamma path length [m]','Detection Angle [rad]','Detection Angle [deg]','Detector Eff'
+		print Parameters
+		FileName = 'TargetParameters(B=%0.3fT,I=%0.3fkA).dat'%(self.B0,self.I0/1000.0)
+		savetxt(Path+FileName,(Parameters),header=Header0)
 
 
 

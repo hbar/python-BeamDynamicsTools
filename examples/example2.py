@@ -1,5 +1,5 @@
 import sys
-sys.path.append('./lib/')
+sys.path.append('../lib/')
 from boundary import *
 from bfield import *
 from trajectory import *
@@ -8,8 +8,8 @@ from ellipse import *
 import pylab as pl
 
 # Import poloidal boundary points
-Rb = loadtxt('./data/CmodCoordinatesRZ.dat',usecols=[0])
-Zb = loadtxt('./data/CmodCoordinatesRZ.dat',usecols=[1])
+Rb = loadtxt('../data/CmodCoordinatesRZ.dat',usecols=[0])
+Zb = loadtxt('../data/CmodCoordinatesRZ.dat',usecols=[1])
 
 # Generate vessel boundary
 Vessel = boundary(Rb,Zb)
@@ -24,7 +24,7 @@ Bn = array([ 0.0, 0.05818182, 0.11345455, 0.16181818 ])
 
 AngleComponents=[]; Coordinates=[]; Parameters=[]; Trajectory=[]
 OutputPath = './output/'
-for i in [1,2,3]:#range(len(Bn)):
+for i in [0,1,2,3]:#range(len(Bn)):
 	B = bfieldTF(B0=Bn[i])
 	Bv = bfieldVF(B0=0.00000)
 	T = trajectory(Vessel,B,Bv)
@@ -41,7 +41,8 @@ for i in [1,2,3]:#range(len(Bn)):
 # Plot 3D results
 Color=['b','g','r','c']
 for i in range(len(Trajectory)):
-	Trajectory[i].Plot3D(ax,Color[i]);
+	Trajectory[i].LineColor = Color[i]
+	Trajectory[i].Plot3D(ax);
 #	Trajectory[i].Target.Plot3D(ax);
 
 Trajectory[-1].Limits3D(ax);
@@ -57,9 +58,10 @@ Trajectory[-1].Limits3D(ax);
 
 
 # Save Angular and Detection Quantities
-savetxt(OutputPath+'geometry/TargetAngle_Vert_Horiz.dat',AngleComponents)
-savetxt(OutputPath+'geometry/TargetCoordinates.dat',Coordinates)
-Header0 = '(0) I0 [A], (1) B0 [T], (2) X [m] , (3) Y [m], (4) Z [m], (5) incident angle [rad], (6) Detection Angle [rad], (7) optical path length [m] , (8) Detection Angle [rad], (9) Detection Angle [deg], (10) Detector Eff'
-savetxt(OutputPath+'geometry/DetectionParameters.dat', (array(Parameters)), header=Header0)
+if False:
+	savetxt(OutputPath+'geometry/TargetAngle_Vert_Horiz.dat',AngleComponents)
+	savetxt(OutputPath+'geometry/TargetCoordinates.dat',Coordinates)
+	Header0 = '(0) I0 [A], (1) B0 [T], (2) X [m] , (3) Y [m], (4) Z [m], (5) incident angle [rad], (6) Detection Angle [rad], (7) optical path length [m] , (8) Detection Angle [rad], (9) Detection Angle [deg], (10) Detector Eff'
+	savetxt(OutputPath+'geometry/DetectionParameters.dat', (array(Parameters)), header=Header0)
 
 pl.show()

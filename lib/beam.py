@@ -44,8 +44,8 @@ class beam(trajectory):
 		self.gradBx = Trajectory.gradBx
 		self.gradBy = Trajectory.gradBy
 		if Target == True:
-			self.NormalV = Trajectory.NormalV
-			self.IncidentV = Trajectory.IncidentV
+			self.NormalV = Trajectory.Target.NormalV
+			self.IncidentV = Trajectory.Target.IncidentV
 			self.Target = Trajectory.Target
 
 

@@ -3,6 +3,8 @@
 *.pyc
 output/geometry/*
 output/sigma/*
+VintageCode/
+VintageCode/*
 .gitignore~
 *.sh~
 *.md~

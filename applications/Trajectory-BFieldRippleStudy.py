@@ -12,11 +12,10 @@ import matplotlib as mpl
 # (x,y,z) = (1.798m, -0.052m, 0.243m)
 #  alpha = 12.6 degrees (X-Z plane)
 #  beta = 8.0 degrees (X-Y plane)
-
 alpha0 = 12.6
 beta0 = 8.0
 
-alpha = alpha0/180.0*pi; beta = beta0/180.0*pi; 
+alpha = alpha0/180.0*pi; beta = beta0/180.0*pi;
 print alpha, beta
 Rinjection = [1.798, -0.052, 0.243]
 Vinjection = [-cos(alpha)*cos(beta), cos(alpha)*sin(beta), -sin(alpha)]
@@ -35,22 +34,59 @@ ax = Vessel.Figure3D()
 Vessel.Plot3D(ax)
 
 # Inputs for four B-field settings 
-Bn = linspace(-0.05,0.05,21)
+Bn = linspace(-0.45,0.45,11)
+#Bn = array([0.0])
 
 #Generate Color Map
+#CMAP = mpl.colors.LinearSegmentedColormap.from_list('mycolors',['black','red','orange'])
 CMAP = mpl.colors.LinearSegmentedColormap.from_list('mycolors',['green','blue','black','red','orange'])
 
 AngleComponents=[]; Coordinates=[]; Parameters=[]; Trajectory=[]
 OutputPath = '../output/'
 #Color=['k','g','r','c','b','m','g','r','c','b','m','g']
 
-for i in range(len(Bn)):
-	B = bfieldTF(B0=0.0)
-	Bv = bfieldVF(B0=Bn[i])
-	T = trajectory(Vessel,B,Bv,v0=Vinjection,E0=Energy,Target=False)
-	T.LineColor = CMAP(1.0*i/len(Bn)); 
-	T.LineWidth = 2.0
-	Trajectory.append(T)
+
+
+# Calculate Target Error vs Magnet Ripple
+if False:
+	dRdB = [] # change in target position with respect to B
+	fB = 0.01
+	for i in range(len(Bn)):
+		B = bfieldTF(B0=Bn[i])
+		Bv = bfieldVF(B0=0.00000)
+		T = trajectory(Vessel,B,Bv,v0=Vinjection,E0=Energy,Target=True)
+		T.LineColor = CMAP(1.0*i/len(Bn)); 
+		T.LineWidth = 2.0
+		Trajectory.append(T)
+
+		B1 = bfieldTF(B0=Bn[i]*(1+fB) ) # Bfield + fractional change
+		T1 = trajectory(Vessel,B1,Bv,v0=Vinjection,E0=Energy,Target=True)
+		dRdB.append(T1.Target.Distance(T)/(fB*100.0)) 	
+	print dRdB
+
+# Calculate Target Error trajectories given % Mangnet Ripple
+if True:
+	fB = 0.02
+	for i in range(len(Bn)):
+		B = bfieldTF(B0=Bn[i])
+		Bv = bfieldVF(B0=0.00000)
+		T = trajectory(Vessel,B,Bv,v0=Vinjection,E0=Energy,Target=True)
+		T.LineColor = CMAP(1.0*i/len(Bn)); 
+		T.LineWidth = 1.0
+		T.LineStyle = ':'
+		Trajectory.append(T)
+
+	fB1 = [-fB,fB]
+	for j in range(len(fB1)):
+		for i in range(len(Bn)):
+			B1 = bfieldTF(B0=Bn[i]*(1+fB1[j]) ) 
+			T1 = trajectory(Vessel,B1,Bv,v0=Vinjection,E0=Energy,Target=True)
+			T1.LineStyle = '-'
+			T1.LineWidth = 1.0
+			T1.LineColor = CMAP(1.0*i/len(Bn));
+			Trajectory.append(T1)
+
+
 
 	# Save target parameters
 #	T.Target.SaveTargetParameters(TFCurrent=In[i],Path=OutputPath+'geometry/')
@@ -64,20 +100,22 @@ for i in range(len(Bn)):
 
 for i in range(len(Trajectory)):
 	Trajectory[i].Plot3D(ax);
-			Trajectory[i].Target.Plot3D(ax);
-Trajectory[-1].Limits3D(ax);
+	#		Trajectory[i].Target.Plot3D(ax);
+#Trajectory[-1].Limits3D(ax);
 
 # Construct Legend
 Leg = []
 for i in range(len(Bn)):
-	Leg.append('NI = %0.1fkA' % (Trajectory[i].BFieldVF.I0/1e3))
+#	Leg.append('B = %0.3fT' % Trajectory[i].BFieldTF.B0)
+	Leg.append('B = %0.2f kA' % ((Trajectory[i].BFieldTF.I0)/1000.0))
 
 # Plot 2D projections of Trajectories (Poloidal View)
 pl.figure(figsize=(20,8))
 for i in range(len(Trajectory)):
 	pl.subplot(1,2,1); Trajectory[i].Plot2D('poloidal');
 pl.subplot(1,2,1); Vessel.Border('poloidal'); pl.xlim(0.2,1.4); pl.ylim(-0.7,0.5)
-pl.xlabel('R [m]'); pl.ylabel('Z [m]'); pl.title(r'Poloidal Projection ($\alpha$ = %0.1f$^o$, $\beta$ = %0.1f$^o$)'% (alpha0,beta0) )
+pl.xlabel('R [m]'); pl.ylabel('Z [m]'); 
+pl.title(r'Poloidal Projection ($\alpha$ = %0.1f$^o$, $\beta$ = %0.1f$^o$)'% (alpha0,beta0) )
 #pl.legend(Leg,loc=4)
 
 # Plot 2D projections of Trajectories (Top View)
@@ -100,12 +138,13 @@ if False:
 	Header0 = '(0) I0 [A], (1) B0 [T], (2) X [m] , (3) Y [m], (4) Z [m], (5) incident angle [rad], (6) Detection Angle [rad], (7) optical path length [m] , (8) Detection Angle [rad], (9) Detection Angle [deg], (10) Detector Eff'
 	savetxt(OutputPath+'geometry/DetectionParameters.dat', (array(Parameters)), header=Header0)
 
-if True:
-	FigName = 'TrajectoryProjections_alpha%2.2f_beta%2.2f' %(alpha0,beta0)
-	FigPath = '/home/hbar/Dropbox/Research/AIMS/Magnet supply upgrade/Beam Modeling Results - Vertical Field Sweep/'
+if False:
+	FigName = 'TrajectoryProjections_alpha%2.2f_beta%2.2f_'%(alpha0,beta0)# + B.Method
+	FigPath = '/home/hbar/Dropbox/Research/AIMS/Magnet supply upgrade/Beam Modeling Results - Toroidal Field Sweep/'
+	Trajectory[-1].Target.SaveTargetParameters(Path=FigPath+'Test_alpha%2.2f_beta%2.2f_UpDown'%(alpha0,beta0))
+	pl.savefig(FigPath + FigName+'_UpDown.pdf')
+	pl.savefig(FigPath + FigName+'_UpDown.png')
+	print 'File saved: ' + FigName
 
-pl.savefig(FigPath + FigName+'.pdf')
-pl.savefig(FigPath + FigName+'.png')
-print 'File saved: ' + FigName
 
-#pl.show()
+pl.show()

@@ -7,8 +7,12 @@ ApplicationE = "Trajectory-AsymmetricDistribution.py"
 #Alpha = [ 0.0 ,12.6 , 5.0 ,23.0 , 12.6 , 5.0 ,23.0 ]
 #Beta = [ 0.0 , 8.0 , 8.0 , 8.0 ,  0.0 , 0.0 , 0.0 ] 
 
-Alpha = linspace(1,11,6)
-Beta  =  linspace(0,8,5)
+#Alpha = linspace(1,11,6)
+#Beta  =  linspace(0,8,5)
+
+Alpha = [12.6 ,12.6 ]
+Beta = [ 8.0 , 0.0  ] 
+
 
 for j in range(len(Beta)):
 	for i in range(len(Alpha)):
