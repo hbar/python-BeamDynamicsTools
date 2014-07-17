@@ -1,11 +1,7 @@
 import sys
 sys.path.append('../lib/')
-from boundary import *
-from bfield import *
-from trajectory import *
-from beam import *
-from ellipse import *
-import pylab as pl
+from BeamDynamicsTools import *
+from matplotlib.pyplot import show
 
 # Input Sigma Matrix
 S1 = matrix(loadtxt('../data/SigmaInjection.dat'))
@@ -67,4 +63,4 @@ pl.xlabel('x [m]'); pl.ylabel('y [m]'); pl.title('Midplane Projection')
 #Header0 = '(0) I0 [A], (1) B0 [T], (2) X [m] , (3) Y [m], (4) Z [m], (5) incident angle [rad], (6) Detection Angle [rad], (7) optical path length [m] , (8) Detection Angle [rad], (9) Detection Angle [deg], (10) Detector Eff'
 #savetxt(OutputPath+'geometry/DetectionParameters.dat', (array(Parameters)), header=Header0)
 
-pl.show()
+show()

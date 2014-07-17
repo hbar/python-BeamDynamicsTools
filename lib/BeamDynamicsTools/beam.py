@@ -4,8 +4,7 @@ from numpy import *
 #import scipy as sp
 import pylab as pl
 from numpy.linalg import inv,norm
-from ellipse import *
-from trajectory import *
+from BeamDynamicsTools import *
 
 class beam(trajectory):
 	# inputs:
