@@ -1,11 +1,7 @@
 # Beam In Vessel Test
 import sys
 sys.path.append('../lib/')
-from boundary import *
-from bfield import *
-from trajectory import *
-from beam import *
-from ellipse import *
+from BeamDynamicsTools import *
 import pylab as pl
 
 # Input Sigma Matrix

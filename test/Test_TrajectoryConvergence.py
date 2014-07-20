@@ -1,7 +1,7 @@
+import sys
+sys.path.append('../lib/')
+from BeamDynamicsTools import *
 from numpy import *
-from boundary import *
-from bfield import *
-from trajectory import *
 import pylab as pl
 
 Rb = [   0.1,   0.1, 100.0, 100.0]

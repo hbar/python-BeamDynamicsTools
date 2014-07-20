@@ -4,45 +4,77 @@ from mpl_toolkits.mplot3d import Axes3D
 from numpy.linalg import norm,det
 import matplotlib.pyplot as plt
 
+#===============================================================================
+# Boundary Class: Defines boundary based on a set of closed set of points
+#===============================================================================
+
 class boundary:
 
 	def __init__(self,Rb,Zb,cw=-1):
-		Cvec = []; # Corner Locations 
-		Mvec = []; # Middle of line locations
-		Tvec = []; # Tangent vectors of border
-		Nvec = []; # Normal Vectors of border
-		self.Rb = Rb
-		self.Zb = Zb
+		Cvec = []; # List of Corner Locations 
+		Mvec = []; # List of Middle of line locations
+		Tvec = []; # List of Tangent vectors of border
+		Nvec = []; # List of Normal Vectors of border
+		self.Rb = array(Rb); self.Rb1 = roll(Rb,1)
+		self.Zb = array(Zb); self.Zb1 = roll(Zb,1)
+		self.NCorners = len(Rb)
+		Cmatrix = matrix(zeros((len(Rb),2),float))
+		Mmatrix = matrix(zeros((len(Rb),2),float))
+		Tmatrix = matrix(zeros((len(Rb),2),float))
+		Nmatrix = matrix(zeros((len(Rb),2),float))
+
+#------------------------------------------------------------------------------ 
+# Generate lists of Corners, Midpoints, Tangents, and Normals
+ 
 		for i in range(len(Rb)):
 			Corner = array([Rb[i],Zb[i]])
 			MidPoint = array([(Rb[i]+Rb[i-1])/2,(Zb[i]+Zb[i-1])/2])
 			Tangent = array([Rb[i]-Rb[i-1],Zb[i]-Zb[i-1]]); Tangent=Tangent/norm(Tangent)
 			Normal = array([-Tangent[1],Tangent[0]]); Normal = Normal/norm(Normal)
-
-			Cvec.append(Corner); 
+			Cvec.append(Corner);
 			Mvec.append(MidPoint); 
 			Tvec.append(Tangent); 
-			Nvec.append(cw*Normal); 
-#			print Corner[i-1]-Corner[i-2]
-		self.Cvec = Cvec
-		self.Mvec = Mvec
-		self.Tvec = Tvec
-		self.Nvec = Nvec
+			Nvec.append(cw*Normal);
+
+#------------------------------------------------------------------------------ 
+# Generate N x 2 matrices of Corners, Midpoints, Tangents, and Normals
+		for i in range(len(Rb)):
+			for j in range(len(Cvec[0])):
+				Cmatrix[i,j] = Cvec[i][j]
+				Mmatrix[i,j] = Mvec[i][j]
+				Tmatrix[i,j] = Tvec[i][j] 
+				Nmatrix[i,j] = Nvec[i][j] 
+
+#------------------------------------------------------------------------------ 
+# Save arrays,list, and matrices as class variables
+
+		self.Cvec = Cvec; self.Cmatrix = Cmatrix
+		self.Mvec = Mvec; self.Mmatrix = Mmatrix
+		self.Tvec = Tvec; self.Tmatrix = Tmatrix
+		self.Nvec = Nvec; self.Nmatrix = Nmatrix
 		self.Nv = len(Nvec)
 		print 'boundary initialized'
+		
+#===============================================================================
+# Boundary Class Methods
+#===============================================================================
 
-	def Plot2D(self,FIG=1):
+#------------------------------------------------------------------------------ 
+
+	def Plot2D(self,FIG=1,NScale=0.1):
 		pl.figure(FIG)
 		Cvec = self.Cvec; Mvec = self.Mvec; Tvec = self.Tvec; Nvec = self.Nvec
 
 		for i in range(self.Nv):
 			pl.plot([Cvec[i][0],Cvec[i-1][0]],[Cvec[i][1],Cvec[i-1][1]])
-			pl.plot([Nvec[i][0]+Mvec[i][0],Mvec[i][0]],[Nvec[i][1]+Mvec[i][1],Mvec[i][1]])
+			pl.plot([Nvec[i][0]*NScale+Mvec[i][0],Mvec[i][0]],[Nvec[i][1]*NScale+Mvec[i][1],Mvec[i][1]])
 			pl.plot(Mvec[i][0],Mvec[i][1],'o')
 
 		pl.xlim(0.3-1,0.3+1)
 		pl.ylim(-1,1)
 
+#------------------------------------------------------------------------------ 
+# Plots a 2D projection of the boundary onto poloidal plane or midplane
 	def Border(self,Type='poloidal'):
 		if Type=='poloidal':
 			RB=[]; ZB=[];
@@ -58,7 +90,9 @@ class boundary:
 				x,y=Circle(self.Rb[i])
 				pl.plot(x,y,'k')
 
-	def InVolume(self,r):
+#------------------------------------------------------------------------------ 
+# Tests to see if point r is in the volume
+	def InVolumeOld(self,r):
 		x0 = [sqrt(r[0]*r[0] + r[1]*r[1]) ,r[2]]
 		IN = True; i=-1;
 		D1 = []
@@ -70,9 +104,51 @@ class boundary:
 					IN = False
 			i = i+1
 		return IN
+#------------------------------------------------------------------------------ 
+# Tests to see if point r is in the volume
+	def InVolume(self,r):
+		x = r[0]; y = r[1];
+		inside = False
+		p1x = self.Rb[0]
+		p1y = self.Zb[0]
+		for i in range(self.NCorners+1):
+			p2x = self.Rb[i % self.NCorners]
+			p2y = self.Zb[i % self.NCorners]
+			if y > min(p1y,p2y):
+				if y <= max(p1y,p2y):
+					if x <= max(p1x,p2x):
+						if p1y != p2y:
+							xints = (y-p1y)*(p2x-p1x)/(p2y-p1y)+p1x
+						if p1x == p2x or x <= xints:
+							inside = not inside
+			p1x,p1y = p2x,p2y
+	
+		return inside
+	   
+# 	def point_in_poly(self,x,y,poly):
+# 
+# 		n = len(poly)
+# 		inside = False
+# 	
+# 		p1x,p1y = poly[0]
+# 		for i in range(n+1):
+# 			p2x,p2y = poly[i % n]
+# 			if y > min(p1y,p2y):
+# 				if y <= max(p1y,p2y):
+# 					if x <= max(p1x,p2x):
+# 						if p1y != p2y:
+# 							xints = (y-p1y)*(p2x-p1x)/(p2y-p1y)+p1x
+# 						if p1x == p2x or x <= xints:
+# 							inside = not inside
+# 			p1x,p1y = p2x,p2y
+# 	
+# 		return inside
 
-	# Xboundary determines the line drawn between two points r0 and r1 crosses a the boundary.
-	# This function returns: boolean (IN), normal vector, tangent vector, incident vector.
+
+
+#------------------------------------------------------------------------------ 
+# Xboundary determines the line drawn between two points r0 and r1 crosses a the boundary.
+# This function returns: boolean (IN), normal vector, tangent vector, incident vector.
 	def Xboundary(self,r0,r1):
 		x0 = array([sqrt(r0[0]**2 + r0[1]**2) ,r0[2]])
 		x1 = array([sqrt(r1[0]**2 + r1[1]**2) ,r1[2]])
@@ -94,6 +170,8 @@ class boundary:
 			i=i+1
 		return IN,NORM,TAN,INC,RT
 
+#------------------------------------------------------------------------------ 
+# create figure and initialize axes for 3D plot
 	def Figure3D(self,FIG=1):
 		fig = pl.figure(FIG)
 		ax = Axes3D(fig)
@@ -131,19 +209,7 @@ class boundary:
 		return ax
 		#return xp,yp,zp,xt,yt,zt
 
-# Test Case
 
-def TestInVolume(Bound,Ni):
-	pl.figure(1)
-	Xrand = array([0.0,0.0])
-	for i in range(Ni):
-		Xrand[0] = random.rand()
-		Xrand[1] = random.rand()*2 - 1
-		print i
-		if Bound.InVolume(Xrand):
-			pl.plot(Xrand[0],Xrand[1],'.g')
-		else:
-			pl.plot(Xrand[0],Xrand[1],'.r')
 
 def Intersection(a1,a2,b1,b2):
 	x1=a1[0]; x2=a2[0]; x3=b1[0]; x4=b2[0];

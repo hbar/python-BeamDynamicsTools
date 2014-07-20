@@ -1,6 +1,8 @@
+import sys
+sys.path.append('../lib/')
+from BeamDynamicsTools import *
 from numpy import *
 from matplotlib.pyplot import *
-from ellipse import *
 
 Path0 = '../output/sigma_trace3d/igmaFinal/'
 FileList = ['SigmaFinal_I_0.txt','SigmaFinal_I_1600.txt','SigmaFinal_I_3120.txt','SigmaFinal_I_4450.txt']

@@ -10,3 +10,4 @@ VintageCode/*
 *.md~
 *.pyc
 *~
+.metadata

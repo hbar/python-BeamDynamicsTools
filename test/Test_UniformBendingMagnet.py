@@ -1,13 +1,8 @@
 
 import sys
 sys.path.append('../lib/')
-
+from BeamDynamicsTools import *
 from numpy import *
-from boundary import *
-from bfield import *
-from trajectory import *
-from beam import *
-from ellipse import *
 import pylab as pl
 
 L0 = 0.1

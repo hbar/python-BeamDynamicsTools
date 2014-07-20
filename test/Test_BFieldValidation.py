@@ -1,5 +1,5 @@
 import sys
-sys.path.append('../lib/')
+sys.path.append('../lib/BeamDynamicsTools/')
 from bfield import *
 
 from numpy import *
