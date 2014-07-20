@@ -13,7 +13,7 @@ S1 = matrix([
 [ 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 4.679517649000000290e+01, 8.473947224080001206e+01],
 [ 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 0.000000000000000000e+00, 8.473947224080001206e+01, 1.572014440000000093e+02]],float)
 
-# boundary(Rb,Zb)
+# Boundary(Rb,Zb)
 #Rb = [ 0.2 , 0.25, 0.4 , 0.6 , 0.8 , 0.8 , 0.6 , 0.4 , 0.25, 0.2 ]
 #Zb = [-0.55,-0.6 ,-0.6 ,-0.5 ,-0.2 , 0.2 , 0.5 , 0.6 , 0.6 , 0.55]
 
@@ -23,12 +23,12 @@ for i in range(len(DATA[:,0])):
 	Rb.append(DATA[i,0])
 	Zb.append(DATA[i,1])
 
-Vessel = boundary(Rb,Zb)
+Vessel = Boundary(Rb,Zb)
 Vessel.Plot2D(0)
 
 # class bfield(self,B0,R0,B0z,fR=0,fz=0):
 #B = bfield(B0=0.1,R0=1)
-B = bfieldTF(B0=0.3)
+B = BfieldTF(B0=0.3)
 
 #class trajectory(self,Vessel,B,dS=1e-3,r0=[1.5,0.0,0.5],v0=[-1.0,0.0,0.0],a0=[0.0,0.0,0.0],A0=2,E0=0.9,Nmax=10000):
 #T = trajectory(Vessel,B)
@@ -72,10 +72,10 @@ if False:
 
 	# Trace Beam and Plot Ellipses
 	Beam.Trace()
-	Ei = ellipse(Beam.Sigma[0]); Ei.PlotALL()
-	Em1 = ellipse(Beam.Sigma[int(len(Beam.Sigma)*0.33)]); Em1.PlotALL()
-	Em2 = ellipse(Beam.Sigma[int(len(Beam.Sigma)*0.66)]); Em2.PlotALL()
-	Ef = ellipse(Beam.Sigma[-1]); Ef.PlotALL()
+	Ei = Ellipse(Beam.Sigma[0]); Ei.PlotALL()
+	Em1 = Ellipse(Beam.Sigma[int(len(Beam.Sigma)*0.33)]); Em1.PlotALL()
+	Em2 = Ellipse(Beam.Sigma[int(len(Beam.Sigma)*0.66)]); Em2.PlotALL()
+	Ef = Ellipse(Beam.Sigma[-1]); Ef.PlotALL()
 
 	pl.figure(); pl.plot(Beam.s); pl.title('s')
 	pl.figure(); pl.plot(Beam.dS); pl.title('dS')
@@ -92,10 +92,10 @@ if False:
 	w=20; pl.xlim(-w,w); pl.ylim(-w,w); 
 	# Reverse Trace Beam and Plot Ellises
 #	Beam.ReverseTrace(Beam.Sigma[-1])
-#	Ei = ellipse(Beam.RevSigma[0][0]); Ei.Plot()
-#	Em1 = ellipse(Beam.RevSigma[0][int(len(Beam.RevSigma[0])*0.33)]); Em1.Plot()
-#	Em2 = ellipse(Beam.RevSigma[0][int(len(Beam.RevSigma[0])*0.66)]); Em2.Plot()
-#	Ef = ellipse(Beam.RevSigma[0][-1]); Ef.Plot()
+#	Ei = Ellipse(Beam.RevSigma[0][0]); Ei.Plot()
+#	Em1 = Ellipse(Beam.RevSigma[0][int(len(Beam.RevSigma[0])*0.33)]); Em1.Plot()
+#	Em2 = Ellipse(Beam.RevSigma[0][int(len(Beam.RevSigma[0])*0.66)]); Em2.Plot()
+#	Ef = Ellipse(Beam.RevSigma[0][-1]); Ef.Plot()
 
 	#pl.legend((r'$\Delta$s = 0.0 m',r'$\Delta$s = 0.5 m',r'$\Delta$s = 1.0 m','Target'))
 

@@ -15,14 +15,14 @@ for i in range(len(alpha)):
 	Vinjection.append([-cos(alpha[i])*cos(beta), cos(alpha[i])*sin(beta), -sin(alpha[i])])
 
 
-# Import poloidal boundary points
+# Import poloidal Boundary points
 Rb = loadtxt('../data/CmodCoordinatesRZ.dat',usecols=[0])
 Zb = loadtxt('../data/CmodCoordinatesRZ.dat',usecols=[1])
 
-# Generate vessel boundary
-Vessel = boundary(Rb,Zb)
+# Generate vessel Boundary
+Vessel = Boundary(Rb,Zb)
 
-# 3D plot of vessel boundary
+# 3D plot of vessel Boundary
 ax = Vessel.Figure3D(1)
 Vessel.Plot3D(ax)
 
@@ -35,13 +35,13 @@ OutputPath = '../output/'
 Color=['b','g','r','c']
 for j in range(len(alpha)):
 	for i in [0,3]:#range(len(Bn)):
-		B = bfieldTF(B0=Bn[i])
-		Bv = bfieldVF(B0=0.00000)
-		T = trajectory(Vessel,B,Bv,v0=Vinjection[j])
+		B = BfieldTF(B0=Bn[i])
+		Bv = BfieldVF(B0=0.00000)
+		T = Trajectory(Vessel,B,Bv,v0=Vinjection[j])
 		T.LineColor = Color[j]
 		Trajectory.append(T)
 
-	# Save target parameters
+	# Save Target parameters
 #	T.Target.SaveTargetParameters(TFCurrent=In[i],Path=OutputPath+'geometry/')
 
 	# append lists of Target Quantities

@@ -1,6 +1,6 @@
 import sys
 sys.path.append('../lib/BeamDynamicsTools/')
-from bfield import *
+from Bfield import *
 
 from numpy import *
 import pylab as pl
@@ -12,11 +12,11 @@ R = array([1,0,0])
 RInj = [1.798, -0.052, 0.243]
 # ======= Toroidal Field ======================================================
 
-TF = bfieldTF()
+TF = BfieldTF()
 
 #======== Vertical Field ======================================================
 
-VF = bfieldVF(B0=1.0)
+VF = BfieldVF(B0=1.0)
 
 def PlotEllipticInt():
 	Ni = 1000; Ek=[]; Ee=[]

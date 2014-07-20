@@ -1,6 +1,6 @@
 import sys
 sys.path.append('../lib/BeamDynamicsTools/')
-from boundaryFAST import *
+from Boundary import *
 from numpy import *
 import pylab as pl
 import timeit
@@ -11,7 +11,7 @@ Zb = loadtxt('../data/CmodCoordinatesRZ.dat',usecols=[1])
 
 #------------------------------------------------------------------------------ 
 # Generate vessel boundary
-Vessel = boundary(Rb,Zb)
+Vessel = Boundary(Rb,Zb)
 
 #
 pl.figure(1)

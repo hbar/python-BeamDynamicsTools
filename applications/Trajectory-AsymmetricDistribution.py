@@ -17,14 +17,14 @@ Vinjection = [-cos(alpha)*cos(beta), cos(alpha)*sin(beta), -sin(alpha)]
 #Energy = [0.594e6, 0.740e6, 0.900e6]
 Energy = linspace(0.594e6,0.900e6,10)
 
-# Import poloidal boundary points
+# Import poloidal Boundary points
 Rb = loadtxt('../data/CmodCoordinatesRZ.dat',usecols=[0])
 Zb = loadtxt('../data/CmodCoordinatesRZ.dat',usecols=[1])
 
-# Generate vessel boundary
-Vessel = boundary(Rb,Zb)
+# Generate vessel Boundary
+Vessel = Boundary(Rb,Zb)
 
-# 3D plot of vessel boundary
+# 3D plot of vessel Boundary
 ax = Vessel.Figure3D(1)
 Vessel.Plot3D(ax)
 
@@ -41,9 +41,9 @@ Color=['k','g','r','c','b','m','g','r','c','b','m','g']
 print len(Energy)*len(Bn)*10.0/60.0
 for j in range(len(Energy)):
 	for i in range(len(Bn)):
-		B = bfieldTF(B0=Bn[i])
-		Bv = bfieldVF(B0=0.00000)
-		T = trajectory(Vessel,B,Bv,v0=Vinjection,E0=Energy[j],Target=False)
+		B = BfieldTF(B0=Bn[i])
+		Bv = BfieldVF(B0=0.00000)
+		T = Trajectory(Vessel,B,Bv,v0=Vinjection,E0=Energy[j],Target=False)
 		T.LineColor = Color[i]; T.LineWidth = 1.0
 		if j==0:
 			T.LineWidth = 2
@@ -55,7 +55,7 @@ for j in range(len(Energy)):
 			T.LineStyle = '--'
 		Trajectory.append(T)
 
-	# Save target parameters
+	# Save Target parameters
 #	T.Target.SaveTargetParameters(TFCurrent=In[i],Path=OutputPath+'geometry/')
 
 	# append lists of Target Quantities

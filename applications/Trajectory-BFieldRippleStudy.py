@@ -18,14 +18,14 @@ Vinjection = [-cos(alpha)*cos(beta), cos(alpha)*sin(beta), -sin(alpha)]
 #Energy = [0.594e6, 0.740e6, 0.900e6]
 Energy = 0.9e6 #linspace(0.594e6,0.900e6,10)
 
-# Import poloidal boundary points
+# Import poloidal Boundary points
 Rb = loadtxt('../data/CmodCoordinatesRZ.dat',usecols=[0])
 Zb = loadtxt('../data/CmodCoordinatesRZ.dat',usecols=[1])
 
-# Generate vessel boundary
-Vessel = boundary(Rb,Zb)
+# Generate vessel Boundary
+Vessel = Boundary(Rb,Zb)
 
-# 3D plot of vessel boundary
+# 3D plot of vessel Boundary
 ax = Vessel.Figure3D()
 Vessel.Plot3D(ax)
 
@@ -45,18 +45,18 @@ OutputPath = '../output/'
 
 # Calculate Target Error vs Magnet Ripple
 if False:
-	dRdB = [] # change in target position with respect to B
+	dRdB = [] # change in Target position with respect to B
 	fB = 0.01
 	for i in range(len(Bn)):
-		B = bfieldTF(B0=Bn[i])
-		Bv = bfieldVF(B0=0.00000)
-		T = trajectory(Vessel,B,Bv,v0=Vinjection,E0=Energy,Target=True)
+		B = BfieldTF(B0=Bn[i])
+		Bv = BfieldVF(B0=0.00000)
+		T = Trajectory(Vessel,B,Bv,v0=Vinjection,E0=Energy,Target=True)
 		T.LineColor = CMAP(1.0*i/len(Bn)); 
 		T.LineWidth = 2.0
 		Trajectory.append(T)
 
-		B1 = bfieldTF(B0=Bn[i]*(1+fB) ) # Bfield + fractional change
-		T1 = trajectory(Vessel,B1,Bv,v0=Vinjection,E0=Energy,Target=True)
+		B1 = BfieldTF(B0=Bn[i]*(1+fB) ) # Bfield + fractional change
+		T1 = Trajectory(Vessel,B1,Bv,v0=Vinjection,E0=Energy,Target=True)
 		dRdB.append(T1.Target.Distance(T)/(fB*100.0)) 	
 	print dRdB
 
@@ -64,9 +64,9 @@ if False:
 if True:
 	fB = 0.02
 	for i in range(len(Bn)):
-		B = bfieldTF(B0=Bn[i])
-		Bv = bfieldVF(B0=0.00000)
-		T = trajectory(Vessel,B,Bv,v0=Vinjection,E0=Energy,Target=True)
+		B = BfieldTF(B0=Bn[i])
+		Bv = BfieldVF(B0=0.00000)
+		T = Trajectory(Vessel,B,Bv,v0=Vinjection,E0=Energy,Target=True)
 		T.LineColor = CMAP(1.0*i/len(Bn)); 
 		T.LineWidth = 1.0
 		T.LineStyle = ':'
@@ -75,8 +75,8 @@ if True:
 	fB1 = [-fB,fB]
 	for j in range(len(fB1)):
 		for i in range(len(Bn)):
-			B1 = bfieldTF(B0=Bn[i]*(1+fB1[j]) ) 
-			T1 = trajectory(Vessel,B1,Bv,v0=Vinjection,E0=Energy,Target=True)
+			B1 = BfieldTF(B0=Bn[i]*(1+fB1[j]) ) 
+			T1 = Trajectory(Vessel,B1,Bv,v0=Vinjection,E0=Energy,Target=True)
 			T1.LineStyle = '-'
 			T1.LineWidth = 1.0
 			T1.LineColor = CMAP(1.0*i/len(Bn));
@@ -84,7 +84,7 @@ if True:
 
 
 
-	# Save target parameters
+	# Save Target parameters
 #	T.Target.SaveTargetParameters(TFCurrent=In[i],Path=OutputPath+'geometry/')
 
 	# append lists of Target Quantities

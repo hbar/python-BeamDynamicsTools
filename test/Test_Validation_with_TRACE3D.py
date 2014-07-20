@@ -16,26 +16,26 @@ SigmaT3D=[]; EllipseT3D = []; SigmaXT3D = []; SigmaYT3D = []
 
 SigmaLC=loadtxt(Path0+'Trace3DSigma_I_0LC.txt')
 SigmaInj = matrix(loadtxt(Path0+'SigmaInj.txt'))
-EllipseInj = ellipse(SigmaInj)
+ellipseInj = Ellipse(SigmaInj)
 
 for i in range(len(FileList)):
 	Sigma.append(matrix(loadtxt(Path0+FileList[i])))
-	Ellipse.append(ellipse(Sigma[-1]))
+	ellipse.append(Ellipse(Sigma[-1]))
 
 for i in range(len(FileListT3D)):
 	SigmaT3D.append(matrix(loadtxt(Path0+FileListT3D[i])))
-	EllipseT3D.append(ellipse(SigmaT3D[-1]))
+	EllipseT3D.append(Ellipse(SigmaT3D[-1]))
 
 # ======== Calculate Mismatch =================================================
 
-M0000 = Ellipse[0].MismatchFactor(EllipseT3D[0]); 
-M1600 = Ellipse[1].MismatchFactor(EllipseT3D[1]); 
-M3120 = Ellipse[2].MismatchFactor(EllipseT3D[2]) 
-M4500 = Ellipse[3].MismatchFactor(EllipseT3D[3]) 
+M0000 = ellipse[0].MismatchFactor(EllipseT3D[0]); 
+M1600 = ellipse[1].MismatchFactor(EllipseT3D[1]); 
+M3120 = ellipse[2].MismatchFactor(EllipseT3D[2]) 
+M4500 = ellipse[3].MismatchFactor(EllipseT3D[3]) 
 
 M=[]
 for i in [0,1,2,3]:
-	M.append( EllipseT3D[i].MismatchFactor(Ellipse[i]) )
+	M.append( EllipseT3D[i].MismatchFactor(ellipse[i]) )
 
 # ======== All in one plot ====================================================
 if False:
@@ -43,13 +43,13 @@ if False:
 	C1 = 1.0#/sqrt(5.0)#0.9
 	for i in [0,1]:
 		subplot(1,3,1,aspect='equal');
-		Ellipse[i].PlotXX1(Mod=Color[i])
+		ellipse[i].PlotXX1(Mod=Color[i])
 		EllipseT3D[i].PlotXX1(Mod='--'+Color[i])
 		subplot(1,3,2,aspect='equal');
-		Ellipse[i].PlotYY1(Mod=Color[i])
+		ellipse[i].PlotYY1(Mod=Color[i])
 		EllipseT3D[i].PlotYY1(Mod='--'+Color[i])
 		subplot(1,3,3,aspect='equal');
-		Ellipse[i].PlotXY(Mod=Color[i])
+		ellipse[i].PlotXY(Mod=Color[i])
 		EllipseT3D[i].PlotXY(Mod='--'+Color[i],Rotate=False)
 		xlim(-LIM,LIM); ylim(-LIM,LIM)
 		title(FileList[i])
@@ -64,35 +64,35 @@ if True:
 		figure(figsize=(10,10))
 #		title(FileList[i])
 		subplot(2,2,1,aspect='equal');
-		EllipseInj.PlotXX1(Mod=':r')
-		Ellipse[i].PlotXX1(Mod=Color[0])
+		ellipseInj.PlotXX1(Mod=':r')
+		ellipse[i].PlotXX1(Mod=Color[0])
 		EllipseT3D[i].PlotXX1(Mod='--'+Color[1])
 		text(0,0,'M=%0.4f' % M[i][0],va='center',ha='center',color='r',size=16)
 		title('Transverse Phase Plane (horizontal)')
 		legend(('Initial Beam','AIMS Code','TRACE3D'),loc=2)
 
 		subplot(2,2,2,aspect='equal');
-		EllipseInj.PlotYY1(Mod=':r')
-		Ellipse[i].PlotYY1(Mod=Color[0])
+		ellipseInj.PlotYY1(Mod=':r')
+		ellipse[i].PlotYY1(Mod=Color[0])
 		EllipseT3D[i].PlotYY1(Mod='--'+Color[1])
 		text(0,0,'M=%0.4f' % M[i][1],va='center',ha='center',color='r',size=16)
 		title('Transverse Phase Plane (Vertical)')
 
 		subplot(2,2,3,aspect='equal');
-		EllipseInj.PlotZZ1(Mod=':r')
-		Ellipse[i].PlotZZ1(Mod=Color[0])
+		ellipseInj.PlotZZ1(Mod=':r')
+		ellipse[i].PlotZZ1(Mod=Color[0])
 		EllipseT3D[i].PlotZZ1(Mod='--'+Color[1])
 		text(0,0,'M=%0.4f' % M[i][2],va='center',ha='center',color='r',size=16)
 		title('Longitudinal Phase Plane')
 
 		subplot(2,2,4,aspect='equal');
-		EllipseInj.PlotXY(Mod=':r')
-		Ellipse[i].PlotXY(Mod=Color[0],Rotate=False)
+		ellipseInj.PlotXY(Mod=':r')
+		ellipse[i].PlotXY(Mod=Color[0],Rotate=False)
 		EllipseT3D[i].PlotXY(Mod='--'+Color[1])
 		text(0,0,'M=%0.4f' % M[i][3],va='center',ha='center',color='r',size=16)
 		title('Transverse Projection')
 
-		E = Ellipse[i]
+		E = ellipse[i]
 		savetxt('Maxima.txt',[E.WidthX,E.WidthY,E.WidthZ,E.DivergenceX,E.DivergenceY,E.DivergenceZ,M[i][0],M[i][1],M[i][2],M[i][3]])
 		suptitle(Title + r' (B$_\phi$= '+BList[i]+')',size=16)
 
@@ -102,15 +102,15 @@ if True:
 	Sigma90 = loadtxt(Path0+'SigmaBend90.txt')
 	Sigma90T3D = loadtxt(Path0+'Trace3DSigmaBend90.txt')
 
-	E90 = ellipse(Sigma90)
-	E90T3D = ellipse(Sigma90T3D)
+	E90 = Ellipse(Sigma90)
+	E90T3D = Ellipse(Sigma90T3D)
 	M90 = E90.MismatchFactor(E90T3D)
 
 	figure(figsize=(10,10))
 	FormatT = dict(va='center',ha='center',color='r',size=16)
 
 	subplot(2,2,1,aspect='equal');
-	EllipseInj.PlotXX1(Mod=':r')
+	ellipseInj.PlotXX1(Mod=':r')
 	p1=E90.PlotXX1(Mod=Color[0])
 	p2=E90T3D.PlotXX1(Mod='--'+Color[1])
 	text(0,0,'M=%0.4f' % M90[0],FormatT)
@@ -118,21 +118,21 @@ if True:
 	legend(('Initial Beam','AIMS Code','TRACE3D'),loc=2)
 
 	subplot(2,2,2,aspect='equal');
-	EllipseInj.PlotYY1(Mod=':r')
+	ellipseInj.PlotYY1(Mod=':r')
 	E90.PlotYY1(Mod=Color[0])
 	E90T3D.PlotYY1(Mod='--'+Color[1])
 	text(0,0,'M=%0.4f' % M90[1],FormatT)
 	title('Transverse Phase Plane (Vertical)')
 
 	subplot(2,2,3,aspect='equal');
-	EllipseInj.PlotZZ1(Mod=':r')
+	ellipseInj.PlotZZ1(Mod=':r')
 	E90.PlotZZ1(Mod=Color[0])
 	E90T3D.PlotZZ1(Mod='--'+Color[1])
 	text(0,0,'M=%0.4f' % M90[2],FormatT)
 	title('Longitudinal Phase Plane')
 
 	subplot(2,2,4,aspect='equal');
-	EllipseInj.PlotXY(Mod=':r')
+	ellipseInj.PlotXY(Mod=':r')
 	E90.PlotXY(Mod=Color[0],Rotate=False)
 	E90T3D.PlotXY(Mod='--'+Color[1])
 	text(0,0,'M=%0.4f' % M90[3],FormatT)
@@ -148,8 +148,8 @@ if True:
 
 if False: 
 	figure(figsize=(8,8));
-	E0 = ellipse(Sigma[0])
-	E1 = ellipse(SigmaLC)
+	E0 = Ellipse(Sigma[0])
+	E1 = Ellipse(SigmaLC)
 	M = E0.MismatchFactor(E1,Type=1)
 
 
@@ -181,7 +181,7 @@ if False:
 if True:
 	figure()
 	for i in [0,1,2,3]:
-		Ellipse[i].PlotXY()
+		ellipse[i].PlotXY()
 
 show()
 

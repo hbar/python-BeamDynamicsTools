@@ -2,7 +2,7 @@ import sys
 sys.path.append('../lib/BeamDynamicsTools/')
 
 from numpy import *
-from ellipse import *
+from Ellipse import *
 import pylab as pl
 
 S1 = matrix([
@@ -22,7 +22,7 @@ S0 = matrix([
 [0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.000000]],float)
 
 
-E0 = ellipse(S0)
+E0 = Ellipse(S0)
 
 E0.PlotProjectionXY()
 E0.PlotProjectionXY(Axz=pi/4,Ayz=0*pi/3)

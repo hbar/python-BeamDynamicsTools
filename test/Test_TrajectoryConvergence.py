@@ -7,7 +7,7 @@ import pylab as pl
 Rb = [   0.1,   0.1, 100.0, 100.0]
 Zb = [-100.0, 100.0, 100.0,-100.0]
 
-Vessel = boundary(Rb,Zb)
+Vessel = Boundary(Rb,Zb)
 #Vessel.Plot2D(0)
 
 if False:
