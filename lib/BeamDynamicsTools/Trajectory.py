@@ -173,13 +173,12 @@ class Trajectory:
 
 				# Check to see if beam crosses boundary
 				IN = True
-				c3 = self.s > Smin
-#				c4 = self.r[-1][0] <  0.5
-#				c5 = self.r[-1][2] >  0.3
-#				c6 = self.r[-1][2] < -0.3
-#				if c3 and c4 and (c5 or c6):
+				c3 = self.s[-1] > Smin
+				c4 = Vessel.InBoundary(self.r[-1])
+				c5 = self.s[-1] < Smax
 				if c3:
-					IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
+					if C4:
+						IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
 
 				#record bending radius
 #				self.k.append(qm * cross(self.v[-1],self.B[-1])/self.v0**2)
