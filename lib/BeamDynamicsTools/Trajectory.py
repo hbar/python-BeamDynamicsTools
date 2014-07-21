@@ -24,7 +24,7 @@ dLB = 2.0e-3 # scale length for B gradient
 #====== \Default injection geometry ==================
 
 class Trajectory:
-	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=Rinjection,v0=Vinjection,a0=[0.0,0.0,0.0],A0=2,E0=0.9e6,I0=1e-3,Freq=425e6,Nmax=5000,Smin=1.1,Target=True):
+	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=Rinjection,v0=Vinjection,a0=[0.0,0.0,0.0],A0=2,E0=0.9e6,I0=1e-3,Freq=425e6,Nmax=5000,Smin=1.1,Smax=5.0):
 		start = timeit.default_timer()
 
 		# B = Magnetic Field [T] (BfieldTF class)
@@ -84,7 +84,7 @@ class Trajectory:
 		
 		# Leapfrog Integration:
 		if True:
-			while (c1 or c2) and i<Nmax:
+			while (c1 or c2) and i<Nmax:# and self.s[-1] < Smax:
 
 				self.r.append( self.r[-1] + self.v[-1]*dt + 0.5*self.a[-1]*dt*dt)
 
@@ -105,14 +105,13 @@ class Trajectory:
 
 				# Check to see if beam crosses boundary
 				IN = True
-				c3 = self.s > Smin
-#				c4 = self.r[-1][0] <  0.5
-#				c5 = self.r[-1][2] >  0.3
-#				c6 = self.r[-1][2] < -0.3
-#				if c3 and c4 and (c5 or c6):
+				c3 = self.s[-1] > Smin
+				c4 = Vessel.InBoundary(self.r[-1])
+				c5 = self.s[-1] < Smax
 				if c3:
-					IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
-
+					if (not c4):
+						IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
+					#print IN,NormalV,TangentV,IncidentV,RT
 				#record bending radius
 #				self.k.append(qm * cross(self.v[-1],self.B[-1])/self.v0**2)
 				self.k.append(norm(self.a[-1]/self.v0**2))
@@ -143,10 +142,10 @@ class Trajectory:
 			stop = timeit.default_timer()
 			self.RunTime = stop-start
 			print 'trajectory complete, S = %0.3f m, B0 = %0.4f T, B0 = %0.4f T, RunTime = %0.1f s' % (self.s[-1],self.BFieldTF.B0,self.BFieldVF.B0,self.RunTime )
-			if Target==True:
-				self.Target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
-				self.Target.SigmaBasis = self.BasisM6[-1]
-				print 'Beam Coordinates Complete'
+
+			self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
+			self.target.SigmaBasis = self.BasisM6[-1]
+			print 'Beam Coordinates Complete'
 
 
 #==============================================================================

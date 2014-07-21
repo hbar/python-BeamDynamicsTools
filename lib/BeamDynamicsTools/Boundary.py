@@ -93,8 +93,8 @@ class Boundary:
 
 #------------------------------------------------------------------------------ 
 # Tests to see if point r is in the volume using "Ray Casting Algorithm"
-	def InVolume(self,r):
-		x = r[0]; y = r[1];
+	def InBoundary(self,r):
+		x = sqrt(r[0]**2+r[1]**2); y = r[2];
 		inside = False
 		p1x = self.Rb[0]
 		p1y = self.Zb[0]

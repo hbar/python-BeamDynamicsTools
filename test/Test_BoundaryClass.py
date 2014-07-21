@@ -39,7 +39,7 @@ IN = []
 start = timeit.default_timer()
 for i in range(Ni):
     r = [Xrand[i],Yrand[i]]
-    IN.append(Vessel.InVolume(r))
+    IN.append(Vessel.InBoundary(r))
 stop = timeit.default_timer()
 TIME = (stop - start)/Ni*1000
 

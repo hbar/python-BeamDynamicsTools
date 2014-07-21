@@ -12,7 +12,7 @@ class Beam(Trajectory):
 	# inputs:
 	# sigma = 6x6 sigma matrix
 	# s0 = 3x3 matrix for local beam coordinate system
-	def __init__(self,trajectory,Sigma0,Target=True):
+	def __init__(self,trajectory,Sigma0):
 		self.Sigma = [Sigma0]
 
 		self.q0 = trajectory.q0
@@ -44,10 +44,9 @@ class Beam(Trajectory):
 		self.gradBn = trajectory.gradBn
 		self.gradBx = trajectory.gradBx
 		self.gradBy = trajectory.gradBy
-		if Target == True:
-			self.NormalV = trajectory.Target.NormalV
-			self.IncidentV = trajectory.Target.IncidentV
-			self.Target = trajectory.Target
+		self.NormalV = trajectory.target.NormalV
+		self.IncidentV = trajectory.target.IncidentV
+		self.Target = trajectory.target
 
 
 		# lists of matrices for reverse calculations

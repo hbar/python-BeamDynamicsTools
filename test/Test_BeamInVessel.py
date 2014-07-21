@@ -17,7 +17,7 @@ S1 = matrix([
 #Rb = [ 0.2 , 0.25, 0.4 , 0.6 , 0.8 , 0.8 , 0.6 , 0.4 , 0.25, 0.2 ]
 #Zb = [-0.55,-0.6 ,-0.6 ,-0.5 ,-0.2 , 0.2 , 0.5 , 0.6 , 0.6 , 0.55]
 
-DATA = loadtxt('../data/CmodCoordinatesRZ.txt')
+DATA = loadtxt('../data/CmodCoordinatesRZ.dat')
 Rb=[]; Zb=[];
 for i in range(len(DATA[:,0])):
 	Rb.append(DATA[i,0])
@@ -26,12 +26,12 @@ for i in range(len(DATA[:,0])):
 Vessel = Boundary(Rb,Zb)
 Vessel.Plot2D(0)
 
-# class bfield(self,B0,R0,B0z,fR=0,fz=0):
-#B = bfield(B0=0.1,R0=1)
+# class Bfield(self,B0,R0,B0z,fR=0,fz=0):
+#B = Bfield(B0=0.1,R0=1)
 B = BfieldTF(B0=0.3)
 
-#class trajectory(self,Vessel,B,dS=1e-3,r0=[1.5,0.0,0.5],v0=[-1.0,0.0,0.0],a0=[0.0,0.0,0.0],A0=2,E0=0.9,Nmax=10000):
-#T = trajectory(Vessel,B)
+#class Trajectory(self,Vessel,B,dS=1e-3,r0=[1.5,0.0,0.5],v0=[-1.0,0.0,0.0],a0=[0.0,0.0,0.0],A0=2,E0=0.9,Nmax=10000):
+#T = Trajectory(Vessel,B)
 
 ax = Vessel.Figure3D(1)
 Vessel.Plot3D(ax)
@@ -39,16 +39,16 @@ B0 = [0.1,0.15,0.2,0.25,0.3,0.35,0.4]
 
 if False:
 	for i in range(len(B0)):
-		B = bfield(B0[i],R0=1,B0z=0.1)
-		T = trajectory(Vessel,B)
+		B = Bfield(B0[i],R0=1,B0z=0.1)
+		T = Trajectory(Vessel,B)
 		T.Plot3D(ax)
 		T.PlotB(2)
 		T.PlotV(3)
 
 if False:
-	B = bfieldTF(B0=0.00000)
-	Bv = bfieldVF(B0=0.0001)
-	T = trajectory(Vessel,B,Bv)
+	B = BfieldTF(B0=0.00000)
+	Bv = BfieldVF(B0=0.0001)
+	T = Trajectory(Vessel,B,Bv)
 	T.Plot3D(ax)
 	T.PlotB(2)
 	T.PlotV(3)
@@ -68,7 +68,7 @@ if False:
 	S0[4:6,4:6] = S1[4:6,4:6] 
 	S0=S1
 
-	Beam = beam(T,S0)
+	Beam = Beam(T,S0)
 
 	# Trace Beam and Plot Ellipses
 	Beam.Trace()
@@ -139,22 +139,22 @@ if True:
 	Angle=[]; Coordinates=[];
 	Path = '../output/'
 	for i in range(len(Bn)):
-		B = bfieldTF(B0=Bn[i])
-		Bv = bfieldVF(B0=0.00000)
-		T = trajectory(Vessel,B,Bv)
-		AIMSBeam = beam(T,S1)
+		B = BfieldTF(B0=Bn[i])
+		Bv = BfieldVF(B0=0.00000)
+		T = Trajectory(Vessel,B,Bv)
+		AIMSBeam = Beam(T,S1)
 		AIMSBeam.Trace()
 		savetxt(Path+'Curvature_I_'+str(int(In[i]))+'.txt',T.k)
 		savetxt(Path+'SCoord_I_'+str(int(In[i]))+'.txt',T.s)
 		savetxt(Path+'GradB_I_'+str(int(In[i]))+'.txt',T.gradB)
 		savetxt(Path+'GradBk_I_'+str(int(In[i]))+'.txt',T.gradBn)
 		savetxt(Path+'GradBn_I_'+str(int(In[i]))+'.txt',T.gradBk)
-		savetxt(Path+'TargetBasis_I_'+str(int(In[i]))+'.txt',T.Target.TargetBasis)
-		savetxt(Path+'SigmaBasis_I_'+str(int(In[i]))+'.txt',T.Target.SigmaBasis)
+		savetxt(Path+'TargetBasis_I_'+str(int(In[i]))+'.txt',T.target.TargetBasis)
+		savetxt(Path+'SigmaBasis_I_'+str(int(In[i]))+'.txt',T.target.SigmaBasis)
 		savetxt(Path+'SigmaFinal_I_'+str(int(In[i]))+'.txt',AIMSBeam.Target.Sigma)
-		Angle.append([T.Target.VAngle,T.Target.HAngle])
-		Coordinates.append([T.Target.R,T.Target.Z,T.Target.Phi])
-#		T.Plot3D(ax); T.Target.Plot3D
+		Angle.append([T.target.VAngle,T.target.HAngle])
+		Coordinates.append([T.target.R,T.target.Z,T.target.Phi])
+#		T.Plot3D(ax); T.target.Plot3D
 		pl.figure(10); T.Plot2D()
 		pl.figure(11); T.Plot2D('top')
 	pl.figure(10); Vessel.Border(); pl.xlim(0.2,1.4); pl.ylim(-0.7,0.5)
