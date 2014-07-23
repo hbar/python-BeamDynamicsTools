@@ -114,7 +114,7 @@ class Boundary:
 
 #------------------------------------------------------------------------------ 
 # Xboundary determines the line drawn between two points r0 and r1 crosses a the boundary.
-# This function returns: boolean (IN), normal vector, tangent vector, incident vector.
+# This function returns: boolean (IN), normal vector, tangent vector, incident vector, target position.
 	def Xboundary(self,r0,r1):
 		x0 = array([sqrt(r0[0]**2 + r0[1]**2) ,r0[2]])
 		x1 = array([sqrt(r1[0]**2 + r1[1]**2) ,r1[2]])

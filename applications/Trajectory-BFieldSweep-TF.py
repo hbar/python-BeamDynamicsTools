@@ -42,50 +42,50 @@ Bn = linspace(-0.45,0.45,50)
 #CMAP = mpl.colors.LinearSegmentedColormap.from_list('mycolors',['black','red','orange'])
 CMAP = mpl.colors.LinearSegmentedColormap.from_list('mycolors',['green','blue','black','red','orange'])
 
-AngleComponents=[]; Coordinates=[]; Parameters=[]; Trajectory=[]
+AngleComponents=[]; Coordinates=[]; Parameters=[]; trajectory=[]
 OutputPath = '../output/'
 #Color=['k','g','r','c','b','m','g','r','c','b','m','g']
 
 for i in range(len(Bn)):
 	B = BfieldTF(B0=Bn[i])
 	Bv = BfieldVF(B0=0.00000)
-	T = Trajectory(Vessel,B,Bv,v0=Vinjection,E0=Energy,Target=True)
+	T = Trajectory(Vessel,B,Bv,v0=Vinjection,E0=Energy)
 	T.LineColor = CMAP(1.0*i/len(Bn)); 
 	T.LineWidth = 2.0
-	Trajectory.append(T)
+	trajectory.append(T)
 
 	# Save Target parameters
-#	T.Target.SaveTargetParameters(TFCurrent=In[i],Path=OutputPath+'geometry/')
+#	T.target.SaveTargetParameters(TFCurrent=In[i],Path=OutputPath+'geometry/')
 
 	# append lists of Target Quantities
-#	AngleComponents.append([T.Target.VAngle,T.Target.HAngle])
-#	Coordinates.append([T.Target.R,T.Target.Z,T.Target.Phi])
-#	Parameters.append(T.Target.GetDetectionParameters())
+#	AngleComponents.append([T.target.VAngle,T.target.HAngle])
+#	Coordinates.append([T.target.R,T.target.Z,T.target.Phi])
+#	Parameters.append(T.target.GetDetectionParameters())
 
 # Plot 3D results
 
-for i in range(len(Trajectory)):
-	Trajectory[i].Plot3D(ax);
-	#		Trajectory[i].Target.Plot3D(ax);
-#Trajectory[-1].Limits3D(ax);
+for i in range(len(trajectory)):
+	trajectory[i].Plot3D(ax);
+	#		trajectory[i].target.Plot3D(ax);
+#trajectory[-1].Limits3D(ax);
 
 # Construct Legend
 Leg = []
 for i in range(len(Bn)):
-	Leg.append('B = %0.3fT' % Trajectory[i].BFieldTF.B0)
+	Leg.append('B = %0.3fT' % trajectory[i].BFieldTF.B0)
 
 # Plot 2D projections of Trajectories (Poloidal View)
 pl.figure(figsize=(20,8))
-for i in range(len(Trajectory)):
-	pl.subplot(1,2,1); Trajectory[i].Plot2D('poloidal');
+for i in range(len(trajectory)):
+	pl.subplot(1,2,1); trajectory[i].Plot2D('poloidal');
 pl.subplot(1,2,1); Vessel.Border('poloidal'); pl.xlim(0.2,1.4); pl.ylim(-0.7,0.5)
 pl.xlabel('R [m]'); pl.ylabel('Z [m]'); 
 pl.title(r'Poloidal Projection ($\alpha$ = %0.1f$^o$, $\beta$ = %0.1f$^o$)'% (alpha0,beta0) )
 #pl.legend(Leg,loc=4)
 
 # Plot 2D projections of Trajectories (Top View)
-for i in range(len(Trajectory)):
-	pl.subplot(1,2,2); Trajectory[i].Plot2D('top'); 
+for i in range(len(trajectory)):
+	pl.subplot(1,2,2); trajectory[i].Plot2D('top'); 
 pl.subplot(1,2,2); Vessel.Border('top'); pl.xlim(0,1.2); pl.ylim(-0.6,0.6)
 pl.xlabel('x [m]'); pl.ylabel('y [m]'); 
 pl.title(r'Midplane Projection ($\alpha$ = %0.1f$^o$, $\beta$ = %0.1f$^o$)'% (alpha0,beta0) )
@@ -106,7 +106,7 @@ if False:
 if True:
 	FigName = 'TrajectoryProjections_alpha%2.2f_beta%2.2f_'%(alpha0,beta0)# + B.Method
 	FigPath = '/home/hbar/Dropbox/Research/AIMS/Magnet supply upgrade/Beam Modeling Results - Toroidal Field Sweep/'
-	Trajectory[-1].Target.SaveTargetParameters(Path=FigPath+'Test_alpha%2.2f_beta%2.2f_UpDown'%(alpha0,beta0))
+	trajectory[-1].target.SaveTargetParameters(Path=FigPath+'Test_alpha%2.2f_beta%2.2f_UpDown'%(alpha0,beta0))
 
 
 pl.savefig(FigPath + FigName+'_UpDown.pdf')

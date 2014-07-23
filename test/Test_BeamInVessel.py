@@ -154,7 +154,7 @@ if True:
 		savetxt(Path+'SigmaFinal_I_'+str(int(In[i]))+'.txt',AIMSBeam.Target.Sigma)
 		Angle.append([T.target.VAngle,T.target.HAngle])
 		Coordinates.append([T.target.R,T.target.Z,T.target.Phi])
-#		T.Plot3D(ax); T.target.Plot3D
+		T.Plot3D(ax); T.target.Plot3D
 		pl.figure(10); T.Plot2D()
 		pl.figure(11); T.Plot2D('top')
 	pl.figure(10); Vessel.Border(); pl.xlim(0.2,1.4); pl.ylim(-0.7,0.5)

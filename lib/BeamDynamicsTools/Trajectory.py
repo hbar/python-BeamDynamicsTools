@@ -19,31 +19,33 @@ alpha=12.6/180.0*pi; beta=8.0/180.0*pi;
 Rinjection = [1.798, -0.052, 0.243]
 Vinjection = [-cos(alpha)*cos(beta), cos(alpha)*sin(beta), -sin(alpha)]
 
+Mass0 = 2.0* (938.272e6)
 dLB = 2.0e-3 # scale length for B gradient
 #Vinjection = [-1,0,0]
 #====== \Default injection geometry ==================
 
 class Trajectory:
-	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=Rinjection,v0=Vinjection,a0=[0.0,0.0,0.0],A0=2,E0=0.9e6,I0=1e-3,Freq=425e6,Nmax=5000,Smin=1.1,Smax=5.0):
+	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=Rinjection,v0=Vinjection,a0=[0.0,0.0,0.0],M0=Mass0,T0=0.9e6,I0=1e-3,Freq=425e6,Nmax=5000,Smin=1.1,Smax=5.0):
 		start = timeit.default_timer()
 
 		# B = Magnetic Field [T] (BfieldTF class)
 		# Vessel = Defines wall (Boundary class)
-		# A0 = atomic mass [amu]
-		# E0 = beam energy [MeV]
+		# M0 = Rest Mass [MeV/c^2]
+		# T0 = kinetic energy beam [eV]
 		# r  = position vector [x, y, z]
 		# v  = velocity vector [Vx, Vy, Vz]
 		# a  = acceleration vector [ax, ay, az] 
 
 		# Particle and beam constants
 		c0 = 299792458; self.c0 = c0
-		qm = (1.60217646e-19)/(A0*1.67262158e-27)
-		self.A0 = A0
+		q0 = 1.60217646e-19
+		qm = q0 / (M0*1e6 * q0 / c0**2)
+		self.A0 = M0/938.272e6
 		self.q0 = 1.60217646e-19
-		self.m0 = A0 * 1.67262158e-27
+		self.m0 = M0
 		self.I0 = I0
 		self.Frequency = Freq
-		self.E0 = E0
+		self.T0 = T0
 
 		# Magnetic coil sets
 		self.BFieldTF = B
@@ -51,15 +53,20 @@ class Trajectory:
 		BFieldTF = B
 		BFieldVF = Bv
 
-#		v0 = pl.sqrt(2*E0*1.602e-16/(A0*1.67e-27))
+		# Beam 
+#		v0 = pl.sqrt(2*T0*1.602e-16/(A0*1.67e-27))
 		self.r = [array(r0)]
-#		self.v0 = c0 * sqrt(2.0*E0/(A0*938.272046))
-		self.v0 = sqrt(2.0*E0*self.q0/(self.m0))
+#		self.v0 = sqrt(2.0*T0*self.q0/(self.m0))
+		self.gamma = 1.0 + T0/M0
+		self.beta = sqrt(1.0-1.0/self.gamma**2)
+		self.Beta = [self.beta * array(v0)/norm(v0)]
+#		self.v0 = sqrt(2.0*T0*self.q0/(self.m0))
+		self.v0 = self.beta*c0
 		self.v = [ self.v0 * array(v0)/norm(v0) ]
-		self.Beta = [self.v[-1]/c0]
 		self.beta = [norm(self.Beta[-1])]
 		self.gamma = [1.0 / (1.0-self.beta[-1]**2)]
 		self.a = [ array(a0) ]
+		self.F = [ 0.0 ]
 		self.B = [ array(B.local(r0)) ]
 		self.s = [ 0.0 ]
 		dt = dS/self.v0
@@ -81,9 +88,77 @@ class Trajectory:
 		self.LineStyle = '-'
 
 		c1=True; c2=True; i = 0
-		
-		# Leapfrog Integration:
+#------------------------------------------------------------------------------ 
+# Relativistic Euler Integration:
 		if True:
+			while (c1 or c2) and i<Nmax:# and self.s[-1] < Smax:
+
+				self.r.append( self.r[-1] + self.v[-1]*dt)
+
+				self.s.append( self.s[-1] + dS )
+
+				self.B.append( B.local(self.r[-1]) + Bv.local(self.r[-1]) )
+
+				self.F.append( self.q0 * cross(self.v[-1],self.B[-1]) )
+				
+				self.a.append( self.c0**2/(self.gamma[-1]*self.m0*self.q0)*(self.F[-1]-(dot(self.v[-1],self.F[-1])*self.v[-1]/self.c0**2) ) )
+
+				self.v.append( self.v[-1] + self.a[-1]*dt )
+
+				self.dS.append( self.s[-1] - self.s[-2] )
+
+				# Normalized Relativistic Parameters
+				self.Beta.append(self.v[-1]/c0)
+				self.beta.append(norm(self.Beta[-1]))
+				self.gamma.append( 1.0 / (1.0-self.beta[-1]**2))
+
+				# Check to see if beam crosses boundary
+				IN = True
+				c3 = self.s[-1] > Smin
+				c4 = Vessel.InBoundary(self.r[-1])
+				c5 = self.s[-1] < Smax
+				if c3:
+					if (not c4):
+						IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
+					#print IN,NormalV,TangentV,IncidentV,RT
+				#record bending radius
+#				self.k.append(qm * cross(self.v[-1],self.B[-1])/self.v0**2)
+				self.k.append(norm(self.a[-1]/self.v0**2))
+				self.Rc.append(1.0/self.k[-1])
+
+				# B Record Gradients
+				vecR = -1.0*(self.a[-1])/norm(self.a[-1]);
+				vecB = self.B[-1]/norm(self.B[-1])
+				Br2 = norm(B.local(self.r[-1]+vecR*dLB))
+				Br1 = norm(B.local(self.r[-1]-vecR*dLB))
+				Bb2 = norm(B.local(self.r[-1]+vecB*dLB))
+				Bb1 = norm(B.local(self.r[-1]-vecB*dLB))
+				self.gradB.append((Br2-Br1)/(2.0*dLB)) #( array( [(Br2-Br1)/(2.0*dLB) , (Bb2-Bb1)/(2.0*dLB)] ) )
+				self.gradBk.append(self.gradB[-1] * qm/(c0*self.v0) ) #(qm/(self.gamma[-1]*self.beta[-1]*c0**2))
+				self.gradBn.append( -1.0 * self.Rc[-1]/norm(self.B[-1]) * (Br2-Br1)/(2.0*dLB) )
+				self.gradBx.append((Br2-Br1)/(2.0*dLB))
+				self.gradBy.append((Bb2-Bb1)/(2.0*dLB))
+
+				# Conditional statements for continuing iteration
+				c1 = IN
+				c2 = self.s[-1] < Smin
+				i=i+1;
+#				print i
+#				print sqrt(self.r[-1][0]**2+self.r[-1][1]**2),self.r[-1][2]
+
+#			self.Target = Target(NormalV,TangentV,IncidentV)
+			self.BeamBasis()
+			stop = timeit.default_timer()
+			self.RunTime = stop-start
+			print 'trajectory complete, S = %0.3f m, B0 = %0.4f T, B0 = %0.4f T, RunTime = %0.1f s' % (self.s[-1],self.BFieldTF.B0,self.BFieldVF.B0,self.RunTime )
+
+			self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
+			self.target.SigmaBasis = self.BasisM6[-1]
+			print 'Beam Coordinates Complete'
+			
+#------------------------------------------------------------------------------ 
+# Leapfrog Integration:
+		if False:
 			while (c1 or c2) and i<Nmax:# and self.s[-1] < Smax:
 
 				self.r.append( self.r[-1] + self.v[-1]*dt + 0.5*self.a[-1]*dt*dt)
@@ -146,6 +221,8 @@ class Trajectory:
 			self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
 			self.target.SigmaBasis = self.BasisM6[-1]
 			print 'Beam Coordinates Complete'
+
+
 
 
 #==============================================================================
