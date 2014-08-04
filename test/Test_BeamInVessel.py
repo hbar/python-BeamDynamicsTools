@@ -30,7 +30,7 @@ Vessel.Plot2D(0)
 #B = Bfield(B0=0.1,R0=1)
 B = BfieldTF(B0=0.3)
 
-#class Trajectory(self,Vessel,B,dS=1e-3,r0=[1.5,0.0,0.5],v0=[-1.0,0.0,0.0],a0=[0.0,0.0,0.0],A0=2,E0=0.9,Nmax=10000):
+#class Trajectory(self,Vessel,B,dS=1e-3,r0=[1.5,0.0,0.5],v0=[-1.0,0.0,0.0],a0=[0.0,0.0,0.0],A0=2,T0=0.9,Nmax=10000):
 #T = Trajectory(Vessel,B)
 
 ax = Vessel.Figure3D(1)

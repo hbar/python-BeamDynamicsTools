@@ -49,7 +49,7 @@ OutputPath = '../output/'
 for i in range(len(Bn)):
 	B = BfieldTF(B0=Bn[i])
 	Bv = BfieldVF(B0=0.00000)
-	T = Trajectory(Vessel,B,Bv,v0=Vinjection,E0=Energy)
+	T = Trajectory(Vessel,B,Bv,v0=Vinjection,T0=Energy)
 	T.LineColor = CMAP(1.0*i/len(Bn)); 
 	T.LineWidth = 2.0
 	trajectory.append(T)

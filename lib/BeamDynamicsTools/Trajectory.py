@@ -25,7 +25,7 @@ dLB = 2.0e-3 # scale length for B gradient
 #====== \Default injection geometry ==================
 
 class Trajectory:
-	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=Rinjection,v0=Vinjection,a0=[0.0,0.0,0.0],M0=Mass0,T0=0.9e6,I0=1e-3,Freq=425e6,Nmax=5000,Smin=1.1,Smax=5.0):
+	def __init__ (self,Vessel,B,Bv,dS=1e-3,r0=Rinjection,v0=Vinjection,a0=[0.0,0.0,0.0],M0=Mass0,T0=0.9e6,I0=1e-3,Freq=425e6,Nmax=5000,Smin=1.1,Smax=5.0,Method='Relativistic'):
 		start = timeit.default_timer()
 
 		# B = Magnetic Field [T] (BfieldTF class)
@@ -39,7 +39,7 @@ class Trajectory:
 		# Particle and beam constants
 		c0 = 299792458; self.c0 = c0
 		q0 = 1.60217646e-19
-		qm = q0 / (M0*1e6 * q0 / c0**2)
+		qm = q0 / (M0 * q0 / c0**2)
 		self.A0 = M0/938.272e6
 		self.q0 = 1.60217646e-19
 		self.m0 = M0
@@ -90,7 +90,7 @@ class Trajectory:
 		c1=True; c2=True; i = 0
 #------------------------------------------------------------------------------ 
 # Relativistic Euler Integration:
-		if True:
+		if Method=='Relativistic':
 			while (c1 or c2) and i<Nmax:# and self.s[-1] < Smax:
 
 				self.r.append( self.r[-1] + self.v[-1]*dt)
@@ -158,7 +158,7 @@ class Trajectory:
 			
 #------------------------------------------------------------------------------ 
 # Leapfrog Integration:
-		if False:
+		if Method=='LeapFrog':
 			while (c1 or c2) and i<Nmax:# and self.s[-1] < Smax:
 
 				self.r.append( self.r[-1] + self.v[-1]*dt + 0.5*self.a[-1]*dt*dt)
@@ -227,7 +227,7 @@ class Trajectory:
 
 #==============================================================================
 		# Euler Integration:
-		if False:
+		if Method=='Euler':
 			while (c1 or c2) and i<Nmax:
 			#for i in range(Nmax):
 

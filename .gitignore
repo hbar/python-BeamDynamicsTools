@@ -5,6 +5,7 @@ output/geometry/*
 output/sigma/*
 VintageCode/
 VintageCode/*
+output/
 .gitignore~
 *.sh~
 *.md~
