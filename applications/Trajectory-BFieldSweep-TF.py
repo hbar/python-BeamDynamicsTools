@@ -4,6 +4,12 @@ from BeamDynamicsTools import *
 import pylab as pl
 import matplotlib as mpl
 
+#===============================================================================
+# Calculates beam trajectories over a sweep over a range of toroidal field
+# settings
+#===============================================================================
+
+#------------------------------------------------------------------------------ 
 # Define array of injection angles
 # (x,y,z) = (1.798m, -0.052m, 0.243m)
 #  alpha = 12.6 degrees (X-Z plane)
@@ -18,18 +24,22 @@ Vinjection = [-cos(alpha)*cos(beta), cos(alpha)*sin(beta), -sin(alpha)]
 #Energy = [0.594e6, 0.740e6, 0.900e6]
 Energy = 0.9e6 #linspace(0.594e6,0.900e6,10)
 
+#------------------------------------------------------------------------------ 
 # Import poloidal Boundary points
 Rb = loadtxt('../data/CmodCoordinatesRZ.dat',usecols=[0])
 Zb = loadtxt('../data/CmodCoordinatesRZ.dat',usecols=[1])
 
+#------------------------------------------------------------------------------ 
 # Generate vessel Boundary
 Vessel = Boundary(Rb,Zb)
 
+#------------------------------------------------------------------------------ 
 # 3D plot of vessel Boundary
 ax = Vessel.Figure3D()
 Vessel.Plot3D(ax)
 
-# Inputs for four B-field settings 
+#------------------------------------------------------------------------------ 
+# Inputs for B-field settings 
 #In = array([ 0.0, 1600.0 ,3120 ,4450.0])
 #Bn = array([ 0.0, 0.05818182, 0.11345455, 0.16181818 ])
 #Bn = array([0.10,0.20, 0.30, 0.40])
@@ -38,10 +48,15 @@ Vessel.Plot3D(ax)
 Bn = linspace(-0.45,0.45,50)
 #Bn = array([0.0])
 
+#------------------------------------------------------------------------------ 
 #Generate Color Map
 #CMAP = mpl.colors.LinearSegmentedColormap.from_list('mycolors',['black','red','orange'])
 CMAP = mpl.colors.LinearSegmentedColormap.from_list('mycolors',['green','blue','black','red','orange'])
 
+
+#===============================================================================
+# Perform Trajectory calculation for B-Field Sweep
+#===============================================================================
 AngleComponents=[]; Coordinates=[]; Parameters=[]; trajectory=[]
 OutputPath = '../output/'
 #Color=['k','g','r','c','b','m','g','r','c','b','m','g']
@@ -62,6 +77,7 @@ for i in range(len(Bn)):
 #	Coordinates.append([T.target.R,T.target.Z,T.target.Phi])
 #	Parameters.append(T.target.GetDetectionParameters())
 
+#------------------------------------------------------------------------------ 
 # Plot 3D results
 
 for i in range(len(trajectory)):
@@ -69,11 +85,13 @@ for i in range(len(trajectory)):
 	#		trajectory[i].target.Plot3D(ax);
 #trajectory[-1].Limits3D(ax);
 
+#------------------------------------------------------------------------------ 
 # Construct Legend
 Leg = []
 for i in range(len(Bn)):
 	Leg.append('B = %0.3fT' % trajectory[i].BFieldTF.B0)
 
+#------------------------------------------------------------------------------ 
 # Plot 2D projections of Trajectories (Poloidal View)
 pl.figure(figsize=(20,8))
 for i in range(len(trajectory)):
@@ -83,6 +101,7 @@ pl.xlabel('R [m]'); pl.ylabel('Z [m]');
 pl.title(r'Poloidal Projection ($\alpha$ = %0.1f$^o$, $\beta$ = %0.1f$^o$)'% (alpha0,beta0) )
 #pl.legend(Leg,loc=4)
 
+#------------------------------------------------------------------------------ 
 # Plot 2D projections of Trajectories (Top View)
 for i in range(len(trajectory)):
 	pl.subplot(1,2,2); trajectory[i].Plot2D('top'); 
@@ -95,7 +114,7 @@ ax.legend(Leg,bbox_to_anchor=(1.28,1.0))
 #pl.legend(('B = 0.05','B = 0.10','B = 0.15','B = 0.20','B = 0.25','B = 0.30')
 
 
-
+#------------------------------------------------------------------------------ 
 # Save Angular and Detection Quantities
 if False:
 	savetxt(OutputPath+'geometry/TargetAngle_Vert_Horiz.dat',AngleComponents)
@@ -103,14 +122,14 @@ if False:
 	Header0 = '(0) I0 [A], (1) B0 [T], (2) X [m] , (3) Y [m], (4) Z [m], (5) incident angle [rad], (6) Detection Angle [rad], (7) optical path length [m] , (8) Detection Angle [rad], (9) Detection Angle [deg], (10) Detector Eff'
 	savetxt(OutputPath+'geometry/DetectionParameters.dat', (array(Parameters)), header=Header0)
 
+#------------------------------------------------------------------------------ 
+# Save Figure
 if True:
 	FigName = 'TrajectoryProjections_alpha%2.2f_beta%2.2f_'%(alpha0,beta0)# + B.Method
 	FigPath = '/home/hbar/Dropbox/Research/AIMS/Magnet supply upgrade/Beam Modeling Results - Toroidal Field Sweep/'
 	trajectory[-1].target.SaveTargetParameters(Path=FigPath+'Test_alpha%2.2f_beta%2.2f_UpDown'%(alpha0,beta0))
+	pl.savefig(FigPath + FigName+'_UpDown.pdf')
+	pl.savefig(FigPath + FigName+'_UpDown.png')
+	print 'File saved: ' + FigName
 
-
-pl.savefig(FigPath + FigName+'_UpDown.pdf')
-pl.savefig(FigPath + FigName+'_UpDown.png')
-print 'File saved: ' + FigName
-
-#pl.show()
+pl.show()

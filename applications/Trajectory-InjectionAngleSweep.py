@@ -30,7 +30,7 @@ Vessel.Plot3D(ax)
 In = array([0.0,1600.0,3120,4450.0])
 Bn = array([ 0.0, 0.05818182, 0.11345455, 0.16181818 ])
 
-AngleComponents=[]; Coordinates=[]; Parameters=[]; Trajectory=[]
+AngleComponents=[]; Coordinates=[]; Parameters=[]; TrajectoryList=[]
 OutputPath = '../output/'
 Color=['b','g','r','c']
 for j in range(len(alpha)):
@@ -39,23 +39,23 @@ for j in range(len(alpha)):
 		Bv = BfieldVF(B0=0.00000)
 		T = Trajectory(Vessel,B,Bv,v0=Vinjection[j])
 		T.LineColor = Color[j]
-		Trajectory.append(T)
+		TrajectoryList.append(T)
 
 	# Save Target parameters
-#	T.Target.SaveTargetParameters(TFCurrent=In[i],Path=OutputPath+'geometry/')
+#	T.target.SaveTargetParameters(TFCurrent=In[i],Path=OutputPath+'geometry/')
 
 	# append lists of Target Quantities
-#	AngleComponents.append([T.Target.VAngle,T.Target.HAngle])
-#	Coordinates.append([T.Target.R,T.Target.Z,T.Target.Phi])
-#	Parameters.append(T.Target.GetDetectionParameters())
+#	AngleComponents.append([T.target.VAngle,T.target.HAngle])
+#	Coordinates.append([T.target.R,T.target.Z,T.target.Phi])
+#	Parameters.append(T.target.GetDetectionParameters())
 
 # Plot 3D results
 
-for i in range(len(Trajectory)):
-	Trajectory[i].Plot3D(ax);
-#		Trajectory[i].Target.Plot3D(ax);
+for i in range(len(TrajectoryList)):
+	TrajectoryList[i].Plot3D(ax);
+#		TrajectoryList[i].target.Plot3D(ax);
 
-Trajectory[-1].Limits3D(ax);
+TrajectoryList[-1].Limits3D(ax);
 
 	# Plot 2D projections of Trajectories
 #	pl.figure(10); T.Plot2D()
