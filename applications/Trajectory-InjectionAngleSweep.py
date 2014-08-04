@@ -14,21 +14,28 @@ Vinjection = []
 for i in range(len(alpha)):
 	Vinjection.append([-cos(alpha[i])*cos(beta), cos(alpha[i])*sin(beta), -sin(alpha[i])])
 
-
+#------------------------------------------------------------------------------ 
 # Import poloidal Boundary points
 Rb = loadtxt('../data/CmodCoordinatesRZ.dat',usecols=[0])
 Zb = loadtxt('../data/CmodCoordinatesRZ.dat',usecols=[1])
 
+#------------------------------------------------------------------------------ 
 # Generate vessel Boundary
 Vessel = Boundary(Rb,Zb)
 
+#------------------------------------------------------------------------------ 
 # 3D plot of vessel Boundary
 ax = Vessel.Figure3D(1)
 Vessel.Plot3D(ax)
 
-# Inputs for four B-field settings 
+#------------------------------------------------------------------------------ 
+# Inputs for B-field settings 
 In = array([0.0,1600.0,3120,4450.0])
 Bn = array([ 0.0, 0.05818182, 0.11345455, 0.16181818 ])
+
+#===============================================================================
+# Perform Trajectory calculation for Trajectory Sweep
+#===============================================================================
 
 AngleComponents=[]; Coordinates=[]; Parameters=[]; TrajectoryList=[]
 OutputPath = '../output/'
@@ -41,7 +48,8 @@ for j in range(len(alpha)):
 		T.LineColor = Color[j]
 		TrajectoryList.append(T)
 
-	# Save Target parameters
+#------------------------------------------------------------------------------ 
+# Save Target parameters
 #	T.target.SaveTargetParameters(TFCurrent=In[i],Path=OutputPath+'geometry/')
 
 	# append lists of Target Quantities
@@ -49,6 +57,7 @@ for j in range(len(alpha)):
 #	Coordinates.append([T.target.R,T.target.Z,T.target.Phi])
 #	Parameters.append(T.target.GetDetectionParameters())
 
+#------------------------------------------------------------------------------ 
 # Plot 3D results
 
 for i in range(len(TrajectoryList)):
@@ -65,8 +74,7 @@ TrajectoryList[-1].Limits3D(ax);
 #pl.figure(11); Vessel.Border('top'); pl.xlim(0,1.2); pl.ylim(-0.6,0.6)
 #pl.xlabel('x [m]'); pl.ylabel('y [m]'); pl.title('Midplane Projection')
 
-
-
+#------------------------------------------------------------------------------ 
 # Save Angular and Detection Quantities
 if False:
 	savetxt(OutputPath+'geometry/TargetAngle_Vert_Horiz.dat',AngleComponents)

@@ -3,45 +3,60 @@ sys.path.append('../lib/')
 from BeamDynamicsTools import *
 from matplotlib.pyplot import show
 
+#===============================================================================
+# Calculate trajectory matrix evolution for 4 values of toroidal B
+#===============================================================================
+
+#------------------------------------------------------------------------------ 
 # Import poloidal boundary points
 Rb = loadtxt('../data/CmodCoordinatesRZ.dat',usecols=[0])
 Zb = loadtxt('../data/CmodCoordinatesRZ.dat',usecols=[1])
 
-# Generate vessel boundary
-Vessel = boundary(Rb,Zb)
+#------------------------------------------------------------------------------ 
+# Generate vessel Boundary
+Vessel = Boundary(Rb,Zb)
 
+#------------------------------------------------------------------------------ 
 # 3D plot of vessel boundary
 ax = Vessel.Figure3D(1)
 Vessel.Plot3D(ax)
 
+#------------------------------------------------------------------------------ 
 # Inputs for four B-field settings 
 In = array([0.0,1600.0,3120,4450.0])
 Bn = array([ 0.0, 0.05818182, 0.11345455, 0.16181818 ])
 
-AngleComponents=[]; Coordinates=[]; Parameters=[]; Trajectory=[]
+#===============================================================================
+# Perform Trajectory and sigma dynamics calculation for B-Field Sweep
+#===============================================================================
+
+AngleComponents=[]; Coordinates=[]; Parameters=[]; TrajectoryList=[]
 OutputPath = './output/'
 for i in [0,1,2,3]:#range(len(Bn)):
-	B = bfieldTF(B0=Bn[i])
-	Bv = bfieldVF(B0=0.00000)
-	T = trajectory(Vessel,B,Bv)
-	Trajectory.append(T)
+	B = BfieldTF(B0=Bn[i])
+	Bv = BfieldVF(B0=0.00000)
+	T = Trajectory(Vessel,B,Bv)
+	TrajectoryList.append(T)
 
-	# Save target parameters
-#	T.Target.SaveTargetParameters(TFCurrent=In[i],Path=OutputPath+'geometry/')
+#------------------------------------------------------------------------------ 
+# Save target parameters
+#	T.target.SaveTargetParameters(TFCurrent=In[i],Path=OutputPath+'geometry/')
 
-	# append lists of Target Quantities
-	AngleComponents.append([T.Target.VAngle,T.Target.HAngle])
-	Coordinates.append([T.Target.R,T.Target.Z,T.Target.Phi])
-	Parameters.append(T.Target.GetDetectionParameters())
+#------------------------------------------------------------------------------ 
+# append lists of Target Quantities
+	AngleComponents.append([T.target.VAngle,T.target.HAngle])
+	Coordinates.append([T.target.R,T.target.Z,T.target.Phi])
+	Parameters.append(T.target.GetDetectionParameters())
 
-# Plot 3D results
+#------------------------------------------------------------------------------ 
+# Plot 3D trajectory results
 Color=['b','g','r','c']
-for i in range(len(Trajectory)):
-	Trajectory[i].LineColor = Color[i]
-	Trajectory[i].Plot3D(ax);
-#	Trajectory[i].Target.Plot3D(ax);
+for i in range(len(TrajectoryList)):
+	TrajectoryList[i].LineColor = Color[i]
+	TrajectoryList[i].Plot3D(ax);
+#	TrajectoryList[i].target.Plot3D(ax);
 
-Trajectory[-1].Limits3D(ax);
+TrajectoryList[-1].Limits3D(ax);
 
 	# Plot 2D projections of Trajectories
 #	pl.figure(10); T.Plot2D()

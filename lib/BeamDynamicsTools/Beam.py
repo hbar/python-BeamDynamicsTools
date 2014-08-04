@@ -46,7 +46,7 @@ class Beam(Trajectory):
 		self.gradBy = trajectory.gradBy
 		self.NormalV = trajectory.target.NormalV
 		self.IncidentV = trajectory.target.IncidentV
-		self.Target = trajectory.target
+		self.target = trajectory.target
 
 
 		# lists of matrices for reverse calculations
@@ -74,9 +74,9 @@ class Beam(Trajectory):
 			self.Sigma[-1] = self.SpaceCharge(i,self.Sigma[-1])
 			#print i
 		if Target==True:
-			self.Target.Sigma = self.Sigma[-1]
-			self.Target.BeamBasis = self.BasisM6
-#		self.Target.Ellipse = Ellipse(self.Sigma[-1])
+			self.target.Sigma = self.Sigma[-1]
+			self.target.BeamBasis = self.BasisM6
+#		self.target.Ellipse = Ellipse(self.Sigma[-1])
 
 	def ReverseTrace(self,SigmaF):
 		Ni = len(self.r)
