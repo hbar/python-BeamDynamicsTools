@@ -1,6 +1,6 @@
 # Beam Transport Simulation Code
 
-Ion beam trajectory and envelope dynamics code written to simulate ion beams in complex magnetic fields. 
+`python-BeamDynamicsTools` is a python library for simulating ion beam trajectories and the phase space envelope dynamics with 3D boundary conditions in complex magnetic fields.
 
 Examples
 ========
