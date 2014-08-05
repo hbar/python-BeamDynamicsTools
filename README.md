@@ -1,13 +1,18 @@
 # Beam Transport Simulation Code
 
-`python-BeamDynamicsTools` is a python library for simulating ion beam trajectories and the phase space envelope dynamics with 3D boundary conditions in complex magnetic fields.
+`python-BeamDynamicsTools` is a python library for simulating ion beam trajectories and the phase space envelope dynamics with 3D boundary conditions in complex magnetic fields. The examples, code tests, classes, and methods contained in this repository are described below.
 
 Examples
 ========
 
-`example1.py` Simulation of trajectory and envelope dynamics calculation for 4 typical beam trajectories for AIMS analysis in the Alcator C-Mod tokamak.
+`example1.py` is a trajectory simulation and envelope dynamics calculation for 4 typical beam trajectories for AIMS analysis in the Alcator C-Mod tokamak.
 
-`example2.py` Simulation of trajectory calculation for 4 typical beam trajectories for AIMS analysis in the Alcator C-Mod tokamak.
+`example2.py` is a simple trajectory simulation for 4 typical beam trajectories for AIMS analysis in the Alcator C-Mod tokamak.
+
+Code Tests
+==========
+
+All Test cases for the code are found in `/test/Test_NameOfTest.py`. These tests are for troubleshooting various classes and methods.
 
 Classes
 ==========
@@ -158,10 +163,6 @@ BfieldVF class
 - `RCoil` = list of horizontal current loops centered at [0,0] defined by [R,Z]
 - Method: `self.local([x,y,z])` returns local B-field vector.
 
-Code Tests
-==========
-
-All Test cases for the code are found in /test/Test_NameOfTest.py
 
 License
 =======
