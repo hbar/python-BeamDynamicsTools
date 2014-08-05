@@ -118,15 +118,15 @@ Boundary Class
 
 ####Boundary Class Variables:
 
-`self.Cvec` = List of vertex position vectors (corners)
-`self.Cmatrix` = Nx3 matrix of vertex position vectors
-`self.Mvec` = List of midpoint position vectors 
-`self.Mmatrix` = Nx3 matrix of midpoint position vectors
-`self.Tvec` = List of tangent vectors 
-`self.Tmatrix` = Nx3 matrix of tangent vectors
-`self.Nvec` = List of Normal vectors
-`self.Nmatrix` = Nx3 matrix of normal vectors
-`self.Nv` = number of vertices
+- `self.Cvec` = List of vertex position vectors (corners)
+- `self.Cmatrix` = Nx3 matrix of vertex position vectors
+- `self.Mvec` = List of midpoint position vectors 
+- `self.Mmatrix` = Nx3 matrix of midpoint position vectors
+- `self.Tvec` = List of tangent vectors 
+- `self.Tmatrix` = Nx3 matrix of tangent vectors
+- `self.Nvec` = List of Normal vectors
+- `self.Nmatrix` = Nx3 matrix of normal vectors
+- `self.Nv` = number of vertices
 
 ####Boundary Methods:
 
