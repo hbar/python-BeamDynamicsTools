@@ -57,6 +57,10 @@ class Beam(Trajectory):
 #		self.e2=trajectory.e2
 #		self.e3=trajectory.e3
 
+#===============================================================================
+# Calculate evolution of sigma matrix along trajectory
+#===============================================================================
+
 	def Trace(self,Target=True):
 		Ni = len(self.r)
 		self.TransferM = []
@@ -77,6 +81,10 @@ class Beam(Trajectory):
 			self.target.Sigma = self.Sigma[-1]
 			self.target.BeamBasis = self.BasisM6
 #		self.target.Ellipse = Ellipse(self.Sigma[-1])
+
+#===============================================================================
+# Calculate reverse evolution of sigma matrix starting at target
+#===============================================================================
 
 	def ReverseTrace(self,SigmaF):
 		Ni = len(self.r)
@@ -105,18 +113,24 @@ class Beam(Trajectory):
 		#print Mdrift
 		return Mdrift
 
-# =============================================================================
-# =========== Magnetic Steering ===============================================
-# =============================================================================
+
+#===============================================================================
+# Generates transfer matrices for magnetic steering
+#===============================================================================
+
 	def BMatrix(self,IND):
 #		print 'Index = '+str(IND) 
 #		Bperp = matrix([[dot(self.B[IND],BasisM3[IND][:,0])],[dot(self.B[IND],BasisM3[IND][:,1])],[0.0]])
+#------------------------------------------------------------------------------ 
+# project B onto local coordinates
 		Bx = dot(self.B[IND],self.BasisM3[IND][:,0])
 		By = dot(self.B[IND],self.BasisM3[IND][:,1])
 		dS = self.dS[IND]
 		G2 = self.gamma[IND]**2
 
 		QP = self.q0/(self.m0*self.v0)
+#------------------------------------------------------------------------------ 
+# Calculate field gradients in local coordinates
 
 #		kx = 0.0*QP * (self.gradBx[IND]);
 		kx = QP * (self.gradBx[IND]);
@@ -130,6 +144,8 @@ class Beam(Trajectory):
 		Ky = (ky + Kappay**2); #print kx,ky#'Ky %0.000f' %Ky   #/1000.0; print Ky
  		Ay = sqrt(abs(Ky))
 
+#------------------------------------------------------------------------------ 
+# Generate matrix entries based on linear model
 		if norm(self.B[IND]) != 0:
 			if Kx == 0:
 				Cx  = 1.0
@@ -179,6 +195,8 @@ class Beam(Trajectory):
 				Dy  = (1.0/Ay) * (1.0 - cosh(Ay*dS))
 				Dy1 = sinh(Ay*dS)
 
+#------------------------------------------------------------------------------ 
+# Populate transfer matrices with calculated entry values
 			Mb = matrix([
 			[ Cx  , Sx  ,  0  ,  0  , 0  , Dx  ],
 			[ Cx1 , Sx1 ,  0  ,  0  , 0  , Dx1 ],
@@ -187,6 +205,8 @@ class Beam(Trajectory):
 			[-Dx1 , -Dx ,-Dy1 ,-Dy  , 1  ,dS/G2/1.],
 			[  0  ,  0  ,  0  ,  0  , 0  , 1   ]],float)
 
+#------------------------------------------------------------------------------ 
+# If there is no field, use tranfer matrix for field free drift
 		else:
 			Mb = matrix([
 			[  1  ,  dS ,  0  ,  0  , 0  ,  0  ],
@@ -205,8 +225,9 @@ class Beam(Trajectory):
 		G2 = self.gamma[IND]**2
 
 		Sigma = SigmaIN
-
-		# Rotate upright in XY Plane
+		
+#------------------------------------------------------------------------------ 
+# Rotate upright in XY Plane
 		ThetaXY = 0.5 * arctan(2*Sigma[0,2]/(Sigma[2,2]-Sigma[0,0]))
 		if isnan(ThetaXY):
 			ThetaXY=0.0
@@ -220,7 +241,8 @@ class Beam(Trajectory):
 		[  0  ,  0  ,  0  ,  0  , 0  ,  1  ]],float)
 		Sigma = Rxy * Sigma * Rxy.T
 
-		# Rotate upright in YZ Plane (Most Important)
+#------------------------------------------------------------------------------ 
+# Rotate upright in YZ Plane (Most Important)
 		ThetaYZ = -0.5 * arctan(2*Sigma[2,4]/(Sigma[4,4]-Sigma[2,2]))
 		if isnan(ThetaYZ):
 			ThetaYZ=0.0
@@ -234,7 +256,8 @@ class Beam(Trajectory):
 		[  0  ,  0  ,  0  ,  S  ,  0  ,  C  ]],float)
 		Sigma = Ryz * Sigma * Ryz.T
 
-		# Rotate upright in XZ Plane
+#------------------------------------------------------------------------------ 
+# Rotate upright in XZ Plane
 		C = 1.0; S = 0.0;
 		ThetaZX = -0.5 * arctan(2*Sigma[4,0]/(Sigma[0,0]-Sigma[4,4]))
 		if isnan(ThetaZX):
@@ -248,8 +271,9 @@ class Beam(Trajectory):
 		[  S  ,  0  ,  0  ,  0  ,  C  ,  0  ],
 		[  0  ,  S  ,  0  ,  0  ,  0  ,  C  ] ],float)
 		Sigma = Rzx * Sigma * Rzx.T
-
-		# Rotation Matrix
+		
+#------------------------------------------------------------------------------ 
+# Rotation Matrix
 		Rotate = Rxy*Ryz*Rzx
 #		Sigma = Rotate * Sigma * Rotate.T
 
@@ -268,7 +292,8 @@ class Beam(Trajectory):
 
 #		print rx,ry,rz
 
-		# normalized radial component for form factor fit
+#------------------------------------------------------------------------------ 
+# calculate normalized radial component for form factor fit
 		p = self.gamma[IND]*rz/sqrt(rx*ry)
 
 		# Form factor f polyfit Coefficient
@@ -278,22 +303,29 @@ class Beam(Trajectory):
 			f = polyval(C0,p)
 		if p >= 1.0:
 			C0 = [0.39122685, -0.97242357, 0.74316934, 0.1744343, -0.0020169 ]
+#------------------------------------------------------------------------------ 
+# Calculate space charge form factor f from polynomial fit
 			f = polyval(C0,1.0/p)
 
-		# Constants for E-Field Calcuation
+#------------------------------------------------------------------------------ 
+# Calculate Constants for E-Field Calculation
 		k = 1.0/(4*pi*8.85e-12)
 		Lambda = self.c0/self.Frequency
 		Q = 3.0*self.I0*Lambda/self.c0
 
-		# Calculate E-Field Components
+#------------------------------------------------------------------------------ 
+# Calculate Space charge E-Field Components
 		Ex = (k*Q/self.gamma[IND]**2) * (1.0 - f) / (rx*(rx+ry)*rz) 
 		Ey = (k*Q/self.gamma[IND]**2) * (1.0 - f) / (ry*(rx+ry)*rz)
 		Ez = (k*Q) * f/(rx*ry*rz)#/sqrt(5)
 
-		# Constant to convert E-field to delta Xi'
+#------------------------------------------------------------------------------ 
+# Constant to convert E-field to delta Xi'
 		d = (self.q0 * self.dS[IND]) / (self.m0 * self.c0**2 * self.beta[IND]) * 1e3 * sqrt(1/5.0)
 #		print d*Ez
-		# Apply SPace Charge Impulses to momentum		
+
+#------------------------------------------------------------------------------ 
+# Apply SPace Charge Impulses to momentum		
 		ME = matrix([
 		[ 1  , 0  , 0  , 0  , 0  ,  0  ],
 		[d*Ex, 1  , 0  , 0  , 0  ,  0  ],

@@ -30,8 +30,9 @@ class Target:
 		self.DetectorAngle = arccos( dot(self.DetectionVec,array([1.0,0.0,0.0])) )
 		self.DetectionDegree = self.DetectorAngle * 180.0/pi
 		self.DetectionEff = AngularEff(self.DetectorAngle)	
-
-		# Draw detection line
+		
+#------------------------------------------------------------------------------ 
+# Draw detection line
 		dl = linspace(0.0,1.0,101);
 		self.LineVector=[]; self.LineX=[]; self.LineY=[]; self.LineZ=[];
 		for i in range(len(dl)):
@@ -44,7 +45,8 @@ class Target:
 		self.LineY = array(self.LineY)
 		self.LineZ = array(self.LineZ)
 
-		# Angular parameters and vectors
+#------------------------------------------------------------------------------ 
+# Calculate Angular parameters and vectors
 		self.BeamTargetAngle = pi-arccos(dot(NORM,INC))
 		self.GammaTargetAngle = arccos(dot(NORM,self.DetectionVec))
 		self.DetectionTargetAngle = arccos(dot(self.DetectionVec,INC))
@@ -57,7 +59,8 @@ class Target:
 		self.VAngle = arccos(dot(NormRZ,IncRZ))
 		self.Degrees = arccos(dot(NORM,-INC))*180.0/pi
 
-		# Basis vectors/matrices and initialize sigma matrices
+#------------------------------------------------------------------------------ 
+# Calculate Basis vectors/matrices and initialize sigma matrices
 		self.BasisM3 = Basis3(e1,e2,e3)
 		self.BasisM6 = Basis6(e1,e2,e3)
 		self.TargetBasis = Basis6(e1,e2,e3)
@@ -73,18 +76,21 @@ class Target:
 		def Projection(self):
 			self.Ellipse.PlotXY(0*self.VAngle,0*self.HAngle)
 
-	# Calculate distance to another Target
+#------------------------------------------------------------------------------ 
+# Calculate distance to Target
 	def Distance(self,Traj1):
 		R0 = self.XYZ
 		R1 = Traj1.Target.XYZ
 		return norm(R0-R1)
 		
-
+#------------------------------------------------------------------------------ 
+# Save Target basis and sigma basis
 	def SaveTargetParameters(self,TFCurrent,Path='Output/'):
 		savetxt(Path+'SigmaBasis_I_'+str(int(TFCurrent))+'.txt',self.SigmaBasis)
 		savetxt(Path+'TargetBasis_I_'+str(int(TFCurrent))+'.txt',self.TargetBasis)
 
-	# 3D plotting function of beam
+#------------------------------------------------------------------------------ 
+# 3D plotting function of beam
 	def Plot3D(self,ax):
 		x=[]; y=[]; z=[];
 		ax.plot(self.LineX,self.LineY,self.LineZ,'g',linewidth=2)

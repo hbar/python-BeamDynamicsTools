@@ -88,8 +88,10 @@ class Trajectory:
 		self.LineStyle = '-'
 
 		c1=True; c2=True; i = 0
-#------------------------------------------------------------------------------ 
-# Relativistic Euler Integration:
+
+#===============================================================================
+# # Relativistic Euler Integration:
+#===============================================================================
 		if Method=='Relativistic':
 			while (c1 or c2) and i<Nmax:# and self.s[-1] < Smax:
 
@@ -156,8 +158,9 @@ class Trajectory:
 			self.target.SigmaBasis = self.BasisM6[-1]
 			print 'Beam Coordinates Complete'
 			
-#------------------------------------------------------------------------------ 
-# Leapfrog Integration:
+#===============================================================================
+# # Leapfrog Integration:
+#===============================================================================
 		if Method=='LeapFrog':
 			while (c1 or c2) and i<Nmax:# and self.s[-1] < Smax:
 
@@ -225,8 +228,9 @@ class Trajectory:
 
 
 
-#==============================================================================
-		# Euler Integration:
+#===============================================================================
+# Euler Integration:
+#===============================================================================
 		if Method=='Euler':
 			while (c1 or c2) and i<Nmax:
 			#for i in range(Nmax):
@@ -294,8 +298,14 @@ class Trajectory:
 				self.Target.SigmaBasis = self.BasisM6[-1]
 				print 'Beam Coordinates Complete'
 
-#==============================================================================
+#===============================================================================
+# Class Methods
+#===============================================================================
 
+#------------------------------------------------------------------------------ 
+# Calculate 3x3 matrix vectors representing the local x,y,z basis
+# and the 6x6 matrix of column vectors representing the local x,x',y,y',l,dp/p
+# phase space basis
 	def BeamBasis(self):
 		Ni = len(self.v);
 		e3 = [self.v[0]/norm(self.v[0])]
@@ -311,6 +321,8 @@ class Trajectory:
 			self.BasisM6.append(Basis6(e1[-1],e2[-1],e3[-1]))
 			#print i
 
+#------------------------------------------------------------------------------ 
+# Plot 2D projection of trajectory
 	def Plot2D(self,Type='poloidal'):
 		x=[]; y=[]; z=[]; R=[]
 #		pl.figure(FIG)
@@ -325,12 +337,15 @@ class Trajectory:
 			PLOT = pl.plot(x,y,color=self.LineColor,linestyle=self.LineStyle,linewidth=self.LineWidth)
 		return PLOT
 
-
+#------------------------------------------------------------------------------ 
+# Initialize 3D Axes on figure
 	def Figure3D(self,FIG=1):
 		fig = pl.figure(FIG)
 		ax = Axes3D(fig)
 		return ax
 
+#------------------------------------------------------------------------------ 
+# Plot trajectory in 3D
 	def Plot3D(self,ax):
 		x=[]; y=[]; z=[];
 		for i in range(len(self.r)):
@@ -346,6 +361,8 @@ class Trajectory:
 		ax.set_ylim3d(-box/2+offsetY,box/2+offsetY)
 		ax.set_zlim3d(-box/2+offsetZ,box/2+offsetZ)
 
+#------------------------------------------------------------------------------ 
+# Plot Magnetic Field components along beam trajectory
 	def PlotB(self,FIG=2):
 		Bx=[]; By=[]; Bz=[]; Bmag=[]
 		pl.figure(FIG)
@@ -360,6 +377,8 @@ class Trajectory:
 		pl.subplot(4,1,4); pl.plot(self.s,Bmag); pl.ylabel(r'|B| [T]')
 		pl.xlabel('S-coordinate [m]')
 
+#------------------------------------------------------------------------------ 
+# Plot velocity components along beam trajectory
 	def PlotV(self,FIG=3):
 		Vx=[]; Vy=[]; Vz=[]; c0=2.998e8;
 		pl.figure(FIG)
@@ -373,8 +392,10 @@ class Trajectory:
 		pl.subplot(3,1,3); pl.plot(self.s,Vz); pl.ylabel(r'$\beta_z$')
 		pl.xlabel('S-coordinate [m]')
 
+#------------------------------------------------------------------------------ 
+# Save magnetic field and curvature parameters
 	def SaveFieldParameters(self,TFCurrent,Path='Output/'):
-		# Save field and geometric parameters along trajector
+		# Save field and geometric parameters along trajectory
 		savetxt(Path+'Curvature_I_'+str(int(TFCurrent))+'.txt',self.k)
 		savetxt(Path+'SCoord_I_'+str(int(TFCurrent))+'.txt',self.s)
 		savetxt(Path+'GradB_I_'+str(int(TFCurrent))+'.txt',self.gradB)

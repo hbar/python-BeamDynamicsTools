@@ -5,27 +5,39 @@ from numpy import *
 class Ellipse:
 	def __init__(self,SIG):
 		self.Sigma = SIG
+#------------------------------------------------------------------------------ 
+# 2x2 sigma matrices
 		self.SigX = self.Sigma[0:2,0:2];
 		self.SigY = self.Sigma[2:4,2:4];
 		self.SigZ = self.Sigma[4:6,4:6];
 
+#------------------------------------------------------------------------------ 
+# Emittance in each phase place
 		# self.EpsilonX = self.Sigma[0,0]*self.Sigma[1,1] - self.Sigma[0,1]**2
 		self.EmittenceX = sqrt(math.fabs(det(self.SigX)))
 		self.EmittenceY = sqrt(math.fabs(det(self.SigY)))
 		self.EmittenceZ = sqrt(math.fabs(det(self.SigZ)))
 
+#------------------------------------------------------------------------------ 
+# Ellipse (Twiss) parameters in each phase plane
 		self.TwissXX1 = array([-(self.SigX[0,1]),self.SigX[0,0],self.SigX[1,1],self.EmittenceX**2]/self.EmittenceX)
 		self.TwissYY1 = array([-(self.SigY[0,1]),self.SigY[0,0],self.SigY[1,1],self.EmittenceY**2]/self.EmittenceY)
 		self.TwissZZ1 = array([-(self.SigZ[0,1]),self.SigZ[0,0],self.SigZ[1,1],self.EmittenceZ**2]/self.EmittenceZ)
 
+#------------------------------------------------------------------------------ 
+# Beam's spatial width in each phase plane
 		self.WidthX = sqrt(self.TwissXX1[1]*self.TwissXX1[3])
 		self.WidthY = sqrt(self.TwissYY1[1]*self.TwissYY1[3])
 		self.WidthZ = sqrt(self.TwissZZ1[1]*self.TwissZZ1[3])
 
+#------------------------------------------------------------------------------ 
+# Beam's angular envelope in each phase plane
 		self.DivergenceX = sqrt(self.TwissXX1[2]*self.TwissXX1[3])
 		self.DivergenceY = sqrt(self.TwissYY1[2]*self.TwissYY1[3])
 		self.DivergenceZ = sqrt(self.TwissZZ1[2]*self.TwissZZ1[3])
 
+#------------------------------------------------------------------------------ 
+# Ellipse parameter in the transverse spatial plane
 		self.EmittenceXY = sqrt( det(matrix([[SIG[0,0],SIG[0,2]] ,[SIG[2,0],SIG[2,2]] ])) )
 		self.TwissXY = array([-SIG[0,2],SIG[0,0],SIG[2,2],self.EmittenceXY**2])/self.EmittenceXY
 
@@ -35,12 +47,18 @@ class Ellipse:
 		self.EmittenceYZ = sqrt( det(matrix([[SIG[2,2],SIG[2,4]] ,[SIG[4,2],SIG[4,4]] ])) )
 		self.TwissYZ = array([-SIG[2,4],SIG[2,2],SIG[4,4],self.EmittenceYZ**2])/self.EmittenceYZ
 
+#------------------------------------------------------------------------------ 
+# Return Spatial Width
 	def SpatialWidth(self):
 		return self.WidthX,self.WidthY,self.WidthZ
 
+#------------------------------------------------------------------------------ 
+# Return Angular Width
 	def AngularWidth(self):
 		return self.DivergenceX, self.DivergenceY, self.DivergenceZ
 
+#------------------------------------------------------------------------------ 
+# Generate points along an ellipse a give set of twiss parameters
 	def GenerateXY(self,TWISS,NPoints=1000):
 		Theta = linspace(0,2*pi,NPoints);
 		XPoints = zeros((NPoints),float); YPoints = zeros((NPoints),float)
@@ -55,6 +73,8 @@ class Ellipse:
 			YPoints[i] = Radius*(m21*cos(Theta[i]) + m22*sin(Theta[i]))
 		return XPoints,YPoints
 
+#------------------------------------------------------------------------------ 
+# Calculate Mismatch factor between self and another ellipse E1
 	def MismatchFactor(self,E1,Type=1):
 
 		def MFactor(Twiss0,Twiss1,Type):
@@ -83,6 +103,8 @@ class Ellipse:
 #		Y = Y/cos(Ayz)
 #		pl.plot(X,Y,Mod,label=Label); pl.xlabel('X [mm]');  pl.ylabel('Y [mm]');
 
+#------------------------------------------------------------------------------ 
+# Plot transverse spatial projection
 	def PlotXY(self,NPoints=1000,L=30.0,Mod='-',Label='',Title = ' ',Scale=1.0,Rotate=False):
 		X,Y = self.GenerateXY(self.TwissXY,NPoints)
 		if Rotate==True: 
@@ -93,6 +115,8 @@ class Ellipse:
 #		pl.xlim(-L,L); pl.ylim(-L,L)
 		return PLOT
 
+#------------------------------------------------------------------------------ 
+# Plot X,X' phase plane projection
 	def PlotXX1(self,NPoints=1000,L=30.0,Mod='-',Label='',Title = ' ',Scale=1.0):
 		X,X1 = self.GenerateXY(self.TwissXX1,NPoints)
 		PLOT = pl.plot(Scale*X,Scale*X1,Mod,label=Label)
@@ -101,6 +125,8 @@ class Ellipse:
 		pl.xlim(-L,L); pl.ylim(-L,L);
 		return PLOT
 
+#------------------------------------------------------------------------------ 
+# Plot Y,Y' phase plane projection
 	def PlotYY1(self,NPoints=1000,L=30.0,Mod='-',Label='',Title = ' ',Scale=1.0):
 		Y,Y1 = self.GenerateXY(self.TwissYY1,NPoints)
 		PLOT = pl.plot(Scale*Y,Scale*Y1,Mod,label=Label)
@@ -109,6 +135,8 @@ class Ellipse:
 		pl.xlim(-L,L); pl.ylim(-L,L); 
 		return PLOT
 
+#------------------------------------------------------------------------------ 
+# Plot Z,Z' phase plane projection
 	def PlotZZ1(self,NPoints=1000,L=30.0,Mod='-',Label='',Title = ' ',Scale=1.0):
 		Z,Z1 = self.GenerateXY(self.TwissZZ1,NPoints)
 		PLOT = pl.plot(Scale*Z,Scale*Z1,Mod,label=Label)
@@ -117,6 +145,8 @@ class Ellipse:
 		pl.xlim(-L,L); pl.ylim(-L,L);
 		return PLOT
 
+#------------------------------------------------------------------------------ 
+# Project transverse beam spot onto off-normal surface
 	def ProjectXY(self,SigmaBasis,TargetBasis,Scale=1.0, Label='',Title = ' ',NPoints=1000,Mod='-'):
 		X,Y = self.GenerateXY(self.TwissXY,NPoints)
 		Bs = matrix(SigmaBasis[:,[0,1]]);
@@ -144,11 +174,15 @@ class Ellipse:
 		pl.plot(Xp,Yp,Mod,label=Label); pl.xlabel('X [mm]');  pl.ylabel('Y [mm]');
 		self.ProjectionX = array(Xp)
 		self.ProjectionY = array(Yp)
-		
+
+#------------------------------------------------------------------------------ 
+# Save XY projection points
 	def PrintProjection(self,FileName='ProjectionXY'):
 		Output = transpose(vstack((self.ProjectionX,self.ProjectionY)) )
 		savetxt(FileName,Output)
 
+#------------------------------------------------------------------------------ 
+# Plot All projections
 	def PlotALL(self,FIG=0,NPoints=1000,Mod='-',Title = ' '):
 
 		f=pl.figure(FIG)

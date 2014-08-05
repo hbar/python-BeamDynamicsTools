@@ -70,6 +70,9 @@ Additional class variables include:
 - `Plot2D()` Generates 2D plot Type = 'poloidal' or 'top' projection
 - `Figure3D()` Generates 3D figure axes
 - `Plot3D()` Generates 3D plot of trajectory
+- `PlotB()` Plot magnetic Field components along beam trajectory
+- `PlotV()` Plot velocity components along beam trajectory
+- `SaveFieldParameters(Path)` Save magnetic field and curvature parameters `Path`='SaveDirectory/'
 
 Beam class
 ----
