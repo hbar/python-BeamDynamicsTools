@@ -9,9 +9,10 @@ Examples
 
 `example2.py` Simulation of trajectory calculation for 4 typical beam trajectories for AIMS analysis in the Alcator C-Mod tokamak.
 
-classes
+Classes
 ==========
-Classes are found in /lib/
+
+Classes are found in `/lib/BeamDynamicsTools/`
 
 Trajectory class
 ----------
@@ -19,7 +20,7 @@ Calculates beam centroid trajectory based on initial beam parameters, magnetic f
 
 `Trajectory(self,Vessel,B,Bv,dS,r0,v0,a0,M0,T0,I0,Freq,Nmax,Smin,Smax,Method)`
 
-###Inputs:
+####Inputs:
 - `Vessel = Defines wall (boundary class)
 - `B` =  Magnetic Field from toroidal field coils (BfieldTF class) (unit:Tesla)
 - `Bv` = Magnetic Field from vertical field coils (BfieldVF class) (unit:Tesla)
@@ -38,7 +39,7 @@ Calculates beam centroid trajectory based on initial beam parameters, magnetic f
 	- =`'Leapfrog'` (classical leapfrog method, reduces first order error)
 	- =`'Euler'` (classical Euler integration method)
 
-###Class Variables
+####Class Variables:
 
 For each integration step these lists are appended along the beam's trajectory:
 
@@ -58,7 +59,7 @@ Additional class variables include:
 
 - `self.target` Geometric parameters describing beam intersection with boundary (Target class type)
 
-###Methods:
+####Methods:
 
 - `BeamBasis()` Calculates local basis and appends `self.BasisM3` and `self.BasisM6`
 - `Plot2D()` Generates 2D plot Type = 'poloidal' or 'top' projection
@@ -71,18 +72,18 @@ The beam class stores all of the parameters used to describe an ion beam. The th
 
 `Beam(Trajectory,Sigma0)`
 
-### Inputs:
+####Inputs:
 
 - `Trajectory` = input trajectory (Trajectory class)
 - `Sigma0` = Initial 6x6 sigma matrix defining beam envelope
 
-###Class Variables:
+####Class Variables:
 
 - The Beam class contains all of the the variables stored in the input Trajectory.
 - `self.Sigma0` Initial 6x6 sigma matrix defining beam envelope
 - 
 
-### Methods:
+####Methods:
 
 - `'self.Trace()'` Calculates evolution of sigma matrix Sigma0 along the trajectory.  The the local values for velocity, magnetic field are used to transform the sigma matrix based on a linear model.
 
@@ -99,39 +100,17 @@ Target class
 - `RT` = Position vector of target
 - `Rdet` = Position vector of detector
 
-BfieldTF class
---------
-
-`BfieldTF(B0, R0, Phi0, Ncoils, Rmin, Rmax)` Generates a set of toroidal field coils using a 2D current filament model.
-
-- `B0` = toroidal field on axis at R0, (unit:Tesla)
-- `R0` = major radius of torus
-- `Phi0` = Toroidal offset of first TF coil leg
-- `Ncoils` = Number of TF Coils
-- `Rmin` = Radial position of inner TF coil legs
-- `Rmax` = Radial position of outer TF coil legs
-- Method: `self.local([x,y,z])` returns local B-field vector
-
-BfieldVF class
---------------
-
-`BfieldVF(B0, RCoil])` Generates a set of horizontal current loops used to calculate a vertical field based on the elliptic integral solution for a current loop. 
-
-- `B0` = toroidal field on axis at R0, (unit:Tesla)
-- `RCoil` = list of horizontal current loops centered at [0,0] defined by [R,Z]
-- Method: `self.local([x,y,z])` returns local B-field vector.
-
 Boundary class
 -------------
 
 `Boundary(Rb,Zb,cw)` Defines a toroidally symmetric boundary from a set of R and Z points.  This is used to detect the intersection of the beam with the wall.
 
-###Inputs:
+####Inputs:
 
 - `Rb,Zb` = List of radial and vertical coordinates representing the vertices of a polygon used to define a toroidally symmetric boundary.  
 - `cw` = Determines if Rb,Zb points are connected clockwise or counter clockwise. This is important to ensure that the unit normal vectors point in. clockwise: cw=1, counter clockwise: cw=-1.
 
-###Class Variables:
+####Class Variables:
 `self.Cvec` = List of vertex position vectors (corners)
 `self.Cmatrix` = Nx3 matrix of vertex position vectors
 `self.Mvec` = List of midpoint position vectors 
@@ -156,7 +135,30 @@ Boundary class
 	- `Nt` = Draw Nt poloidal contours
 	- `Color` Boundary color e.g. =`'b'`
 	- `PhiMin, PhiMax` = Angular limits of revolved surface plot
- 
+
+
+BfieldTF class
+--------
+
+`BfieldTF(B0, R0, Phi0, Ncoils, Rmin, Rmax)` Generates a set of toroidal field coils using a 2D current filament model.
+
+- `B0` = toroidal field on axis at R0, (unit:Tesla)
+- `R0` = major radius of torus
+- `Phi0` = Toroidal offset of first TF coil leg
+- `Ncoils` = Number of TF Coils
+- `Rmin` = Radial position of inner TF coil legs
+- `Rmax` = Radial position of outer TF coil legs
+- Method: `self.local([x,y,z])` returns local B-field vector
+
+BfieldVF class
+--------------
+
+`BfieldVF(B0, RCoil])` Generates a set of horizontal current loops used to calculate a vertical field based on the elliptic integral solution for a current loop. 
+
+- `B0` = toroidal field on axis at R0, (unit:Tesla)
+- `RCoil` = list of horizontal current loops centered at [0,0] defined by [R,Z]
+- Method: `self.local([x,y,z])` returns local B-field vector.
+
 Code Tests
 ==========
 
