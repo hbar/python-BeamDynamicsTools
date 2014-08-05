@@ -4,9 +4,10 @@ Ion beam trajectory and envelope dynamics code written to simulate ion beams in 
 
 Examples
 ========
-`example1.py`
 
-Simulation of trajectory and envelope dynamics calculation for 4 typical beam trajectories for AIMS analysis in the Alcator C-Mod tokamak.
+`example1.py` Simulation of trajectory and envelope dynamics calculation for 4 typical beam trajectories for AIMS analysis in the Alcator C-Mod tokamak.
+
+`example2.py` Simulation of trajectory calculation for 4 typical beam trajectories for AIMS analysis in the Alcator C-Mod tokamak.
 
 classes
 ==========
@@ -19,23 +20,23 @@ Calculates beam centroid trajectory based on initial beam parameters, magnetic f
 `Trajectory(self,Vessel,B,Bv,dS,r0,v0,a0,M0,T0,I0,Freq,Nmax,Smin,Smax,Method)`
 
 ###Inputs:
-- Vessel = Defines wall (boundary class)
-- B =  Magnetic Field from toroidal field coils (BfieldTF class) (unit:Tesla)
-- Bv = Magnetic Field from vertical field coils (BfieldVF class) (unit:Tesla)
-- dS = Step size (unit:m)
-- r0 = Beam injection position vector: array([x,y,z]) (unit:m) 
-- v0 = Initial velocity unit vector, array([Vx, Vy, Vz]), (unit vector, scaled to match T0)
-- a0 = Initial acceleration vector, array([ax, ay, az]), (unit:kg*m/s^2)
-- M0 = Ion rest mass (unit:eV/c^2)
-- T0 = Beam kinetic energy (unit:eV)
-- I0 = Beam current (unit:Amps)
-- Freq = RF frequency of accelerator (unit: Hz)
-- Nmax = maximum number of integration steps
-- Smax = maximum trajectory length (unit: m)
-- Method = Method used to calculate trajectory
-	- ='Relativistic' (relativistic Euler integration method)
-	- ='Leapfrog' (classical leapfrog method, reduces first order error)
-	- ='Euler' (classical Euler integration method)
+- `Vessel = Defines wall (boundary class)
+- `B` =  Magnetic Field from toroidal field coils (BfieldTF class) (unit:Tesla)
+- `Bv` = Magnetic Field from vertical field coils (BfieldVF class) (unit:Tesla)
+- `dS` = Step size (unit:m)
+- `r0` = Beam injection position vector: array([x,y,z]) (unit:m) 
+- `v0` = Initial velocity unit vector, array([Vx, Vy, Vz]), (unit vector, scaled to match T0)
+- `a0` = Initial acceleration vector, array([ax, ay, az]), (unit:kg*m/s^2)
+- `M0` = Ion rest mass (unit:eV/c^2)
+- `T0` = Beam kinetic energy (unit:eV)
+- `I0` = Beam current (unit:Amps)
+- `Freq` = RF frequency of accelerator (unit: Hz)
+- `Nmax` = maximum number of integration steps
+- `Smax` = maximum trajectory length (unit: m)
+- `Method` = Method used to calculate trajectory
+	- =`'Relativistic'` (relativistic Euler integration method)
+	- =`'Leapfrog'` (classical leapfrog method, reduces first order error)
+	- =`'Euler'` (classical Euler integration method)
 
 ###Class Variables
 
@@ -66,59 +67,96 @@ Additional class variables include:
 
 Beam class
 ----
-tools for calculating the evolution of the beam envelope sigma matrix along the trajectory
+The beam class stores all of the parameters used to describe an ion beam. The the Trace() method is used to calculate the evolution of the beam envelope sigma matrix along the trajectory.
 
 `Beam(Trajectory,Sigma0)`
 
 ### Inputs:
-- Trajectory = input trajectory (Trajectory class)
-- Sigma0 = initial 6x6 sigma matrix defining beam envelope
+
+- `Trajectory` = input trajectory (Trajectory class)
+- `Sigma0` = Initial 6x6 sigma matrix defining beam envelope
+
+###Class Variables:
+
+- The Beam class contains all of the the variables stored in the input Trajectory.
+- `self.Sigma0` Initial 6x6 sigma matrix defining beam envelope
+- 
 
 ### Methods:
 
-- 'self.Trace()' Calcuates evolution of sigma matrix Sigma0 along the trajectory
--
+- `'self.Trace()'` Calculates evolution of sigma matrix Sigma0 along the trajectory.  The the local values for velocity, magnetic field are used to transform the sigma matrix based on a linear model.
 
+- `'self.ReverseTrace(SigmaFinal)'` Calculates reverse evolution of sigma matrix SigmaFinal along the trajectory.  The the local values for velocity, magnetic field are used to transform the sigma matrix based on a linear model. This is used to predict the acceptance envelope that will result in SigmaFinal.
 
-target class
+Target class
 -----------
-Records geometry of the beam as it intersects with the wall and calculates detection geometry.
 
-`target(NORM,TAN,INC,BFieldTF,BFieldVF,RT,Rdet=[1.3075, -0.2457, -0.05900])`
-- NORM, TAN, INC = normal, tangent, and incident beam vector on target (from trajectory calculation).
-- BFieldTF = Toroidal Magnetic Field, (unit:Tesla), (bfieldTF class)
-- BFieldVF = Vertical Magnetic Field, (unit:Tesla), (bfieldVF class)
+`Target(NORM,TAN,INC,BFieldTF,BFieldVF,RT,Rdet)` Records geometry of the beam as it intersects with the wall and calculates detection geometry.
 
-bfieldTF class
+- `NORM, TAN, INC` = normal, tangent, and incident beam vector on target (from trajectory calculation).
+- `BFieldTF` = Toroidal Magnetic Field, (unit:Tesla), (BfieldTF class)
+- `BFieldVF` = Vertical Magnetic Field, (unit:Tesla), (BfieldVF class)
+- `RT` = Position vector of target
+- `Rdet` = Position vector of detector
+
+BfieldTF class
 --------
-Generates a set of toroidal field coils
 
-`bfieldTF(B0=1.0, R0=0.66, Phi0=2*pi/40, Ncoils=20, Rmin=0.1947965, Rmax=1.195229)`
-- B0 = toroidal field on axis at R0, (unit:Tesla)
-- R0 = major radius of torus
-- Phi0 = Toroidal offset of first TF coil leg
-- Ncoils = Number of TF Coils
-- Rmin = Radial position of inner TF coil legs
-- Rmax = Radial position of outer TF coil legs
-- self.local([x,y,z]) returns local B-field vector
+`BfieldTF(B0, R0, Phi0, Ncoils, Rmin, Rmax)` Generates a set of toroidal field coils using a 2D current filament model.
 
-bfieldVF class
+- `B0` = toroidal field on axis at R0, (unit:Tesla)
+- `R0` = major radius of torus
+- `Phi0` = Toroidal offset of first TF coil leg
+- `Ncoils` = Number of TF Coils
+- `Rmin` = Radial position of inner TF coil legs
+- `Rmax` = Radial position of outer TF coil legs
+- Method: `self.local([x,y,z])` returns local B-field vector
+
+BfieldVF class
 --------------
-Generates a set of horizontal current loops used to calculate a vertical field.
 
-`bfieldVF(B0=1.0, RCoil=[array([1.504188,0.440817]),array([1.504188,-0.440817])])`
-- B0 = toroidal field on axis at R0, (unit:Tesla)
-- RCoil = list of horizontal current loops centered at [0,0] defined by [R,Z]
-- self.local([x,y,z]) returns local B-field vector
+`BfieldVF(B0, RCoil])` Generates a set of horizontal current loops used to calculate a vertical field based on the elliptic integral solution for a current loop. 
 
-boundary class
+- `B0` = toroidal field on axis at R0, (unit:Tesla)
+- `RCoil` = list of horizontal current loops centered at [0,0] defined by [R,Z]
+- Method: `self.local([x,y,z])` returns local B-field vector.
+
+Boundary class
 -------------
-Defines a toroidally symmetric boundary from a set of R and Z points.  This is used to detect the intersection of the beam with the wall.
 
-`boundary(Rb,Zb,cw=-1)`
-- Rb,Zb = lists of radial and vertical positions used to define a toroidally symmetric boundary
-- cw = determines if Rb,Zb points are connected clockwise or counter clockwise.  Determines if boundary is convex or concave
+`Boundary(Rb,Zb,cw)` Defines a toroidally symmetric boundary from a set of R and Z points.  This is used to detect the intersection of the beam with the wall.
 
+###Inputs:
+
+- `Rb,Zb` = List of radial and vertical coordinates representing the vertices of a polygon used to define a toroidally symmetric boundary.  
+- `cw` = Determines if Rb,Zb points are connected clockwise or counter clockwise. This is important to ensure that the unit normal vectors point in. clockwise: cw=1, counter clockwise: cw=-1.
+
+###Class Variables:
+`self.Cvec` = List of vertex position vectors (corners)
+`self.Cmatrix` = Nx3 matrix of vertex position vectors
+`self.Mvec` = List of midpoint position vectors 
+`self.Mmatrix` = Nx3 matrix of midpoint position vectors
+`self.Tvec` = List of tangent vectors 
+`self.Tmatrix` = Nx3 matrix of tangent vectors
+`self.Nvec` = List of Normal vectors
+`self.Nmatrix` = Nx3 matrix of normal vectors
+`self.Nv` = number of vertices
+
+###Class Methods:
+
+- `InBoundary(r)` If position r=[x,y,z] is in the boundary, returns `True`.
+- `Xboundary(r0,r1)` If boundary is crossed between r0 and r1, return `True,NORM,TAN,INC,RT` (inputs for Target class)
+- `Plot2D()` Draw 2D projection of boundary with normal vectors.
+- `Border(Type)` Draw 2D proejection of boundary
+	- for revolved boundary surfaces,`Type` = `'poloidal'` or `'top'`
+
+- `Figure3D()` Generates 3D figure axes
+- `Plot3D(ax,Nt,Color,PhiMin,PhiMax)` Generates 3D plot of trajectory
+	- `ax` = Figure3D()
+	- `Nt` = Draw Nt poloidal contours
+	- `Color` Boundary color e.g. =`'b'`
+	- `PhiMin, PhiMax` = Angular limits of revolved surface plot
+ 
 Code Tests
 ==========
 

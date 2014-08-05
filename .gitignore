@@ -6,6 +6,7 @@ output/sigma/*
 VintageCode/
 VintageCode/*
 output/
+data/sigma_trace3d/
 .gitignore~
 *.sh~
 *.md~
