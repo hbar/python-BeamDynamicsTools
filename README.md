@@ -1,6 +1,10 @@
 # Beam Transport Simulation Code
 
-`python-BeamDynamicsTools` is a python library for simulating ion beam trajectories and the phase space envelope dynamics with 3D boundary conditions in complex magnetic fields. The examples, code tests, classes, and methods contained in this repository are described below.
+The python library `python-BeamDynamicsTools` is designed for simulating ion beam trajectories and the evolution of beam's phase space distribution envelope with 3D boundary conditions and in complex magnetic fields. This code trajectories with the `Trajectory` class, recursively applying the Lorentz force to the beam centroid within 3D boundary conditions defined with the `Boundary` class. When the beam intersects the boundary, an instance of the `Target` class is created containing geometric parameters and coordinate system information describing the beam target. 
+
+The `Beam` class uses the position, velocity, and magnetic field and magnetic field gradient information recorded in the trajectory calculation calculate the evolution of the envelope of the beam's 6D phase space (x,y,z,Vx,Vy,Vz) distribution. The envelope is described by a 6x6 matrix representing a 6D ellipsoidal 1-sigma envelope of the distribution. Using transfer matrices calculated from 3D linear models for the Lorentz force and space charge effects, the evolution of the beam envelope is calculated interatively along the trajectory allowing the beam distribution to be predicted on target.  
+
+The the appropriate relativistic parameters are included in these calculations so the these tools can be applied to low energy ion beams as well as highly relativistic electron beams. The examples, code tests, classes, and methods contained in this repository are described below.
 
 Examples
 ========
