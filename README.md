@@ -21,7 +21,7 @@ Calculates beam centroid trajectory based on initial beam parameters, magnetic f
 `Trajectory(self,Vessel,B,Bv,dS,r0,v0,a0,M0,T0,I0,Freq,Nmax,Smin,Smax,Method)`
 
 ####Inputs:
-- `Vessel = Defines wall (boundary class)
+- `Vessel` = Defines wall (boundary class)
 - `B` =  Magnetic Field from toroidal field coils (BfieldTF class) (unit:Tesla)
 - `Bv` = Magnetic Field from vertical field coils (BfieldVF class) (unit:Tesla)
 - `dS` = Step size (unit:m)
@@ -57,7 +57,7 @@ For each integration step these lists are appended along the beam's trajectory:
 
 Additional class variables include:
 
-- `self.target` Geometric parameters describing beam intersection with boundary (Target class type)
+- `self.target` Geometric parameters describing beam intersection with boundary (Target class)
 
 ####Methods:
 
@@ -68,9 +68,8 @@ Additional class variables include:
 
 Beam class
 ----
-The beam class stores all of the parameters used to describe an ion beam. The the Trace() method is used to calculate the evolution of the beam envelope sigma matrix along the trajectory.
 
-`Beam(Trajectory,Sigma0)`
+`Beam(Trajectory,Sigma0)` The beam class stores all of the parameters used to describe an ion beam. The the Trace() method is used to calculate the evolution of the beam envelope sigma matrix along the trajectory.
 
 ####Inputs:
 
@@ -81,8 +80,8 @@ The beam class stores all of the parameters used to describe an ion beam. The th
 
 - The Beam class contains all of the the variables stored in the input Trajectory.
 - `self.Sigma0` Initial 6x6 sigma matrix defining beam envelope
-- 
-
+- `self.Sigma` list of 6x6 sigma matrices defining beam envelope alont the trajectory.
+- `self.TransferM` list of 6x6 transfer matrices defining sigma transformations due to fields along the trajectory
 ####Methods:
 
 - `'self.Trace()'` Calculates evolution of sigma matrix Sigma0 along the trajectory.  The the local values for velocity, magnetic field are used to transform the sigma matrix based on a linear model.
