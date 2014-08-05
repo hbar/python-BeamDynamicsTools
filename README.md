@@ -19,14 +19,13 @@ Classes
 
 Classes are found in `/lib/BeamDynamicsTools/`
 
-Trajectory class
+Trajectory Class
 ----------
-Calculates beam centroid trajectory based on initial beam parameters, magnetic field, and boundary.
 
-`Trajectory(self,Vessel,B,Bv,dS,r0,v0,a0,M0,T0,I0,Freq,Nmax,Smin,Smax,Method)`
+`Trajectory(self,Vessel,B,Bv,dS,r0,v0,a0,M0,T0,I0,Freq,Nmax,Smin,Smax,Method)` Calculates beam centroid trajectory based on initial beam parameters, magnetic field, and boundary.
 
-####Inputs:
-- `Vessel` = Defines wall (boundary class)
+####Trajectory Inputs:
+- `Vessel` = Defines wall (Boundary class)
 - `B` =  Magnetic Field from toroidal field coils (BfieldTF class) (unit:Tesla)
 - `Bv` = Magnetic Field from vertical field coils (BfieldVF class) (unit:Tesla)
 - `dS` = Step size (unit:m)
@@ -44,7 +43,7 @@ Calculates beam centroid trajectory based on initial beam parameters, magnetic f
 	- =`'Leapfrog'` (classical leapfrog method, reduces first order error)
 	- =`'Euler'` (classical Euler integration method)
 
-####Class Variables:
+####Trajectory Variables:
 
 For each integration step these lists are appended along the beam's trajectory:
 
@@ -64,7 +63,7 @@ Additional class variables include:
 
 - `self.target` Geometric parameters describing beam intersection with boundary (Target class)
 
-####Methods:
+####Trajectory Methods:
 
 - `BeamBasis()` Calculates local basis and appends `self.BasisM3` and `self.BasisM6`
 - `Plot2D()` Generates 2D plot Type = 'poloidal' or 'top' projection
@@ -74,29 +73,29 @@ Additional class variables include:
 - `PlotV()` Plot velocity components along beam trajectory
 - `SaveFieldParameters(Path)` Save magnetic field and curvature parameters `Path`='SaveDirectory/'
 
-Beam class
-----
+Beam Class
+----------
 
 `Beam(Trajectory,Sigma0)` The beam class stores all of the parameters used to describe an ion beam. The the Trace() method is used to calculate the evolution of the beam envelope sigma matrix along the trajectory.
 
-####Inputs:
+####Beam Inputs:
 
 - `Trajectory` = input trajectory (Trajectory class)
 - `Sigma0` = Initial 6x6 sigma matrix defining beam envelope
 
-####Class Variables:
+####Beam Variables:
 
 - The Beam class contains all of the the variables stored in the input Trajectory.
 - `self.Sigma0` Initial 6x6 sigma matrix defining beam envelope
 - `self.Sigma` list of 6x6 sigma matrices defining beam envelope alont the trajectory.
 - `self.TransferM` list of 6x6 transfer matrices defining sigma transformations due to fields along the trajectory
-####Methods:
+####Beam Methods:
 
 - `'self.Trace()'` Calculates evolution of sigma matrix Sigma0 along the trajectory.  The the local values for velocity, magnetic field are used to transform the sigma matrix based on a linear model.
 
 - `'self.ReverseTrace(SigmaFinal)'` Calculates reverse evolution of sigma matrix SigmaFinal along the trajectory.  The the local values for velocity, magnetic field are used to transform the sigma matrix based on a linear model. This is used to predict the acceptance envelope that will result in SigmaFinal.
 
-Target class
+Target Class
 -----------
 
 `Target(NORM,TAN,INC,BFieldTF,BFieldVF,RT,Rdet)` Records geometry of the beam as it intersects with the wall and calculates detection geometry.
@@ -107,17 +106,18 @@ Target class
 - `RT` = Position vector of target
 - `Rdet` = Position vector of detector
 
-Boundary class
+Boundary Class
 -------------
 
 `Boundary(Rb,Zb,cw)` Defines a toroidally symmetric boundary from a set of R and Z points.  This is used to detect the intersection of the beam with the wall.
 
-####Inputs:
+####Boundary Inputs:
 
 - `Rb,Zb` = List of radial and vertical coordinates representing the vertices of a polygon used to define a toroidally symmetric boundary.  
 - `cw` = Determines if Rb,Zb points are connected clockwise or counter clockwise. This is important to ensure that the unit normal vectors point in. clockwise: cw=1, counter clockwise: cw=-1.
 
-####Class Variables:
+####Boundary Class Variables:
+
 `self.Cvec` = List of vertex position vectors (corners)
 `self.Cmatrix` = Nx3 matrix of vertex position vectors
 `self.Mvec` = List of midpoint position vectors 
@@ -128,7 +128,7 @@ Boundary class
 `self.Nmatrix` = Nx3 matrix of normal vectors
 `self.Nv` = number of vertices
 
-###Class Methods:
+####Boundary Class Methods:
 
 - `InBoundary(r)` If position r=[x,y,z] is in the boundary, returns `True`.
 - `Xboundary(r0,r1)` If boundary is crossed between r0 and r1, return `True,NORM,TAN,INC,RT` (inputs for Target class)
@@ -137,14 +137,49 @@ Boundary class
 	- for revolved boundary surfaces,`Type` = `'poloidal'` or `'top'`
 
 - `Figure3D()` Generates 3D figure axes
-- `Plot3D(ax,Nt,Color,PhiMin,PhiMax)` Generates 3D plot of trajectory
+- `Plot3D(ax,Nt,Color,PhiMin,PhiMax)` Generates 3D plot of boundary
 	- `ax` = Figure3D()
 	- `Nt` = Draw Nt poloidal contours
 	- `Color` Boundary color e.g. =`'b'`
 	- `PhiMin, PhiMax` = Angular limits of revolved surface plot
 
+Ellipse Class:
+--------------
 
-BfieldTF class
+`Ellipse(SIG)` Converts the 6x6 sigma matrix `SIG` into all relevant ellipse parameters to describe a 6D ellipsoidal envelope function.  This class also contains plotting functions for projecting the beam envelope onto all phase planes. 
+
+####Ellipse Variables:
+
+- 2x2 sigma matrix for the x-x', y-y', z-z' plane:
+	- `self.SigX`, `self.SigY`, `self.SigZ`
+- Transverse emittance in the x-x', y-y' plane:
+	- `self.EmittenceX`, `self.EmittenceY`
+- Longitudinal emittance in the z,z' plane:
+	- `self.EmittenceZ`
+- Twiss parameters [alpha, beta, gamma, emittance] in the x-x', y-y', z-z' plane:
+	- `self.TwissXX1`, `self.TwissYY1`, `self.TwissZZ1`
+- Beam's spatial width in each phase plane:
+	- `self.WidthX`, `self.WidthY`, `self.WidthZ`
+- Beam's angular envelope in each phase plane:
+	- `self.DivergenceX`, `self.DivergenceY`, `self.DivergenceZ`
+- Ellipse parameters [alpha, beta, gamma, emittance] in the x-y, x-z, y-z spatial planes:
+	- `self.TwissXY`, `self.TwissXZ`, `self.TwissYZ`
+- Emittance in the x-y, x-z, y-z spatial planes:
+	-`self.EmittenceXY`, `self.EmittenceXZ`, `self.EmittenceYZ`
+
+####Ellipse Methods:
+
+- `SpatialWidth()` Return Spatial Width
+- `AngularWidth()` Return Angular Width
+- `GenerateXY(TWISS,NPoints)` Generate points along an ellipse a give set of twiss parameters
+- `MismatchFactor(E1,Type=1)` Calculate Mismatch factor between self and another ellipse E1
+- `PlotXY(NPoints,L,Mod,Label,Title,Scale,Rotate)` Plot transverse spatial projection
+- `PlotXX1`, `PlotYY1`. `PlotZZ1(NPoints,L,Mod,Label,Title,Scale,Rotate)` Plot projection on desired phase plane
+- `ProjectXY(SigmaBasis,TargetBasis,Scale, Label,Title,NPoints,Mod)` Project transverse beam spot onto off-normal surface.
+- `PrintProjection(FileName)` Save XY projection points
+- `PlotALL(FIG,NPoints,Mod,Title)` Plot All projections
+
+BfieldTF Class
 --------
 
 `BfieldTF(B0, R0, Phi0, Ncoils, Rmin, Rmax)` Generates a set of toroidal field coils using a 2D current filament model.
@@ -157,7 +192,7 @@ BfieldTF class
 - `Rmax` = Radial position of outer TF coil legs
 - Method: `self.local([x,y,z])` returns local B-field vector
 
-BfieldVF class
+BfieldVF Class
 --------------
 
 `BfieldVF(B0, RCoil])` Generates a set of horizontal current loops used to calculate a vertical field based on the elliptic integral solution for a current loop. 
