@@ -12,32 +12,73 @@ classes
 ==========
 Classes are found in /lib/
 
-trajectory class
+Trajectory class
 ----------
 Calculates beam centroid trajectory based on initial beam parameters, magnetic field, and boundary.
 
-`trajectory(Vessel,B,Bv,dS=1e-3,r0,v0,a0,A0,E0,I0,Freq,Nmax,Smin)`
-- B =  Magnetic Field from toroidal field coils (bfieldTF class) (unit:Tesla)
-- Bv = Magnetic Field from vertical cield coils (bfieldVF class) (unit:Tesla)
-- Vessel = Defines wall (boundary class)
-- A0 = atomic mass, (unit:amu)
-- E0 = beam energy, (unit:MeV)
-- r  = position vector, [x, y, z], (unit:m)
-- v  = velocity vector, [Vx, Vy, Vz], (unit vector, scaled by sqrt(2*E0/m)
-- a  = acceleration vector, [ax, ay, az], (unit:kg*m/s^2)
-- I0 = Beam current (unit:Amps)
-- Freq = RF frequency of accelerator
-- Nmax = maximum number of integration steps
-- Smax = maximum trajectory length
+`Trajectory(self,Vessel,B,Bv,dS,r0,v0,a0,M0,T0,I0,Freq,Nmax,Smin,Smax,Method)`
 
-beam class
+###Inputs:
+- Vessel = Defines wall (boundary class)
+- B =  Magnetic Field from toroidal field coils (BfieldTF class) (unit:Tesla)
+- Bv = Magnetic Field from vertical field coils (BfieldVF class) (unit:Tesla)
+- dS = Step size (unit:m)
+- r0 = Beam injection position vector: array([x,y,z]) (unit:m) 
+- v0 = Initial velocity unit vector, array([Vx, Vy, Vz]), (unit vector, scaled to match T0)
+- a0 = Initial acceleration vector, array([ax, ay, az]), (unit:kg*m/s^2)
+- M0 = Ion rest mass (unit:eV/c^2)
+- T0 = Beam kinetic energy (unit:eV)
+- I0 = Beam current (unit:Amps)
+- Freq = RF frequency of accelerator (unit: Hz)
+- Nmax = maximum number of integration steps
+- Smax = maximum trajectory length (unit: m)
+- Method = Method used to calculate trajectory
+	- ='Relativistic' (relativistic Euler integration method)
+	- ='Leapfrog' (classical leapfrog method, reduces first order error)
+	- ='Euler' (classical Euler integration method)
+
+###Class Variables
+
+For each integration step these lists are appended along the beam's trajectory:
+
+- `self.r` position vectors
+- `self.s` longitudinal coordinate s
+- `self.dS`longitudinal step size
+- `self.B` local magnetic field vectors in Cartesian coordinates
+- `self.a` acceleration vectors
+- `self.v` velocity vectors
+- `self.Beta` v/c vectors along trajectory
+- `self.beta` |v/v| along trajectory
+- `self.gamma` relativistic parameter gamma=1/sqrt(1-beta)
+- `self.BaisM3` 3x3 matrix of column vectors representing the local x,y,z basis
+- `self.BaisM6` 6x6 matrix of column vectors representing the local x,x',y,y',l,dp/p phase space basis
+
+Additional class variables include:
+
+- `self.target` Geometric parameters describing beam intersection with boundary (Target class type)
+
+###Methods:
+
+- `BeamBasis()` Calculates local basis and appends `self.BasisM3` and `self.BasisM6`
+- `Plot2D()` Generates 2D plot Type = 'poloidal' or 'top' projection
+- `Figure3D()` Generates 3D figure axes
+- `Plot3D()` Generates 3D plot of trajectory
+
+Beam class
 ----
 tools for calculating the evolution of the beam envelope sigma matrix along the trajectory
 
-`beam(Trajectory,Sigma0)`
-- Trajectory = input trajectory (trajectory class)
+`Beam(Trajectory,Sigma0)`
+
+### Inputs:
+- Trajectory = input trajectory (Trajectory class)
 - Sigma0 = initial 6x6 sigma matrix defining beam envelope
-- self.Trace() = Calcuates evolution of sigma matrix Sigma0 along the trajectory
+
+### Methods:
+
+- 'self.Trace()' Calcuates evolution of sigma matrix Sigma0 along the trajectory
+-
+
 
 target class
 -----------
