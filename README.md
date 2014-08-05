@@ -128,7 +128,7 @@ Boundary Class
 `self.Nmatrix` = Nx3 matrix of normal vectors
 `self.Nv` = number of vertices
 
-####Boundary Class Methods:
+####Boundary Methods:
 
 - `InBoundary(r)` If position r=[x,y,z] is in the boundary, returns `True`.
 - `Xboundary(r0,r1)` If boundary is crossed between r0 and r1, return `True,NORM,TAN,INC,RT` (inputs for Target class)
