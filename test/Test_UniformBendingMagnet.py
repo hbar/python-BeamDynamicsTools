@@ -6,7 +6,7 @@ from numpy import *
 import pylab as pl
 
 L0 = 0.1
-L1 = 1.0
+L1 = 10.0
 
 Rb = [L0, L0 , L1 , L1 , L0]
 Zb = [0.0, L1 , L1 ,-L1 ,-L1]
@@ -35,12 +35,13 @@ Bv = BfieldVF(B0=0.00000)
 if True:
 #	B = BfieldTF(B0=0.2)
 	B = Bfieldc(B0=BR)
-	T = Trajectory(Vessel,B,Bv,r0=[1.0,0.0,-1.0],v0=[1.0,0.0,0.0],Target=False )
-	plot(Rb,Zb);xlim(-2,2);ylim(-2,2);
+	T = Trajectory(Vessel,B,Bv,r0=[10.0,0.0,1.0],v0=[-1.0,0.0,0.0],Nmax=100)
+	plot(Rb,Zb);
 	T.Plot2D()
 #	T.PlotB()
 	pl.xlabel(r'X'); pl.ylabel(r'Y')
 	pl.title(r'?')
+	xlim(-L0,L1*1.1);ylim(-L1*1.1,L1*1.1);
 	Y = []
 	for i in range(len(T.B)):
 #		Y.append(norm( cross(T.v[i],T.B[i]) ) )
@@ -49,7 +50,7 @@ if True:
 
 #	pl.figure(); pl.plot(Y)
 
-if True:
+if False:
 	S0 = matrix([
 	[0.577100, 0.398000, 0.000000, 0.000000, 0.000000, 0.000000],
 	[0.398000, 171.8262, 0.000000, 0.000000, 0.000000, 0.000000],
@@ -58,7 +59,7 @@ if True:
 	[0.000000, 0.000000, 0.000000, 0.000000, 1.297156, 2.343722],
 	[0.000000, 0.000000, 0.000000, 0.000000, 2.343722, 134.9344]],float)
 
-	S0 = matrix(loadtxt('SigmaFinal/SigmaInj.txt'))
+	S0 = matrix(loadtxt('data/SigmaFinal/SigmaInj.txt'))
 
 	Beam = beam(T,S0,Target=False)
 
@@ -71,6 +72,6 @@ if True:
 	Em2 = Ellipse(Beam.Sigma[int(len(Beam.Sigma)*0.66)]); Em2.PlotALL()
 	Ef = Ellipse(Beam.Sigma[-1]); Ef.PlotALL(Title = STR)
 
-	savetxt('SigmaFinal/SigmaBend90.txt',Beam.Sigma[-1])
+#	savetxt('data/SigmaFinal/SigmaBend90.txt',Beam.Sigma[-1])
 
-#pl.show()
+pl.show()

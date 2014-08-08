@@ -88,15 +88,13 @@ class Trajectory:
 		self.LineStyle = '-'
 
 		c1=True; c2=True; i = 0
-
-		#NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT
-		self.target = Target([nan,nan,nan],[nan,nan,nan],[nan,nan,nan],BFieldTF,BFieldVF,[nan,nan,nan])
-
+		IN=False; NormalV=zeros(3); TangentV=zeros(3); 
+		IncidentV=zeros(3); RT=zeros(3)
 #===============================================================================
 # # Relativistic Euler Integration:
 #===============================================================================
 		if Method=='Relativistic':
-			while (c1 or c2) and i<Nmax:# and self.s[-1] < Smax:
+			while (c1 or c2) and (i<Nmax and self.s[-1]<Smax):
 
 				self.r.append( self.r[-1] + self.v[-1]*dt)
 
@@ -111,8 +109,8 @@ class Trajectory:
 				self.v.append( self.v[-1] + self.a[-1]*dt )
 
 				self.dS.append( self.s[-1] - self.s[-2] )
-
-				# Normalized Relativistic Parameters
+#------------------------------------------------------------------------------ 
+			# Normalized Relativistic Parameters
 				self.Beta.append(self.v[-1]/c0)
 				self.beta.append(norm(self.Beta[-1]))
 				self.gamma.append( 1.0 / (1.0-self.beta[-1]**2))
@@ -125,13 +123,13 @@ class Trajectory:
 				if c3:
 					if (not c4):
 						IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
-					#print IN,NormalV,TangentV,IncidentV,RT
-				#record bending radius
-#				self.k.append(qm * cross(self.v[-1],self.B[-1])/self.v0**2)
+#------------------------------------------------------------------------------ 
+			#record curvature and bending radius
 				self.k.append(norm(self.a[-1]/self.v0**2))
 				self.Rc.append(1.0/self.k[-1])
 
-				# B Record Gradients
+#------------------------------------------------------------------------------ 
+			# B Record Gradients
 				vecR = -1.0*(self.a[-1])/norm(self.a[-1]);
 				vecB = self.B[-1]/norm(self.B[-1])
 				Br2 = norm(B.local(self.r[-1]+vecR*dLB))
@@ -143,29 +141,40 @@ class Trajectory:
 				self.gradBn.append( -1.0 * self.Rc[-1]/norm(self.B[-1]) * (Br2-Br1)/(2.0*dLB) )
 				self.gradBx.append((Br2-Br1)/(2.0*dLB))
 				self.gradBy.append((Bb2-Bb1)/(2.0*dLB))
-
-				# Conditional statements for continuing iteration
+				
+#------------------------------------------------------------------------------ 
+			# Conditional statements for continuing iteration
 				c1 = IN
 				c2 = self.s[-1] < Smin
 				i=i+1;
-#				print i
-#				print sqrt(self.r[-1][0]**2+self.r[-1][1]**2),self.r[-1][2]
 
-#			self.Target = Target(NormalV,TangentV,IncidentV)
+#------------------------------------------------------------------------------ 
+		# Calculate Basis Matrices
 			self.BeamBasis()
 			stop = timeit.default_timer()
 			self.RunTime = stop-start
 			print 'trajectory complete, S = %0.3f m, B0 = %0.4f T, B0 = %0.4f T, RunTime = %0.1f s' % (self.s[-1],self.BFieldTF.B0,self.BFieldVF.B0,self.RunTime )
-			if i<Nmax-2:
+			
+#------------------------------------------------------------------------------ 
+		# Define Target
+			if i<Nmax-1 and self.s[-1]<=Smax:
 				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
 				self.target.SigmaBasis = self.BasisM6[-1]
+#------------------------------------------------------------------------------ 
+		# If no boundary was reached assume normal incidence
+			else:
+				NormalV = array(self.BasisM3[-1][:,2]).flatten()
+				TangentV = array(self.BasisM3[-1][:,1]).flatten()
+				IncidentV = array(self.BasisM3[-1][:,2]).flatten()
+				RT = self.r[-1]
+				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
 			print 'Beam Coordinates Complete'
 			
 #===============================================================================
 # # Leapfrog Integration:
 #===============================================================================
 		if Method=='LeapFrog':
-			while (c1 or c2) and i<Nmax:# and self.s[-1] < Smax:
+			while (c1 or c2) and (i<Nmax and self.s[-1]<Smax):# and self.s[-1] < Smax:
 
 				self.r.append( self.r[-1] + self.v[-1]*dt + 0.5*self.a[-1]*dt*dt)
 
@@ -179,12 +188,14 @@ class Trajectory:
 
 				self.dS.append( self.s[-1] - self.s[-2] )
 
-				# Normalized Relativistic Parameters
+#------------------------------------------------------------------------------ 
+			# Normalized Relativistic Parameters
 				self.Beta.append(self.v[-1]/c0)
 				self.beta.append(norm(self.Beta[-1]))
 				self.gamma.append( 1.0 / (1.0-self.beta[-1]**2))
 
-				# Check to see if beam crosses boundary
+#------------------------------------------------------------------------------ 
+			# Check to see if beam crosses boundary
 				IN = True
 				c3 = self.s[-1] > Smin
 				c4 = Vessel.InBoundary(self.r[-1])
@@ -192,13 +203,14 @@ class Trajectory:
 				if c3:
 					if (not c4):
 						IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
-					#print IN,NormalV,TangentV,IncidentV,RT
-				#record bending radius
+#------------------------------------------------------------------------------ 
+			#record bending radius
 #				self.k.append(qm * cross(self.v[-1],self.B[-1])/self.v0**2)
 				self.k.append(norm(self.a[-1]/self.v0**2))
 				self.Rc.append(1.0/self.k[-1])
 
-				# B Record Gradients
+#------------------------------------------------------------------------------ 
+			# B Record Gradients
 				vecR = -1.0*(self.a[-1])/norm(self.a[-1]);
 				vecB = self.B[-1]/norm(self.B[-1])
 				Br2 = norm(B.local(self.r[-1]+vecR*dLB))
@@ -211,32 +223,39 @@ class Trajectory:
 				self.gradBx.append((Br2-Br1)/(2.0*dLB))
 				self.gradBy.append((Bb2-Bb1)/(2.0*dLB))
 
-				# Conditional statements for continuing iteration
+#------------------------------------------------------------------------------ 
+			# Conditional statements for continuing iteration
 				c1 = IN
 				c2 = self.s[-1] < Smin
 				i=i+1;
-#				print i
-#				print sqrt(self.r[-1][0]**2+self.r[-1][1]**2),self.r[-1][2]
 
-#			self.Target = Target(NormalV,TangentV,IncidentV)
+#------------------------------------------------------------------------------ 
+		# Calculate Basis Matrices
 			self.BeamBasis()
 			stop = timeit.default_timer()
 			self.RunTime = stop-start
 			print 'trajectory complete, S = %0.3f m, B0 = %0.4f T, B0 = %0.4f T, RunTime = %0.1f s' % (self.s[-1],self.BFieldTF.B0,self.BFieldVF.B0,self.RunTime )
-
-			self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
-			self.target.SigmaBasis = self.BasisM6[-1]
+			
+#------------------------------------------------------------------------------ 
+		# Define Target
+			if i<Nmax-1 and self.s[-1]<=Smax:
+				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
+				self.target.SigmaBasis = self.BasisM6[-1]
+#------------------------------------------------------------------------------ 
+		# If no boundary was reached assume normal incidence
+			else:
+				NormalV = array(self.BasisM3[-1][:,2]).flatten()
+				TangentV = array(self.BasisM3[-1][:,1]).flatten()
+				IncidentV = array(self.BasisM3[-1][:,2]).flatten()
+				RT = self.r[-1]
+				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
 			print 'Beam Coordinates Complete'
-
-
-
 
 #===============================================================================
 # Euler Integration:
 #===============================================================================
 		if Method=='Euler':
-			while (c1 or c2) and i<Nmax:
-			#for i in range(Nmax):
+			while (c1 or c2) and (i<Nmax and self.s[-1]<Smax):
 
 				self.r.append( self.r[-1] + self.v[-1]*dt)
 
@@ -250,12 +269,14 @@ class Trajectory:
 
 				self.dS.append( self.s[-1] - self.s[-2] )
 
-				# Normalized Relativistic Parameters
+#------------------------------------------------------------------------------ 
+			# Normalized Relativistic Parameters
 				self.Beta.append(self.v[-1]/c0)
 				self.beta.append(norm(self.Beta[-1]))
 				self.gamma.append( 1.0 / (1.0-self.beta[-1]**2))
 
-				# Check to see if beam crosses boundary
+#------------------------------------------------------------------------------ 
+			# Check to see if beam crosses boundary
 				IN = True
 				c3 = self.s[-1] > Smin
 				c4 = Vessel.InBoundary(self.r[-1])
@@ -264,12 +285,14 @@ class Trajectory:
 					if C4:
 						IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
 
-				#record bending radius
+#------------------------------------------------------------------------------ 
+			#record curvature and bending radius
 #				self.k.append(qm * cross(self.v[-1],self.B[-1])/self.v0**2)
 				self.k.append(norm(self.a[-1]/self.v0**2))
 				self.Rc.append(1.0/self.k[-1])
 
-				# B Record Gradients
+#------------------------------------------------------------------------------ 
+			# B Record Gradients
 				vecR = -1.0*(self.a[-1])/norm(self.a[-1]);
 				vecB = self.B[-1]/norm(self.B[-1])
 				Br2 = norm(B.local(self.r[-1]+vecR*dLB))
@@ -282,24 +305,33 @@ class Trajectory:
 				self.gradBx.append((Br2-Br1)/(2.0*dLB))
 				self.gradBy.append((Bb2-Bb1)/(2.0*dLB))
 
-				# Conditional statements for continuing iteration
+#------------------------------------------------------------------------------ 
+			# Conditional statements for continuing iteration
 				c1 = IN
 				c2 = self.s[-1] < Smin
 				i=i+1;
-#				if not (c1 or c2):
-#					break
-#				print i
-#				print sqrt(self.r[-1][0]**2+self.r[-1][1]**2),self.r[-1][2]
 
-#			self.Target = Target(NormalV,TangentV,IncidentV)
+#------------------------------------------------------------------------------ 
+		# Calculate Basis Matrices
 			self.BeamBasis()
 			stop = timeit.default_timer()
 			self.RunTime = stop-start
 			print 'trajectory complete, S = %0.3f m, B0 = %0.4f T, B0 = %0.4f T, RunTime = %0.1f s' % (self.s[-1],self.BFieldTF.B0,self.BFieldVF.B0,self.RunTime )
-			if Target==True:
-				self.Target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
-				self.Target.SigmaBasis = self.BasisM6[-1]
-				print 'Beam Coordinates Complete'
+			
+#------------------------------------------------------------------------------ 
+		# Define Target
+			if i<Nmax-1 and self.s[-1]<=Smax:
+				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
+				self.target.SigmaBasis = self.BasisM6[-1]
+#------------------------------------------------------------------------------ 
+		# If no boundary was reached assume normal incidence
+			else:
+				NormalV = array(self.BasisM3[-1][:,2]).flatten()
+				TangentV = array(self.BasisM3[-1][:,1]).flatten()
+				IncidentV = array(self.BasisM3[-1][:,2]).flatten()
+				RT = self.r[-1]
+				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
+			print 'Beam Coordinates Complete'
 
 #===============================================================================
 # Class Methods

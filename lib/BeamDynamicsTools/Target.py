@@ -48,8 +48,9 @@ class Target:
 
 #------------------------------------------------------------------------------ 
 # Calculate Angular parameters and vectors
+		print self.NormalV,self.IncidentV
 		self.BeamTargetAngle = pi-arccos(dot(self.NormalV,self.IncidentV))
-		self.GammaTargetAngle = arccos(dot(NORM,self.DetectionVec))
+		self.GammaTargetAngle = arccos(dot(self.NormalV,self.DetectionVec))
 		self.DetectionTargetAngle = arccos(dot(self.DetectionVec,self.IncidentV))
 		NormXY = array([self.NormalV[0],self.NormalV[1]]); NormXY/norm(NormXY)
 		IncXY = -1.0*array([self.IncidentV[0],self.IncidentV[1]]); IncXY/norm(IncXY)
