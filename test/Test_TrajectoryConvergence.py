@@ -11,7 +11,7 @@ Vessel = Boundary(Rb,Zb)
 #Vessel.Plot2D(0)
 
 if False:
-	B = Bfieldc(B0=0.1); Bv=Bfieldc(B0=0.0)
+	B = Bfieldc(B0=0.1); Bv=Bfieldc(B0=0.0001)
 	d0 = 10.0
 	dS = logspace(-5,-2,15)
 	dr = []; T=[];
@@ -39,8 +39,9 @@ if True:
 		#T.Plot2D()
 	
 		x=[]; y=[]; z=[]; S=[]; r=[]; R=[]; rN=[];
-		RL = (T.m0*T.v0) / (T.q0*B.B0)  # mV/qB
-		R0 = array([20.0-RL,0,0.0]) 
+		#RL = (T.m0*T.v0) / (T.q0*B.B0)  # mV/qB
+		RL = T.m0/T.c0 * T.beta[-1] / (B.B0)  # mV/qB
+		R0 = array([20.0-RL,0,0.0])
 	
 		for i in range(len(T.r)):
 			R.append(T.r[i] - R0)
@@ -56,8 +57,8 @@ if True:
 		pl.figure(1); pl.plot(x,z);
 		pl.figure(2); pl.plot(S,abs(1-r/RL));
 		pl.xlabel('S Coordinate [m]'); pl.ylabel(r'Error $\epsilon $'); pl.title(r'$\epsilon = \Delta $r/Rc')
-		pl.figure(3); pl.loglog(S,abs(1-r/RL));
-		pl.xlabel('S Coordinate [m]'); pl.ylabel(r'$\epsilon $'); pl.title(r'$\epsilon = \Delta $r/Rc') 
+#		pl.figure(3); pl.loglog(S,abs(1-r/RL));
+#		pl.xlabel('S Coordinate [m]'); pl.ylabel(r'$\epsilon $'); pl.title(r'$\epsilon = \Delta $r/Rc') 
 		pl.figure(4); pl.plot(S,array(rN))
 		pl.xlabel('S Coordinate [m]'); pl.ylabel(r'Normalized Error $\epsilon_N $'); pl.title(r'$\epsilon_N = \Delta$ r/S')  
 		pl.figure(5); pl.semilogx(S,array(rN))

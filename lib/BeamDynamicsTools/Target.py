@@ -57,7 +57,6 @@ class Target:
 		self.HAngle = arccos(dot(NormXY,IncXY))
 		NormRZ = array([sqrt(self.NormalV[0]**2+self.NormalV[1]**2),self.NormalV[2]])
 		IncRZ = array([sqrt(self.IncidentV[0]**2+self.IncidentV[1]**2),self.IncidentV[2]])
-		print NormRZ, IncRZ
 		self.VAngle = arccos(dot(NormRZ,IncRZ))
 		self.Degrees = arccos(dot(self.NormalV,-self.IncidentV))*180.0/pi
 
