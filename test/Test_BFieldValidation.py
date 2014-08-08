@@ -10,14 +10,21 @@ import matplotlib as mpl
 
 R = array([1,0,0])
 RInj = [1.798, -0.052, 0.243]
-# ======= Toroidal Field ======================================================
 
+#------------------------------------------------------------------------------ 
+# Define Toroidal Field
 TF = BfieldTF()
 
-#======== Vertical Field ======================================================
-
+#------------------------------------------------------------------------------ 
+# Define Vertical Field
 VF = BfieldVF(B0=1.0)
 
+#===============================================================================
+# B Field Plotting Functions
+#===============================================================================
+
+#------------------------------------------------------------------------------ 
+# Plot Elliptic Integrals of the 1st and 2nd kind, used for vertical field
 def PlotEllipticInt():
 	Ni = 1000; Ek=[]; Ee=[]
 	for i in range(Ni):
@@ -28,8 +35,9 @@ def PlotEllipticInt():
 	pl.plot(Ek)
 	pl.plot(Ee)
 
+#------------------------------------------------------------------------------ 
+# Plot Toroidal field in 1D
 
-# ========= Plotting ==========================================================
 def PlotTF1D(TF):
 	Rmin=0.1947965; Rmax=1.195229
 	Ni = 1000; R0 = 0.66; B0 = 1.0
@@ -45,18 +53,19 @@ def PlotTF1D(TF):
 		Rvec = array([R[i], 0 , 0])
 		BIdeal[i] = norm(TF.local(Rvec))
 
-	pl.figure(1); pl.plot(R,B); pl.plot(R,BIdeal,'-'); pl.ylim(0,1.2*max(B))
+	pl.plot(R,B); pl.plot(R,BIdeal,'-'); pl.ylim(0,1.2*max(B))
 	pl.title(r'Magnitude of B-field from TF Coils |B$_\phi(r)$|/|B$_\phi(R_o)$|')
 	pl.xlabel('Radial Position [m]'); pl.ylabel(r'Normalized B-Field Magnitude |B$_\phi$/B$_o$|')
 	pl.legend(('Discrete Coils',r'Ideal B$\sim$1/R') )
 
+#------------------------------------------------------------------------------ 
+# Plot Vertical Field in 1D at distance Z from the midplane
 def PlotVF1D(VF):
 	Ni = 1000;
 	R = linspace(0.15,2.0,Ni)
 	Z = [0.1, 0.2, 0.3]
 	BNorm = zeros(Ni);BVert = zeros(Ni); BIdeal = zeros(Ni)
 	Bvector=[]; Bmag=[];
-	pl.figure();
 	for j in range(len(Z)):
 		for i in range(Ni):
 			Rvec = array([R[i], 0 , Z[j]])
@@ -80,6 +89,8 @@ def PlotVF1D(VF):
 	pl.xlabel('Radial Position [m]'); pl.ylabel(r'Normalized Vertical Component of B-Field |B$_z$|/|B$_0$|')
 	pl.legend(loc=3)
 
+#------------------------------------------------------------------------------ 
+# Magnitude Plot of Toroidal Field in 2D
 
 def PlotTF2D(TF):
 	Nij = 100
@@ -97,9 +108,12 @@ def PlotTF2D(TF):
 				BMagMatrix[i,j] = Mag
 	pl.figure()
 #	pl.pcolor(x,y,BMagMatrix); pl.colorbar
-	pl.contour(x,y,BMagMatrix,100); pl.colorbar
+	pl.contour(x,y,BMagMatrix,100);
 	pl.title(r'Magnitude of B-field from TF Coils |B($r,\phi$)|/|B($R_o,\phi$)|')
 	pl.xlabel('x [m]'); pl.ylabel('y [m]'); pl.colorbar()
+	
+#------------------------------------------------------------------------------ 
+# Magnitude Plot of Vertical Field in 2D
 
 def PlotVF2D():
 	Nij = 200
@@ -117,10 +131,13 @@ def PlotVF2D():
 				BMagMatrix[j,i] = Mag/BZ0 #log(Mag)
 	pl.figure(4)
 #	pl.pcolor(r,z,BMagMatrix); 
-	pl.contour(r,z,BMagMatrix,120); pl.colorbar
+	pl.contour(r,z,BMagMatrix,120);
 	pl.title(r'Magnitude of B-field from VF Coils: |B($r,z$)|/|B($0,0$)|')
 	pl.xlabel('r [m]'); pl.ylabel('z [m]'); pl.colorbar()
 
+
+#------------------------------------------------------------------------------ 
+# Vector plot of Vertical B-Field in 2D
 def VectorVerticalField(VF):
 	Nij = 25
 #	r = linspace(0.2,2.2,Nij)
@@ -146,6 +163,9 @@ def VectorVerticalField(VF):
 	pl.xlim(min(r),RInj[0]);pl.ylim(min(z),max(z))
 	return R,Z,Br,Bz,Mag
 
+#------------------------------------------------------------------------------ 
+# Vector plot of Toroidal B-Field in 2D
+
 def VectorToroidalField(TF):
 	Nij = 25
 #	x = linspace(0,1.4,Nij)
@@ -169,7 +189,6 @@ def VectorToroidalField(TF):
 				Mag.append( MAG )
 			else:
 				Mag.append( nan )
-#	pl.figure()
 	Q = pl.quiver( X , Y , Bx, By , array(Mag) , pivot='mid', scale=10, width =0.005,cmap=mpl.cm.winter) #,cmap=mpl.cm.winter
 #	pl.title(r'Toroidal B($r,\phi$)-field (uniform in $z$)')
 	pl.title(r'Toroidal Field Map (Top View) B($r,\phi$)/|B$(R_o,\phi)$|')
@@ -182,6 +201,7 @@ def VectorToroidalField(TF):
 
 #RInj = [1.798, -0.052, 0.243]
 
+#------------------------------------------------------------------------------ 
 # Draw Beam
 alpha=12.6/180.0*pi; beta=8.0/180.0*pi;
 #Rinjection = [1.798, 0.052, 0.243]
@@ -191,21 +211,14 @@ yTop = [RInj[1], RInj[1]+(xTop[0]-xTop[1])*tan(beta)]
 rTop = [2.0, 1.798, 0.6]
 zTop = [0.243+(rTop[0]-rTop[1])*tan(alpha), 0.243, 0.243-(rTop[1]-rTop[2])*tan(alpha)]
 
-if False:
-	#PlotTF1D(TF)
+
+if True:
+	pl.figure(1)
 	X,Y,Bx,By,Mag=VectorToroidalField(TF)
 	pl.plot(xTop,yTop,'r',linewidth=2)
-#	PlotTF2D(TF)
 
-if False:
-#	PlotVF1D()
-#	Ek,Ee=VerticalField()
-#	PlotVF2D()
-	R,Z,Br,Bz,Mag=VectorVerticalField(B0=0.1)
-	pl.plot(rTop,zTop,'r',linewidth=2)
-
-if False:
-	pl.figure(figsize=(16,6))
+if True:
+	pl.figure(2,figsize=(16,6))
 
 	pl.subplot(1,2,1); X,Y,Bx,By,Mag=VectorToroidalField(TF)
 	pl.subplot(1,2,1); pl.plot(xTop,yTop,'r',linewidth=2)
@@ -215,13 +228,13 @@ if False:
 	pl.subplot(1,2,2); pl.plot(rTop,zTop,'r',linewidth=2)
 	pl.xlabel('R [m]'); pl.ylabel('Z [m]'); pl.title('Vertical Field')
 
-if False:
-	pl.figure()
-	PlotVF1D(VF)
-
 if True:
-	pl.figure()
+	pl.figure(3)
 	PlotTF1D(TF)
+	
+if True:
+	pl.figure(4)
+	PlotVF1D(VF)
 
 pl.show()
 

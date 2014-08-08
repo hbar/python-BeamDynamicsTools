@@ -11,13 +11,13 @@ Vessel = Boundary(Rb,Zb)
 #Vessel.Plot2D(0)
 
 if False:
-	B = bfieldc(B0=0.1); Bv=bfieldc(B0=0.0)
+	B = Bfieldc(B0=0.1); Bv=Bfieldc(B0=0.0)
 	d0 = 10.0
 	dS = logspace(-5,-2,15)
 	dr = []; T=[];
 	for i in range(len(dS)):
-#		T.append(trajectory(Vessel,B,r0=[20.0,0.0,0.0],v0=[0.0,0.0,1.0],dS=dS[i],Nmax=round(d0/dS[i])) )
-		T.append(trajectory(Vessel,B,Bv,r0=[20.0,0.0,0.0],v0=[0.0,0.0,1.0],dS=dS[i],Nmax=round(d0/dS[i])) )
+#		T.append(Trajectory(Vessel,B,r0=[20.0,0.0,0.0],v0=[0.0,0.0,1.0],dS=dS[i],Nmax=round(d0/dS[i])) )
+		T.append(Trajectory(Vessel,B,Bv,r0=[20.0,0.0,0.0],v0=[0.0,0.0,1.0],dS=dS[i],Nmax=round(d0/dS[i])) )
 		RL = (T[-1].m0*T[-1].v0) / (T[-1].q0*B.B0)
 		R = T[-1].r[-1] - array([20.0-RL,0,0.0])
 		dr.append( sqrt(R[0]**2+R[1]**2+R[2]**2)*(d0/T[-1].s[-1]) - RL)  # -RL)/d0 ) #/T.s[-1]*d0 - RL)
@@ -34,8 +34,8 @@ if False:
 if True:
 	BTF = [0.15,0.1, 0.05]
 	for i in range(len(BTF)):
-		B = bfieldc(B0=BTF[i]); Bv=bfieldc(B0=0.0)
-		T = trajectory(Vessel,B,Bv,r0=[20.0,0.0,0.0],v0=[0.0,1.0,1.0],Nmax=10000,Target=False)
+		B = Bfieldc(B0=BTF[i]); Bv=Bfieldc(B0=0.0)
+		T = Trajectory(Vessel,B,Bv,r0=[20.0,0.0,0.0],v0=[0.0,1.0,1.0],Nmax=10000)
 		#T.Plot2D()
 	
 		x=[]; y=[]; z=[]; S=[]; r=[]; R=[]; rN=[];

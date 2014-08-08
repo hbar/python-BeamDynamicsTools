@@ -92,6 +92,7 @@ class Boundary:
 					x,y=Circle(self.Rb[i])
 					pl.plot(x,y,'k')
 					
+#------------------------------------------------------------------------------ 
 # Plots a 2D projection of the boundary onto side plane or top plane
 		if self.Geometry=='Extrude':
 			if Type=='XZ' or Type=='Side':

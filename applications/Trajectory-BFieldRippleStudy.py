@@ -34,7 +34,7 @@ Vessel.Plot3D(ax)
 
 #------------------------------------------------------------------------------ 
 # Inputs for four B-field settings 
-Bn = linspace(-0.45,0.45,61)
+Bn = linspace(-0.45,0.45,41)
 #Bn = array([0.0])
 
 #------------------------------------------------------------------------------ 
@@ -53,8 +53,8 @@ OutputPath = '../output/'
 #------------------------------------------------------------------------------ 
 # Define current ripple as a function of current 
 def RippleFunction(I0):
-	RipMax = 0.03
-	RipFS = 0.01
+	RipMax = 3.0
+	RipFS = 1.0
 	FS = 12.5e3
 	dI = (RipMax-RipFS)/FS**2 * (-(I0-FS)*(I0+FS)) + RipFS
 	return dI
@@ -96,20 +96,22 @@ if True:
 	DeltaR = []
 	for i in range(len(Bn)):
 		I1 = CalculateI0(Bn[i])
-		fB = RippleFunction(I1)/2.0
+		dI = RippleFunction(I1)/2.0
+#		fB = CalculateB0(dI) 
+		fB = CalculateB0(dI+0.0005*12.5e3) 
 		fB1 = [-fB,fB]
+		print dI, fB
 		for j in range(len(fB1)):
 			fB1 = [-fB,fB]
-			B1 = BfieldTF(B0=Bn[i]*(1+fB1[j]) )
-			T1 = Trajectory(Vessel,B1,Bv,v0=Vinjection,T0=Energy,dS=1e-3,Nmax=100000)
+#			B1 = BfieldTF(B0=Bn[i]*(1+fB1[j]) ) # B * (1 + epsilon)
+			B1 = BfieldTF(B0=Bn[i]+fB1[j] ) # B + epsilon
+			T1 = Trajectory(Vessel,B1,Bv,v0=Vinjection,T0=Energy,dS=1e-4,Nmax=100000)
 			RError[j] = T1.target.XYZ
 			T1.LineStyle = '-'
 			T1.LineWidth = 1.0
 			T1.LineColor = CMAP(1.0*i/len(Bn));
 #			TrajectoryList.append(T1)
 		DeltaR.append(norm(RError[1] - RError[0]) )
-
-
 
 	# Save Target parameters
 #	T.Target.SaveTargetParameters(TFCurrent=In[i],Path=OutputPath+'geometry/')
@@ -122,7 +124,7 @@ if True:
 #===============================================================================
 # Plot Resuts
 #===============================================================================
-if False:
+if True:
 # Plot 3D results
 
 	for i in range(len(TrajectoryList)):
@@ -162,9 +164,9 @@ if False:
 #------------------------------------------------------------------------------ 
 # Plot Error vs I0
 pl.figure()
-pl.plot(array(I0)*1e-3,array(DeltaR)*1e2)
+pl.plot(array(I0)*1e-3,array(DeltaR)*1e3)
 pl.xlabel('Current [kA]')
-pl.ylabel('peak-peak Error [cm]')
+pl.ylabel('peak-peak Error [mm]')
 pl.title('Beam centroid error due to TF current error')
 
 #===============================================================================

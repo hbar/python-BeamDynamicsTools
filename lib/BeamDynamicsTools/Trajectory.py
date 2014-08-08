@@ -89,6 +89,9 @@ class Trajectory:
 
 		c1=True; c2=True; i = 0
 
+		#NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT
+		self.target = Target([nan,nan,nan],[nan,nan,nan],[nan,nan,nan],BFieldTF,BFieldVF,[nan,nan,nan])
+
 #===============================================================================
 # # Relativistic Euler Integration:
 #===============================================================================
@@ -153,9 +156,9 @@ class Trajectory:
 			stop = timeit.default_timer()
 			self.RunTime = stop-start
 			print 'trajectory complete, S = %0.3f m, B0 = %0.4f T, B0 = %0.4f T, RunTime = %0.1f s' % (self.s[-1],self.BFieldTF.B0,self.BFieldVF.B0,self.RunTime )
-
-			self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
-			self.target.SigmaBasis = self.BasisM6[-1]
+			if i<Nmax-2:
+				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
+				self.target.SigmaBasis = self.BasisM6[-1]
 			print 'Beam Coordinates Complete'
 			
 #===============================================================================

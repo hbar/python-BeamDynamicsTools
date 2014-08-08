@@ -8,26 +8,27 @@ from AngleCorrection import *
 from Trajectory import *
 
 class Target:
-	def __init__ (self,NORM,TAN,INC,BFieldTF,BFieldVF,RT,Rdet=[1.3075, -0.2457, -0.05900]):
+	def __init__ (self,NORM,TAN,INC,BFieldTF,BFieldVF,RT,Rdet=[1.3075, -0.2457, -0.05900],AxisDet=[1.0,0.0,0.0]):
 		self.X = RT[0]; self.Y = RT[1]; self.Z = RT[2]
-		self.XYZ = RT
-		self.XYZdetector = Rdet
+		self.XYZ = array(RT)
+		self.XYZdetector = array(Rdet)
+		self.AxisDetector = array(AxisDet)
 		self.B0 = BFieldTF.B0
 		self.B0z = BFieldVF.B0
 		self.I0 = BFieldTF.I0
 		R = sqrt( RT[0]**2 + RT[1]**2 )
 		self.X = RT[0]; self.Y = RT[1]; Z = RT[2]
 		PHI = arctan( RT[1]/RT[0] )
-		self.NormalV = NORM # Normal to Tile
-		self.IncidentV = INC # Incident Vector
+		self.NormalV = array(NORM) # Normal to Tile
+		self.IncidentV = array(INC) # Incident Vector
 		self.TangentV = TAN # Poloidal Direction
 		self.R = R; self.Z=Z; self.Phi = PHI;
-		e3 = NORM/norm(NORM); self.NormalV = e3 #self.e3=e3;
-		e2 = TAN/norm(TAN); self.PoloidalV = e2 #self.e2=e2; #Poloidal Direction
+		e3 = array(NORM)/norm(NORM); self.NormalV = e3 #self.e3=e3;
+		e2 = array(TAN)/norm(TAN); self.PoloidalV = e2 #self.e2=e2; #Poloidal Direction
 		e1 = cross(e3,e2); e1=e1/norm(e1); self.ToroidalV = e1 #self.e1=e1; self.e1=e1; # Toroidal Direction
 		self.DetectionLength = norm(self.XYZ-self.XYZdetector)
 		self.DetectionVec = (self.XYZdetector-self.XYZ)/self.DetectionLength
-		self.DetectorAngle = arccos( dot(self.DetectionVec,array([1.0,0.0,0.0])) )
+		self.DetectorAngle = arccos( dot(self.DetectionVec,self.AxisDetector) )
 		self.DetectionDegree = self.DetectorAngle * 180.0/pi
 		self.DetectionEff = AngularEff(self.DetectorAngle)	
 		
@@ -47,17 +48,18 @@ class Target:
 
 #------------------------------------------------------------------------------ 
 # Calculate Angular parameters and vectors
-		self.BeamTargetAngle = pi-arccos(dot(NORM,INC))
+		self.BeamTargetAngle = pi-arccos(dot(self.NormalV,self.IncidentV))
 		self.GammaTargetAngle = arccos(dot(NORM,self.DetectionVec))
-		self.DetectionTargetAngle = arccos(dot(self.DetectionVec,INC))
-		NormXY = array([NORM[0],NORM[1]]); NormXY/norm(NormXY)
-		IncXY = -1.0*array([INC[0],INC[1]]); IncXY/norm(IncXY)
+		self.DetectionTargetAngle = arccos(dot(self.DetectionVec,self.IncidentV))
+		NormXY = array([self.NormalV[0],self.NormalV[1]]); NormXY/norm(NormXY)
+		IncXY = -1.0*array([self.IncidentV[0],self.IncidentV[1]]); IncXY/norm(IncXY)
 		self.Test = [NormXY,IncXY]
 		self.HAngle = arccos(dot(NormXY,IncXY))
-		NormRZ = array([sqrt(NORM[0]**2+NORM[1]**2),NORM[2]])
-		IncRZ = array([sqrt(INC[0]**2+INC[1]**2),INC[2]])
+		NormRZ = array([sqrt(self.NormalV[0]**2+self.NormalV[1]**2),self.NormalV[2]])
+		IncRZ = array([sqrt(self.IncidentV[0]**2+self.IncidentV[1]**2),self.IncidentV[2]])
+		print NormRZ, IncRZ
 		self.VAngle = arccos(dot(NormRZ,IncRZ))
-		self.Degrees = arccos(dot(NORM,-INC))*180.0/pi
+		self.Degrees = arccos(dot(self.NormalV,-self.IncidentV))*180.0/pi
 
 #------------------------------------------------------------------------------ 
 # Calculate Basis vectors/matrices and initialize sigma matrices
@@ -85,9 +87,9 @@ class Target:
 		
 #------------------------------------------------------------------------------ 
 # Save Target basis and sigma basis
-	def SaveTargetParameters(self,TFCurrent,Path='Output/'):
-		savetxt(Path+'SigmaBasis_I_'+str(int(TFCurrent))+'.txt',self.SigmaBasis)
-		savetxt(Path+'TargetBasis_I_'+str(int(TFCurrent))+'.txt',self.TargetBasis)
+#	def SaveTargetParameters(self,TFCurrent,Path='Output/'):
+#		savetxt(Path+'SigmaBasis_I_'+str(int(TFCurrent))+'.txt',self.SigmaBasis)
+#		savetxt(Path+'TargetBasis_I_'+str(int(TFCurrent))+'.txt',self.TargetBasis)
 
 #------------------------------------------------------------------------------ 
 # 3D plotting function of beam
