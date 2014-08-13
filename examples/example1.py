@@ -48,8 +48,8 @@ for i in [0,1,2,3]:#range(len(Bn)):
 
 #------------------------------------------------------------------------------ 
 # Save field and geometric parameters along trajectory
-	T.SaveFieldParameters(TFCurrent=In[i],Path=OutputPath+'geometry/')
-	T.target.SaveTargetParameters(Path=OutputPath+'geometry/')
+#	T.SaveFieldParameters(TFCurrent=In[i],Path=OutputPath+'geometry/')
+#	T.target.SaveTargetParameters(Path=OutputPath+'geometry/')
 
 #------------------------------------------------------------------------------ 
 # append lists of Target Quantities
