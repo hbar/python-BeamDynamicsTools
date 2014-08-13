@@ -68,8 +68,8 @@ For each integration step these lists are appended along the beam's trajectory:
 - `self.Beta` v/c vectors along trajectory
 - `self.beta` |v/v| along trajectory
 - `self.gamma` relativistic parameter gamma=1/sqrt(1-beta)
-- `self.BaisM3` 3x3 matrix of column vectors representing the local x,y,z basis
-- `self.BaisM6` 6x6 matrix of column vectors representing the local x,x',y,y',l,dp/p phase space basis
+- `self.BasisM3` 3x3 matrix of column vectors representing the local x,y,z basis
+- `self.BasisM6` 6x6 matrix of column vectors representing the local x,x',y,y',l,dp/p phase space basis
 
 Additional class variables include:
 
