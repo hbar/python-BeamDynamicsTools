@@ -6,6 +6,14 @@ The `Beam` class uses the position, velocity, and magnetic field and magnetic fi
 
 The the appropriate relativistic parameters are included in these calculations so the these tools can be applied to low energy ion beams as well as highly relativistic electron beams. The examples, code tests, classes, and methods contained in this repository are described below.
 
+####Requirements: 
+
+Python 3 is recommended
+
+- python3-numpy
+- python3-matplotlib
+- python3-scipy
+
 Examples
 ========
 
