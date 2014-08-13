@@ -13,7 +13,7 @@ Zb = loadtxt('../data/CmodCoordinatesRZ.dat',usecols=[1])
 # Generate vessel boundary
 Vessel = Boundary(Rb,Zb)
 
-#
+#------------------------------------------------------------------------------ 
 pl.figure(1)
 Vessel.Border()
 

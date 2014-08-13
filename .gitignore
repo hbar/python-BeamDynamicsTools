@@ -1,8 +1,10 @@
 *.py~
 *.txt~
 *.pyc
-output/geometry/*
-output/sigma/*
+output/geometry/*.txt
+output/geometry/*.dat
+output/sigma/*.txt
+output/sigma/*.dat
 VintageCode/
 VintageCode/*
 output/

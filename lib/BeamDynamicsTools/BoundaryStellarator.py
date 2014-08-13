@@ -5,13 +5,12 @@ from numpy.linalg import norm,det
 import matplotlib.pyplot as plt
 
 #===============================================================================
-# Boundary Class: Defines boundary based on a set of closed set of points
+#  Class: Defines boundary based on a set of closed set of points
 #===============================================================================
 
-class Boundary:
+class BoundaryStellarator:
 
-	def __init__(self,Rb,Zb,Ymin=-1e10,Ymax=1e10,cw=-1,Geometry='Revolve'):
-		self.Geometry = Geometry # Type of boundary (revolved or extruded polygon)
+	def __init__(self,Rb,Zb,Ymin=-1e10,Ymax=1e10,cw=-1,R=1.0,Z=0,Psi=0):
 		Cvec = []; # List of Corner Locations 
 		Mvec = []; # List of Middle of line locations
 		Tvec = []; # List of Tangent vectors of border
@@ -26,35 +25,34 @@ class Boundary:
 
 #------------------------------------------------------------------------------ 
 # Generate lists of Corners, Midpoints, Tangents, and Normals
- 		if Geometry =='Revolve' or Geometry =='Extrude':
- 			for i in range(len(Rb)):
-		 		Corner = array([Rb[i],Zb[i]])
-				MidPoint = array([(Rb[i]+Rb[i-1])/2,(Zb[i]+Zb[i-1])/2])
-				Tangent = array([Rb[i]-Rb[i-1],Zb[i]-Zb[i-1]]); Tangent=Tangent/norm(Tangent)
-				Normal = array([-Tangent[1],Tangent[0]]); Normal = Normal/norm(Normal)
-				Cvec.append(Corner);
-				Mvec.append(MidPoint); 
-				Tvec.append(Tangent); 
-				Nvec.append(cw*Normal);
+ 		for i in range(len(Rb)):
+			Corner = array([Rb[i],Zb[i]])
+			MidPoint = array([(Rb[i]+Rb[i-1])/2,(Zb[i]+Zb[i-1])/2])
+			Tangent = array([Rb[i]-Rb[i-1],Zb[i]-Zb[i-1]]); Tangent=Tangent/norm(Tangent)
+			Normal = array([-Tangent[1],Tangent[0]]); Normal = Normal/norm(Normal)
+			Cvec.append(Corner);
+			Mvec.append(MidPoint); 
+			Tvec.append(Tangent); 
+			Nvec.append(cw*Normal);
 
 #------------------------------------------------------------------------------ 
 # Generate N x 2 matrices of Corners, Midpoints, Tangents, and Normals
-			for i in range(len(Rb)):
-				for j in range(len(Cvec[0])):
-					Cmatrix[i,j] = Cvec[i][j]
-					Mmatrix[i,j] = Mvec[i][j]
-					Tmatrix[i,j] = Tvec[i][j] 
-					Nmatrix[i,j] = Nvec[i][j] 
+		for i in range(len(Rb)):
+			for j in range(len(Cvec[0])):
+				Cmatrix[i,j] = Cvec[i][j]
+				Mmatrix[i,j] = Mvec[i][j]
+				Tmatrix[i,j] = Tvec[i][j] 
+				Nmatrix[i,j] = Nvec[i][j] 
 
 #------------------------------------------------------------------------------ 
 # Save arrays,list, and matrices as class variables
 
-			self.Cvec = Cvec; self.Cmatrix = Cmatrix
-			self.Mvec = Mvec; self.Mmatrix = Mmatrix
-			self.Tvec = Tvec; self.Tmatrix = Tmatrix
-			self.Nvec = Nvec; self.Nmatrix = Nmatrix
-			self.Nv = len(Nvec)
-			print 'boundary initialized'
+		self.Cvec = Cvec; self.Cmatrix = Cmatrix
+		self.Mvec = Mvec; self.Mmatrix = Mmatrix
+		self.Tvec = Tvec; self.Tmatrix = Tmatrix
+		self.Nvec = Nvec; self.Nmatrix = Nmatrix
+		self.Nv = len(Nvec)
+		print 'boundary initialized'
 		
 #===============================================================================
 # Boundary Class Methods
@@ -77,38 +75,20 @@ class Boundary:
 #------------------------------------------------------------------------------ 
 # Plots a 2D projection of the boundary onto poloidal plane or midplane
 	def Border(self,Type='poloidal'):
-		if self.Geometry=='Revolve':
-			if Type=='poloidal':
-				RB=[]; ZB=[];
-				for i in range(len(self.Rb)):
-					RB.append(self.Rb[i])
-					ZB.append(self.Zb[i])
-				RB.append(self.Rb[0])
-				ZB.append(self.Zb[0])
-				pl.plot(RB,ZB,'k')
+		if Type=='poloidal':
+			RB=[]; ZB=[];
+			for i in range(len(self.Rb)):
+				RB.append(self.Rb[i])
+				ZB.append(self.Zb[i])
+			RB.append(self.Rb[0])
+			ZB.append(self.Zb[0])
+			pl.plot(RB,ZB,'k')
 
 			if Type=='top':
 				for i in range(len(self.Rb)):
 					x,y=Circle(self.Rb[i])
 					pl.plot(x,y,'k')
 					
-#------------------------------------------------------------------------------ 
-# Plots a 2D projection of the boundary onto side plane or top plane
-		if self.Geometry=='Extrude':
-			if Type=='XZ' or Type=='Side':
-				RB=[]; ZB=[];
-				for i in range(len(self.Rb)):
-					RB.append(self.Rb[i])
-					ZB.append(self.Zb[i])
-				RB.append(self.Rb[0])
-				ZB.append(self.Zb[0])
-				pl.plot(RB,ZB,'k')
-
-			if Type=='XY' or Type=='Top':
-				for i in range(len(self.Rb)):
-					x,y=Circle(self.Rb[i])
-					pl.plot(x,y,'k')		
-
 
 #------------------------------------------------------------------------------ 
 # Tests to see if point r is in the volume using "Ray Casting Algorithm"
@@ -212,6 +192,13 @@ def Circle(R,Nt=100):
 	x = R*cos(t)
 	y = R*sin(t)
 	return x,y
+
+def RPeriodicity(N=1.0,R0=1.0,a0=0.0,Phi=0,Offset=0.0):
+	pass
+
+	
+def PsiPeriodicity(N,Phi,Offset=0.0):
+	pass
 
 #Rb = [ 0.2 , 0.25, 0.4 , 0.6 , 0.8 , 0.8 , 0.6 , 0.4 , 0.25, 0.2 ]
 #Zb = [-0.55,-0.6 ,-0.6 ,-0.5 ,-0.2 , 0.2 , 0.5 , 0.6 , 0.6 , 0.55]
