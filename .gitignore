@@ -1,13 +1,14 @@
 *.py~
 *.txt~
 *.pyc
+VintageCode/
+VintageCode/*
 output/geometry/*.txt
 output/geometry/*.dat
 output/sigma/*.txt
 output/sigma/*.dat
-VintageCode/
-VintageCode/*
-output/
+output/*.txt
+output/*.dat
 data/sigma_trace3d/
 data/Sigma_Trace3d/
 .gitignore~
