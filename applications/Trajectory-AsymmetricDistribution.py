@@ -116,7 +116,7 @@ if False:
 
 if True:
 	FigName = 'TrajectoryProjections_alpha%2.2f_beta%2.2f.pdf' %(alpha0,beta0)
-	FigPath = '/home/hbar/Dropbox/Research/AIMS/Magnet supply upgrade/Beam Modeling Results - Energy Spread/'
+	FigPath = '/output/plots/'
 
 #------------------------------------------------------------------------------ 
 # Save Figure

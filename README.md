@@ -103,9 +103,9 @@ Beam Class
 - `self.TransferM` list of 6x6 transfer matrices defining sigma transformations due to fields along the trajectory
 ####Beam Methods:
 
-- `'self.Trace()'` Calculates evolution of sigma matrix Sigma0 along the trajectory.  The the local values for velocity, magnetic field are used to transform the sigma matrix based on a linear model.
+- `self.Trace()` Calculates evolution of sigma matrix Sigma0 along the trajectory.  The the local values for velocity, magnetic field are used to transform the sigma matrix based on a linear model.
 
-- `'self.ReverseTrace(SigmaFinal)'` Calculates reverse evolution of sigma matrix SigmaFinal along the trajectory.  The the local values for velocity, magnetic field are used to transform the sigma matrix based on a linear model. This is used to predict the acceptance envelope that will result in SigmaFinal.
+- `self.ReverseTrace(SigmaFinal)` Calculates reverse evolution of sigma matrix SigmaFinal along the trajectory.  The the local values for velocity, magnetic field are used to transform the sigma matrix based on a linear model. This is used to predict the acceptance envelope that will result in SigmaFinal.
 
 Target Class
 -----------

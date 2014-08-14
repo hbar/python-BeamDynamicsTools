@@ -126,7 +126,7 @@ if False:
 # Save Figure
 if True:
 	FigName = 'TrajectoryProjections_alpha%2.2f_beta%2.2f_'%(alpha0,beta0)# + B.Method
-	FigPath = '/home/hbar/Dropbox/Research/AIMS/Magnet supply upgrade/Beam Modeling Results - Toroidal Field Sweep/'
+	FigPath = '../output/plots/'
 	trajectory[-1].target.SaveTargetParameters(Path=FigPath+'Test_alpha%2.2f_beta%2.2f_UpDown'%(alpha0,beta0))
 	pl.savefig(FigPath + FigName+'_UpDown.pdf')
 	pl.savefig(FigPath + FigName+'_UpDown.png')
