@@ -90,6 +90,7 @@ class Trajectory:
 		c1=True; c2=True; i = 0
 		IN=False; NormalV=zeros(3); TangentV=zeros(3); 
 		IncidentV=zeros(3); RT=zeros(3)
+
 #===============================================================================
 # # Relativistic Euler Integration:
 #===============================================================================
@@ -160,6 +161,7 @@ class Trajectory:
 			if i<Nmax-1 and self.s[-1]<=Smax:
 				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
 				self.target.SigmaBasis = self.BasisM6[-1]
+#				self.target.TargetBasis = self.BasisM6[-1]
 #------------------------------------------------------------------------------ 
 		# If no boundary was reached assume normal incidence
 			else:

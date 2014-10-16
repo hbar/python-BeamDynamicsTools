@@ -9,20 +9,34 @@ from Trajectory import *
 
 class Target:
 	def __init__ (self,NORM,TAN,INC,BFieldTF,BFieldVF,RT,Rdet=[1.3075, -0.2457, -0.05900],AxisDet=[1.0,0.0,0.0]):
+		# Target Position (cartesian)
 		self.X = RT[0]; self.Y = RT[1]; self.Z = RT[2]
 		self.XYZ = array(RT)
+		# Target Position (Toroidal Coordinates)
+		self.R = sqrt(RT[0]**2 + RT[1]**2)
+		self.Phi = arctan(RT[1]/RT[0])
+		self.PhiDegrees = self.Phi * 180.0/pi
+		RCenter = array([0.67,0.0])
+		dR = array([self.R,self.Z])-RCenter
+		self.r =  norm(dR)
+		if dR[0]>0:
+			self.Theta = arccos(dot(-1.0*RCenter/norm(RCenter),dR/norm(dR)))
+		else:
+			self.Theta = -1.0*arccos(dot(-1.0*RCenter/norm(RCenter),dR/norm(dR)))
+		self.ThetaDegrees = self.Theta*180/pi
+
+		# Detector Coordinates
 		self.XYZdetector = array(Rdet)
 		self.AxisDetector = array(AxisDet)
+		# Magnetic Field parameters
 		self.B0 = BFieldTF.B0
 		self.B0z = BFieldVF.B0
 		self.I0 = BFieldTF.I0
-		R = sqrt( RT[0]**2 + RT[1]**2 )
-		self.X = RT[0]; self.Y = RT[1]; Z = RT[2]
-		PHI = arctan( RT[1]/RT[0] )
+		# Beam Vectors
 		self.NormalV = array(NORM) # Normal to Tile
 		self.IncidentV = array(INC) # Incident Vector
 		self.TangentV = TAN # Poloidal Direction
-		self.R = R; self.Z=Z; self.Phi = PHI;
+		#Basis Vectors
 		e3 = array(NORM)/norm(NORM); self.NormalV = e3 #self.e3=e3;
 		e2 = array(TAN)/norm(TAN); self.PoloidalV = e2 #self.e2=e2; #Poloidal Direction
 		e1 = cross(e3,e2); e1=e1/norm(e1); self.ToroidalV = e1 #self.e1=e1; self.e1=e1; # Toroidal Direction
@@ -30,7 +44,7 @@ class Target:
 		self.DetectionVec = (self.XYZdetector-self.XYZ)/self.DetectionLength
 		self.DetectorAngle = arccos( dot(self.DetectionVec,self.AxisDetector) )
 		self.DetectionDegree = self.DetectorAngle * 180.0/pi
-		self.DetectionEff = AngularEff(self.DetectorAngle)	
+		self.DetectionEff = AngularEff(self.DetectorAngle)
 		
 #------------------------------------------------------------------------------ 
 # Draw detection line
@@ -66,17 +80,56 @@ class Target:
 		self.BasisM3 = Basis3(e1,e2,e3)
 		self.BasisM6 = Basis6(e1,e2,e3)
 		self.TargetBasis = Basis6(e1,e2,e3)
+
+#------------------------------------------------------------------------------ 
+# initialize sigma matrices and projected ellipses
+
 		self.Sigma = eye(6,6)
 		self.SigmaProj = eye(6,6)
 		self.SigmaBasis = eye(6,6)
-		self.Ellipse = False
-		self.ProjEllipse = False
+		self.TransverseEllipse = False
+		self.ProjEllipse = Ellipse(eye(6,6))
+		self.ProjectionX = zeros(1)
+		self.ProjectionY = zeros(1)
+
+#------------------------------------------------------------------------------ 
+		# Plotting attributes
+		self.LineColor = 'r'
+		self.LineWidth = 1
+		self.LineStyle = '-'
+
+#------------------------------------------------------------------------------ 
+# Project transverse ellipse on target
 
 		def ProjectSigma(self,SB=self.SigmaBasis,ST=self.TargetBasis): 
-			self.SigmaProj = ST * SB * self.Sigma * SB.T * ST.T
+#			self.SigmaProj = ST * SB * self.Sigma * SB.T * ST.T
+#			self.ProjEllipse = Ellipse(self.SigmaProj)
+			self.TransverseEllipse = Ellipse(self.Sigma)
 
-		def Projection(self):
-			self.Ellipse.PlotXY(0*self.VAngle,0*self.HAngle)
+	def PlotProjectionXY(self,Centered=True):
+		if Centered==True:
+			dX=0.0
+			dY=0.0
+		else:
+			dX= self.R*self.Phi
+			dY = self.r*self.Z
+		pl.plot(self.ProjectionX+dX,self.ProjectionY+dY,color=self.LineColor,linestyle=self.LineStyle,linewidth=self.LineWidth)
+
+	def PlotProjection(self,Type='Centered'):
+		dX=0.0;
+		dY = 0.0
+		XLAB = r'X [mm]'; xscale = 1000.0
+		YLAB = r'Y [mm]'; yscale = 1000.0
+		if Type=='ThetaPhi':
+			dX = self.R*self.Phi
+			dY = self.r*self.Theta
+			XLAB = r'Toroidal Position $R\cdot\phi$ [cm]'; xscale = 100.0
+			YLAB = r'Polidal Position $r\cdot\theta$ [cm]'; yscale = 100.0
+		#	hlines()
+
+		pl.plot((self.ProjectionX+dX)*xscale,(self.ProjectionY+dY)*yscale,color=self.LineColor,linestyle=self.LineStyle,linewidth=self.LineWidth)
+		xlabel(XLAB); ylabel(YLAB)
+		pl.axes().set_aspect('equal', 'datalim')
 
 #------------------------------------------------------------------------------ 
 # Calculate distance to Target

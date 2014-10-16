@@ -12,8 +12,8 @@ class Beam(Trajectory):
 	# inputs:
 	# sigma = 6x6 sigma matrix
 	# s0 = 3x3 matrix for local beam coordinate system
-	def __init__(self,trajectory,Sigma0):
-		self.Sigma = [Sigma0]
+	def __init__(self,trajectory,sigma0):
+		self.sigma = [sigma0]
 
 		self.q0 = trajectory.q0
 		self.c0 = trajectory.c0
@@ -50,7 +50,7 @@ class Beam(Trajectory):
 
 
 		# lists of matrices for reverse calculations
-		self.RevSigma = []
+		self.Revsigma = []
 		self.RevTransferM = []
 
 #		self.e1=trajectory.e1
@@ -61,7 +61,7 @@ class Beam(Trajectory):
 # Calculate evolution of sigma matrix along trajectory
 #===============================================================================
 
-	def Trace(self,Target=True):
+	def Trace(self):
 		Ni = len(self.r)
 		self.TransferM = []
 		for i in range(Ni):
@@ -71,25 +71,28 @@ class Beam(Trajectory):
 #			print self.B[i]
 #			B = self.BMatrix(S,self.B[i],self.dS[i])
 			M = self.BMatrix(i)
-#			Q = self.SpaceCharge(i,self.Sigma[i]) #,self.dS[i],self.beta[i],self.gamma[i])
+#			Q = self.SpaceCharge(i,self.sigma[i]) #,self.dS[i],self.beta[i],self.gamma[i])
 #			M = Q*M
 			self.TransferM.append(M)
-			self.Sigma.append( M * self.Sigma[-1] * M.T )
-			self.Sigma[-1] = self.SpaceCharge(i,self.Sigma[-1])
+			self.sigma.append( M * self.sigma[-1] * M.T )
+			self.sigma[-1] = self.SpaceCharge(i,self.sigma[-1])
 			#print i
-		if Target==True:
-			self.target.Sigma = self.Sigma[-1]
-			self.target.BeamBasis = self.BasisM6
-#		self.target.Ellipse = Ellipse(self.Sigma[-1])
+
+		self.target.sigma = self.sigma[-1]
+		self.target.BeamBasis = self.BasisM6[-1]
+		self.target.ProjEllipse = Ellipse(self.sigma[-1])
+		self.target.ProjectionX,self.target.ProjectionY = self.target.ProjEllipse.ProjectOffNormal(self.target.BeamBasis,self.target.TargetBasis)
+#		self.target.ProjectSigma(self,SB=self.target.BeamBasis,ST=self.TargetBasis)
+
 
 #===============================================================================
 # Calculate reverse evolution of sigma matrix starting at target
 #===============================================================================
 
-	def ReverseTrace(self,SigmaF):
+	def ReverseTrace(self,sigmaF):
 		Ni = len(self.r)
 		RevTransferM = []
-		RevSigma = [SigmaF]
+		Revsigma = [sigmaF]
 		for i in range(Ni-1,-1,-1):
 			D = self.Drift(self.dS[i])
 			# Mb is the matrix form of Acc = (q/m) v x B
@@ -97,9 +100,9 @@ class Beam(Trajectory):
 			B = self.BMatrix(S,self.B[i],self.dS[i])
 			M = inv(B)
 			RevTransferM.append(M)
-			RevSigma.append( M * RevSigma[-1] * M.T )
+			Revsigma.append( M * Revsigma[-1] * M.T )
 			print i
-		self.RevSigma.append(RevSigma)
+		self.Revsigma.append(Revsigma)
 		self.RevTransferM.append(RevTransferM)
 
 	def Drift(self,ds=1e-3):
@@ -221,14 +224,14 @@ class Beam(Trajectory):
 # =============================================================================
 # =========== Space Charge Effects ============================================
 # =============================================================================
-	def SpaceCharge(self,IND,SigmaIN):
+	def SpaceCharge(self,IND,sigmaIN):
 		G2 = self.gamma[IND]**2
 
-		Sigma = SigmaIN
+		sigma = sigmaIN
 		
 #------------------------------------------------------------------------------ 
 # Rotate upright in XY Plane
-		ThetaXY = 0.5 * arctan(2*Sigma[0,2]/(Sigma[2,2]-Sigma[0,0]))
+		ThetaXY = 0.5 * arctan(2*sigma[0,2]/(sigma[2,2]-sigma[0,0]))
 		if isnan(ThetaXY):
 			ThetaXY=0.0
 		C = cos(ThetaXY); S = sin(ThetaXY) 
@@ -239,11 +242,11 @@ class Beam(Trajectory):
 		[  0  ,  S  ,  0  ,  C  , 0  ,  0  ],
 		[  0  ,  0  ,  0  ,  0  , 1  ,  0  ],
 		[  0  ,  0  ,  0  ,  0  , 0  ,  1  ]],float)
-		Sigma = Rxy * Sigma * Rxy.T
+		sigma = Rxy * sigma * Rxy.T
 
 #------------------------------------------------------------------------------ 
 # Rotate upright in YZ Plane (Most Important)
-		ThetaYZ = -0.5 * arctan(2*Sigma[2,4]/(Sigma[4,4]-Sigma[2,2]))
+		ThetaYZ = -0.5 * arctan(2*sigma[2,4]/(sigma[4,4]-sigma[2,2]))
 		if isnan(ThetaYZ):
 			ThetaYZ=0.0
 		C = cos(ThetaYZ); S = sin(ThetaYZ) 
@@ -254,12 +257,12 @@ class Beam(Trajectory):
 		[  0  ,  0  ,  0  ,  C  ,  0  , -S  ],
 		[  0  ,  0  ,  S  ,  0  ,  C  ,  0  ],
 		[  0  ,  0  ,  0  ,  S  ,  0  ,  C  ]],float)
-		Sigma = Ryz * Sigma * Ryz.T
+		sigma = Ryz * sigma * Ryz.T
 
 #------------------------------------------------------------------------------ 
 # Rotate upright in XZ Plane
 		C = 1.0; S = 0.0;
-		ThetaZX = -0.5 * arctan(2*Sigma[4,0]/(Sigma[0,0]-Sigma[4,4]))
+		ThetaZX = -0.5 * arctan(2*sigma[4,0]/(sigma[0,0]-sigma[4,4]))
 		if isnan(ThetaZX):
 			ThetaZX=0.0
 		C = cos(ThetaZX); S = sin(ThetaZX)
@@ -270,25 +273,25 @@ class Beam(Trajectory):
 		[  0  ,  0  ,  0  ,  1  ,  0  ,  0  ],
 		[  S  ,  0  ,  0  ,  0  ,  C  ,  0  ],
 		[  0  ,  S  ,  0  ,  0  ,  0  ,  C  ] ],float)
-		Sigma = Rzx * Sigma * Rzx.T
+		sigma = Rzx * sigma * Rzx.T
 		
 #------------------------------------------------------------------------------ 
 # Rotation Matrix
 		Rotate = Rxy*Ryz*Rzx
-#		Sigma = Rotate * Sigma * Rotate.T
+#		sigma = Rotate * sigma * Rotate.T
 
-		#print Sigma[0,2],Sigma[2,4], Sigma[4,0]
+		#print sigma[0,2],sigma[2,4], sigma[4,0]
 #		print ThetaXY, ThetaYZ, ThetaZX
-#		print 0.5 * arctan(2*Sigma[0,2]/(Sigma[2,2]-Sigma[0,0])), 0.5 * arctan(2*Sigma[2,4]/(Sigma[4,4]-Sigma[2,2])),-0.5 * arctan(2*Sigma[4,0]/(Sigma[0,0]-Sigma[4,4]))
-#		print Sigma[0,2],Sigma[2,4],Sigma[4,0]
+#		print 0.5 * arctan(2*sigma[0,2]/(sigma[2,2]-sigma[0,0])), 0.5 * arctan(2*sigma[2,4]/(sigma[4,4]-sigma[2,2])),-0.5 * arctan(2*sigma[4,0]/(sigma[0,0]-sigma[4,4]))
+#		print sigma[0,2],sigma[2,4],sigma[4,0]
 		# Beam semiaxes
 		Const= 1.0e-3 * sqrt(5.0)
 
-		rx = sqrt(abs(Sigma[0,0])) * Const; 
-		ry = sqrt(abs(Sigma[2,2])) * Const;
-		rz = sqrt(abs(Sigma[4,4])) * Const / self.gamma[IND];
+		rx = sqrt(abs(sigma[0,0])) * Const; 
+		ry = sqrt(abs(sigma[2,2])) * Const;
+		rz = sqrt(abs(sigma[4,4])) * Const / self.gamma[IND];
 
-#		Sigma = (1.0/5.0)*Sigma
+#		sigma = (1.0/5.0)*sigma
 
 #		print rx,ry,rz
 
@@ -334,13 +337,13 @@ class Beam(Trajectory):
 		[ 0  , 0  , 0  , 0  , 1  ,  0  ],
 		[ 0  , 0  , 0  , 0  ,d*Ez,  1  ]],float)
 
-#		print d*Ex/sqrt(Sigma[1,1]),d*Ey/sqrt(Sigma[3,3]),d*Ez/sqrt(Sigma[5,5])
+#		print d*Ex/sqrt(sigma[1,1]),d*Ey/sqrt(sigma[3,3]),d*Ez/sqrt(sigma[5,5])
 		# Rotate back to orignial orientation
-##		Sigma = (Rxy.T * Ryz.T * Rzx.T) * Sigma * (Rzx * Ryz * Rxy)
-#		return (Rzx.T * Ryz.T * Rxy.T) * ME * Sigma * ME.T * ( Rxy *Ryz * Rzx )
-#		return (Rzx * Ryz * Rxy) * ME * Sigma * ME.T * (Rzx.T * Ryz.T * Rxy.T)
-#		return ME * Sigma * ME.T
-		return Rotate.T * ME * Sigma * ME.T * Rotate
+##		sigma = (Rxy.T * Ryz.T * Rzx.T) * sigma * (Rzx * Ryz * Rxy)
+#		return (Rzx.T * Ryz.T * Rxy.T) * ME * sigma * ME.T * ( Rxy *Ryz * Rzx )
+#		return (Rzx * Ryz * Rxy) * ME * sigma * ME.T * (Rzx.T * Ryz.T * Rxy.T)
+#		return ME * sigma * ME.T
+		return Rotate.T * ME * sigma * ME.T * Rotate
 
 # =============================================================================
 # =============================================================================
@@ -410,14 +413,14 @@ class Beam(Trajectory):
 #		Mb = matrix(identity(6))
 		return Mb
 
-#		Sigma = ME * Sigma * ME.T
+#		sigma = ME * sigma * ME.T
 #		print d*Ex,d*Ey,d*Ez
 
 #		print Rxy
 #		print Ryz
 #		print Rzx
 #		print ME
-#		print Sigma
+#		print sigma
 #		print ME
 #		print ThetaXY, ThetaYZ, ThetaZX
 

@@ -55,6 +55,20 @@ class Boundary:
 			self.Nvec = Nvec; self.Nmatrix = Nmatrix
 			self.Nv = len(Nvec)
 			print 'boundary initialized'
+
+#------------------------------------------------------------------------------ 
+# Generate list of poloidal points
+		PoloidalPoints = zeros(len(Rb)) 
+		RCenter = array([0.67,0.0])
+		for i in range(len(Rb)):
+			R = array([Rb[i],Zb[i]])
+			dR = R-RCenter
+			if dR[0]>0.0:
+				Theta = -1.0*dot(RCenter,dR)/norm(dR)/norm(RCenter)
+			else:
+				Theta = -1.0*dot(-RCenter,dR)/norm(dR)/norm(RCenter) + pi
+			PoloidalPoints[i] = norm(dR)*Theta			
+
 		
 #===============================================================================
 # Boundary Class Methods

@@ -1,6 +1,8 @@
 import pylab as pl
 from pylab import det
 from numpy import *
+from numpy.linalg import inv
+
 
 class Ellipse:
 	def __init__(self,SIG):
@@ -46,6 +48,12 @@ class Ellipse:
 
 		self.EmittenceYZ = sqrt( det(matrix([[SIG[2,2],SIG[2,4]] ,[SIG[4,2],SIG[4,4]] ])) )
 		self.TwissYZ = array([-SIG[2,4],SIG[2,2],SIG[4,4],self.EmittenceYZ**2])/self.EmittenceYZ
+
+#------------------------------------------------------------------------------ 
+# Plotting Attributes
+		self.LineColor = 'r'
+		self.LineWidth = 1
+		self.LineStyle = '-'
 
 #------------------------------------------------------------------------------ 
 # Return Spatial Width
@@ -147,10 +155,10 @@ class Ellipse:
 
 #------------------------------------------------------------------------------ 
 # Project transverse beam spot onto off-normal surface
-	def ProjectXY(self,SigmaBasis,TargetBasis,Scale=1.0, Label='',Title = ' ',NPoints=1000,Mod='-'):
+	def ProjectOffNormal(self,SigmaBasis,TargetBasis,Scale=1.0, Label='',Title = ' ',NPoints=1000,Mod='-'):
 		X,Y = self.GenerateXY(self.TwissXY,NPoints)
-		Bs = matrix(SigmaBasis[:,[0,1]]);
-		Bt = matrix(TargetBasis[:,[0,1]]);
+		Bs = matrix(SigmaBasis[:,[0,2]]);
+		Bt = matrix(TargetBasis[:,[0,2]]);
 		Ms = Scale*eye(2)
 		Xp=[]; Yp=[];
 		Bdot = Bt * Bs.T		
@@ -171,9 +179,20 @@ class Ellipse:
 			Vp = Ms * inv(Bs.T * Bt) * V
 			Xp.append(Vp[0,0])
 			Yp.append(-Vp[1,0])
-		pl.plot(Xp,Yp,Mod,label=Label); pl.xlabel('X [mm]');  pl.ylabel('Y [mm]');
-		self.ProjectionX = array(Xp)
-		self.ProjectionY = array(Yp)
+		self.ProjectionX = array(Xp)/1000.0
+		self.ProjectionY = array(Yp)/1000.0
+		return self.ProjectionX,self.ProjectionY
+
+	def PlotProjectionXY(self,offsetX=0.0,offsetY=0.0,Mod='-',Label=''):
+		Xp = self.ProjectionX + offsetX
+		Yp = self.ProjectionY + offsetY
+		pl.plot(Xp,Yp,Mod,label=Label,color=self.LineColor); pl.xlabel('X [mm]');  pl.ylabel('Y [mm]');
+
+	def PlotProjectionPolPhi(self): # NOT FINISHED
+		Xp = self.ProjectionX
+		Yp = self.ProjectionY
+		pl.plot(Xp,Yp,Mod,label=Label); pl.xlabel('Poloidal Position [mm]');  pl.ylabel('Toroidal Angle [degrees]');
+
 
 #------------------------------------------------------------------------------ 
 # Save XY projection points
