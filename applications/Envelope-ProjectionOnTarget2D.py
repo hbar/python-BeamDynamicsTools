@@ -50,8 +50,9 @@ Vessel.Plot3D(ax)
 #Bn = array([0.0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40,0.45])
 #Bn = linspace(0.0,0.45,19)
 #Bn = linspace(-0.45,0.45,50)
-Bn = linspace(-0.45,0.45,11)
+Bn = linspace(-0.45,0.45,2)
 #Bn = linspace(0.2,0,2)
+Bv0 = linspace(-0.05,0.00,2)
 
 #------------------------------------------------------------------------------ 
 #Generate Color Map
@@ -66,27 +67,33 @@ AngleComponents=[]; Coordinates=[]; Parameters=[]; trajectory=[]; beam=[]; targe
 OutputPath = '../output/'
 #Color=['k','g','r','c','b','m','g','r','c','b','m','g']
 
-for i in range(len(Bn)):
-	B = BfieldTF(B0=Bn[i])
-	Bv = BfieldVF(B0=0.00000)
-	# Calcuate Trajectory
-	T = Trajectory(Vessel,B,Bv,v0=Vinjection,T0=Energy)
-	T.LineColor = CMAP(1.0*i/len(Bn));
-	T.target.LineColor = CMAP(1.0*i/len(Bn));
-	T.LineWidth = 2.0;
-	T.target.LineWidth = 2.0
-	trajectory.append(T)
-	# Calcuate Sigma and Beamspot
-	IonBeam = Beam(T,SInput)
-	IonBeam.Trace()
-	beam.append(IonBeam)
-	targetellipse.append(Ellipse(IonBeam.sigma[-1]))
-	figure(10)
-	IonBeam.target.PlotProjection()
-	figure(11)
-#	IonBeam.target.PlotProjection(Type='ThetaPhi')
-	Vessel.PlotCorners2D(Xlim=[-2.0,2.0],scale=100.0)
-	IonBeam.target.PlotProjection(Type='PolPhi')
+figure(11)
+Vessel.PlotCorners2D(Xlim=[-2.0,2.0],scale=100.0)
+Count=0.0
+MaxCount = len(Bv0)*len(Bn)*1.0
+for j in range(len(Bv0)):
+	for i in range(len(Bn)):
+		B = BfieldTF(B0=Bn[i])
+		Bv = BfieldVF(B0=Bv0[j])
+		# Calcuate Trajectory
+		T = Trajectory(Vessel,B,Bv,v0=Vinjection,T0=Energy)
+		T.LineColor = CMAP(1.0*i/len(Bn));
+		T.target.LineColor = CMAP(1.0*i/len(Bn));
+		T.LineWidth = 2.0;
+		T.target.LineWidth = 2.0
+		trajectory.append(T)
+		# Calcuate Sigma and Beamspot
+		IonBeam = Beam(T,SInput)
+		IonBeam.Trace()
+		beam.append(IonBeam)
+		targetellipse.append(Ellipse(IonBeam.sigma[-1]))
+		figure(10)
+		IonBeam.target.PlotProjection()
+		figure(11)
+	#	IonBeam.target.PlotProjection(Type='ThetaPhi')
+		IonBeam.target.PlotProjection(Type='PolPhi')
+		Count=Count+1.0
+		print Count/MaxCount
 	pl.ylim(-125.0,75.0)
 
 
@@ -119,9 +126,10 @@ for i in range(len(Bn)):
 pl.figure(figsize=(20,8))
 for i in range(len(trajectory)):
 	pl.subplot(1,2,1); trajectory[i].Plot2D('poloidal');
-pl.subplot(1,2,1); Vessel.Border('poloidal'); pl.xlim(0.2,1.4); pl.ylim(-0.7,0.5)
+pl.subplot(1,2,1); Vessel.Border('poloidal'); pl.xlim(0.2,1.4);# pl.ylim(-0.7,0.5)
 pl.xlabel('R [m]'); pl.ylabel('Z [m]'); 
 pl.title(r'Poloidal Projection ($\alpha$ = %0.1f$^o$, $\beta$ = %0.1f$^o$)'% (alpha0,beta0) )
+pl.axes().set_aspect('equal', 'datalim')
 #pl.legend(Leg,loc=4)
 
 #------------------------------------------------------------------------------ 

@@ -123,7 +123,7 @@ class Trajectory:
 				c5 = self.s[-1] < Smax
 				if c3:
 					if (not c4):
-						IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
+						IN,NormalV,TangentV,IncidentV,RT,Xpol = Vessel.Xboundary(self.r[-2],self.r[-1])
 #------------------------------------------------------------------------------ 
 			#record curvature and bending radius
 				self.k.append(norm(self.a[-1]/self.v0**2))
@@ -159,7 +159,7 @@ class Trajectory:
 #------------------------------------------------------------------------------ 
 		# Define Target
 			if i<Nmax-1 and self.s[-1]<=Smax:
-				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
+				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT,Xpol)
 				self.target.SigmaBasis = self.BasisM6[-1]
 #				self.target.TargetBasis = self.BasisM6[-1]
 #------------------------------------------------------------------------------ 
@@ -169,7 +169,7 @@ class Trajectory:
 				TangentV = array(self.BasisM3[-1][:,1]).flatten()
 				IncidentV = array(self.BasisM3[-1][:,2]).flatten()
 				RT = self.r[-1]
-				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
+				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT,Xpol)
 			print 'Beam Coordinates Complete'
 			
 #===============================================================================
@@ -204,7 +204,7 @@ class Trajectory:
 				c5 = self.s[-1] < Smax
 				if c3:
 					if (not c4):
-						IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
+						IN,NormalV,TangentV,IncidentV,RT,Xpol = Vessel.Xboundary(self.r[-2],self.r[-1])
 #------------------------------------------------------------------------------ 
 			#record bending radius
 #				self.k.append(qm * cross(self.v[-1],self.B[-1])/self.v0**2)
@@ -241,7 +241,7 @@ class Trajectory:
 #------------------------------------------------------------------------------ 
 		# Define Target
 			if i<Nmax-1 and self.s[-1]<=Smax:
-				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
+				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT,Xpol)
 				self.target.SigmaBasis = self.BasisM6[-1]
 #------------------------------------------------------------------------------ 
 		# If no boundary was reached assume normal incidence
@@ -250,7 +250,7 @@ class Trajectory:
 				TangentV = array(self.BasisM3[-1][:,1]).flatten()
 				IncidentV = array(self.BasisM3[-1][:,2]).flatten()
 				RT = self.r[-1]
-				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
+				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT,Xpol)
 			print 'Beam Coordinates Complete'
 
 #===============================================================================
@@ -285,7 +285,7 @@ class Trajectory:
 				c5 = self.s[-1] < Smax
 				if c3:
 					if C4:
-						IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
+						IN,NormalV,TangentV,IncidentV,RT,Xpol = Vessel.Xboundary(self.r[-2],self.r[-1])
 
 #------------------------------------------------------------------------------ 
 			#record curvature and bending radius
@@ -323,7 +323,7 @@ class Trajectory:
 #------------------------------------------------------------------------------ 
 		# Define Target
 			if i<Nmax-1 and self.s[-1]<=Smax:
-				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
+				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT,Xpol)
 				self.target.SigmaBasis = self.BasisM6[-1]
 #------------------------------------------------------------------------------ 
 		# If no boundary was reached assume normal incidence
@@ -332,7 +332,7 @@ class Trajectory:
 				TangentV = array(self.BasisM3[-1][:,1]).flatten()
 				IncidentV = array(self.BasisM3[-1][:,2]).flatten()
 				RT = self.r[-1]
-				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
+				self.target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT,Xpol)
 			print 'Beam Coordinates Complete'
 
 #===============================================================================
@@ -524,7 +524,7 @@ if False:
 		self.gamma.append( 1.0 / (1.0-self.beta[-1]**2))
 
 		# Check to see if beam crosses boundary
-		IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
+		IN,NormalV,TangentV,IncidentV,RT,Xpol = Vessel.Xboundary(self.r[-2],self.r[-1])
 
 		c1 = IN
 		c2 = self.s[-1] < Smin
@@ -533,7 +533,7 @@ if False:
 #			self.Target = Target(NormalV,TangentV,IncidentV)
 
 	print 'trajectory complete'
-	self.Target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
+	self.Target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT,Xpol)
 	self.BeamBasis()
 	print 'Beam Coordinates Complete'
 	print self.BasisM3
@@ -584,7 +584,7 @@ if False:
 		self.gamma.append( 1.0 / (1.0-self.beta[-1]**2))
 
 		# Check to see if beam crosses boundary
-		IN,NormalV,TangentV,IncidentV,RT = Vessel.Xboundary(self.r[-2],self.r[-1])
+		IN,NormalV,TangentV,IncidentV,RT,Xpol = Vessel.Xboundary(self.r[-2],self.r[-1])
 
 		c1 = IN
 		c2 = i*dS < Smin
@@ -595,7 +595,7 @@ if False:
 	print 'trajectory complete'
 	self.BeamBasis()
 	print 'Beam Coordinates Complete'
-	self.Target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT)
+	self.Target = Target(NormalV,TangentV,IncidentV,BFieldTF,BFieldVF,RT,Xpol)
 	print 'Target Complete'
 
 	self.NormalV = NormalV

@@ -8,7 +8,7 @@ from AngleCorrection import *
 from Trajectory import *
 
 class Target:
-	def __init__ (self,NORM,TAN,INC,BFieldTF,BFieldVF,RT,Rdet=[1.3075, -0.2457, -0.05900],AxisDet=[1.0,0.0,0.0]):
+	def __init__ (self,NORM,TAN,INC,BFieldTF,BFieldVF,RT,Xpol,Rdet=[1.3075, -0.2457, -0.05900],AxisDet=[1.0,0.0,0.0]):
 		# Target Position (cartesian)
 		self.X = RT[0]; self.Y = RT[1]; self.Z = RT[2]
 		self.XYZ = array(RT)
@@ -24,6 +24,7 @@ class Target:
 		else:
 			self.Theta = -1.0*arccos(dot(-1.0*RCenter/norm(RCenter),dR/norm(dR)))
 		self.ThetaDegrees = self.Theta*180/pi
+		self.Xpol = Xpol
 
 		# Detector Coordinates
 		self.XYZdetector = array(Rdet)
@@ -118,16 +119,22 @@ class Target:
 	def PlotProjection(self,Type='Centered'):
 		dX=0.0;
 		dY = 0.0
+		escale = 2.0
 		XLAB = r'X [mm]'; xscale = 1000.0
 		YLAB = r'Y [mm]'; yscale = 1000.0
 		if Type=='ThetaPhi':
 			dX = self.R*self.Phi
-			dY = self.r*self.Theta
+			dY = self.Z#self.r*self.Theta
 			XLAB = r'Toroidal Position $R\cdot\phi$ [cm]'; xscale = 100.0
 			YLAB = r'Polidal Position $r\cdot\theta$ [cm]'; yscale = 100.0
-		#	hlines()
 
-		pl.plot((self.ProjectionX+dX)*xscale,(self.ProjectionY+dY)*yscale,color=self.LineColor,linestyle=self.LineStyle,linewidth=self.LineWidth)
+		if Type=='PolPhi':
+			dX = self.R*self.Phi
+			dY = self.Xpol
+			XLAB = r'Toroidal Position $R\cdot\phi$ [cm]'; xscale = 100.0
+			YLAB = r'Polidal Position $X_p$ [cm]'; yscale = 100.0
+
+		pl.plot((escale*self.ProjectionX+dX)*xscale,(escale*self.ProjectionY+dY)*yscale,color=self.LineColor,linestyle=self.LineStyle,linewidth=self.LineWidth)
 		xlabel(XLAB); ylabel(YLAB)
 		pl.axes().set_aspect('equal', 'datalim')
 

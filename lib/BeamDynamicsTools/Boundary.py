@@ -58,18 +58,15 @@ class Boundary:
 
 #------------------------------------------------------------------------------ 
 # Generate list of poloidal points
-		PoloidalPoints = zeros(len(Rb)) 
-		RCenter = array([0.67,0.0])
-		for i in range(len(Rb)):
-			R = array([Rb[i],Zb[i]])
-			dR = R-RCenter
-			if dR[0]>0.0:
-				Theta = -1.0*dot(RCenter,dR)/norm(dR)/norm(RCenter)
-			else:
-				Theta = -1.0*dot(-RCenter,dR)/norm(dR)/norm(RCenter) + pi
-			PoloidalPoints[i] = norm(dR)*Theta			
+		Xpol = zeros(len(Rb))
+		Xpol[0] =  0.215700 - 1.7335261798429005# Offset subtracted so zero occurs at the midplane
+		for i in range(1,len(Rb)):
+			R1 = self.Cvec[i-1]
+			R2 = self.Cvec[i]
+			Xpol[i] = Xpol[i-1] + norm(R2-R1)
+		self.PoloidalLines=Xpol
+		#(0.432800-0.215700) - ( 1.7335261798429005 + 0.068944835197059254 )
 
-		
 #===============================================================================
 # Boundary Class Methods
 #===============================================================================
@@ -100,12 +97,13 @@ class Boundary:
 				RB.append(self.Rb[0])
 				ZB.append(self.Zb[0])
 				pl.plot(RB,ZB,'k')
+				#pl.axes().set_aspect('equal', 'datalim')
 
 			if Type=='top':
 				for i in range(len(self.Rb)):
 					x,y=Circle(self.Rb[i])
 					pl.plot(x,y,'k')
-					
+					#pl.axes().set_aspect('equal')
 #------------------------------------------------------------------------------ 
 # Plots a 2D projection of the boundary onto side plane or top plane
 		if self.Geometry=='Extrude':
@@ -151,11 +149,13 @@ class Boundary:
 	def Xboundary(self,r0,r1):
 		x0 = array([sqrt(r0[0]**2 + r0[1]**2) ,r0[2]])
 		x1 = array([sqrt(r1[0]**2 + r1[1]**2) ,r1[2]])
+		Xpol = 0.0 - ( 1.7335261798429005 + 0.068944835197059254 ) # Offset subtracted so zero occurs at the midplane
 		IN = True; i=-1; Di1 = []; Di2 = []; Df = []; NORM=[]; TAN=[]; INC=[]; RT = r1
 		while (IN == True and i<self.Nv):
 			Di1 = x0-self.Cvec[i-1]; Di1 = Di1/norm(Di1)
 			Di2 = x0-self.Cvec[i]; Di1 = Di1/norm(Di1)
 			Df = x1-self.Cvec[i-1]
+			Xpol = Xpol + norm(self.Cvec[i]-self.Cvec[i-1])
 			if dot(Di1,self.Tvec[i])>0 and dot(Di2,self.Tvec[i])<0:
 				if dot(Di1,self.Nvec[i])>0 and dot(Di2,self.Nvec[i])>0:
 					if dot(Df,self.Nvec[i])<0 and dot(Df,self.Nvec[i])<0:
@@ -166,8 +166,9 @@ class Boundary:
 						TAN = TAN/norm(TAN)
 						INC = r1-r0; INC = INC/sqrt( INC[0]**2 + INC[1]**2 + INC[2]**2 )
 						RT = r1
+						Xpol = Xpol - norm(self.Cvec[i]-x1)
 			i=i+1
-		return IN,NORM,TAN,INC,RT
+		return IN,NORM,TAN,INC,RT,Xpol
 
 #------------------------------------------------------------------------------ 
 # create figure and initialize axes for 3D plot
@@ -207,6 +208,11 @@ class Boundary:
 		pl.xlim(-1,1); pl.ylim(-1,1)
 		return ax
 		#return xp,yp,zp,xt,yt,zt
+
+	def PlotCorners2D(self,Xlim=[-1,1],scale=1.0):
+		for i in range(len(self.PoloidalLines)):
+			pl.plot(scale*array(Xlim),scale*array([self.PoloidalLines[i],self.PoloidalLines[i]]),color='k',linewidth=0.7)
+			pl.plot(scale*array(Xlim),scale*array([0.0,0.0]),color='r',linewidth=1.5,linestyle=':')
 
 #===============================================================================
 # Extra Functions
